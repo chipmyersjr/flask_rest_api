@@ -17,6 +17,29 @@ class ProductAPI(MethodView):
             abort(400)
 
     def post(self):
+        """
+        Creates a new product.
+
+        Example Post Body:
+        {
+            "title": "PS4",
+            "product_type": "Electronics",
+            "vendor": "Sony"
+        }
+
+        Example response:
+        {
+            "product": {
+                    "created_at": "Sat, 22 Dec 2018 22:45:50 GMT",
+                    "id": "ef5a799c-7f43-412e-89a3-ed666f605482",
+                    "product_type": "Electronics",
+                    "title": "PS4",
+                    "updated_at": "Sat, 22 Dec 2018 22:45:50 GMT",
+                    "vendor": "Electronics"
+                        },
+                "result": "ok"
+        }
+        """
         product_json = request.json
         error = best_match(Draft4Validator(schema).iter_errors(product_json))
         if error:
