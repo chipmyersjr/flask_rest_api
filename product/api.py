@@ -22,6 +22,7 @@ class ProductAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
+        print("ok")
         product = Product(
             id=str(uuid.uuid4()),
             title=product_json.get("title"),
