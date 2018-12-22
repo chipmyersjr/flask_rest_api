@@ -7,6 +7,7 @@ import uuid
 
 from product.models import Product
 from product.schema import schema
+from product.templates import product_obj
 
 
 class ProductAPI(MethodView):
@@ -23,11 +24,13 @@ class ProductAPI(MethodView):
 
         product = Product(
             id=str(uuid.uuid4()),
-            title=product_json.get("title")
+            title=product_json.get("title"),
+            product_type=product_json.get("product_type"),
+            vendor=product_json.get("product_type")
         ).save()
 
         response = {
             "result": "ok",
-            "pet": pet_obj(pet)
+            "product": product_obj(product)
         }
         return jsonify(response), 201
