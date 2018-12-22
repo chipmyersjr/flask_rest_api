@@ -9,3 +9,7 @@ class Product(db.Document):
     vendor = db.StringField(db_field="vendor")
     created_at = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
+
+    meta = {
+        'indexes': ['id']
+    }
