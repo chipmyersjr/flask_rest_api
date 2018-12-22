@@ -20,6 +20,8 @@ class ProductAPI(MethodView):
         """
         Creates a new product.
 
+        Endpoint: /product/
+
         Example Post Body:
         {
             "title": "PS4",

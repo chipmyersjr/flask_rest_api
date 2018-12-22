@@ -1,6 +1,7 @@
 from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
+import json
 
 from settings import MONGODB_HOST
 
@@ -33,6 +34,6 @@ class ProductTest(unittest.TestCase):
                }
 
         rv = self.app.post('/product/',
-                           data=data,
+                           data=json.dumps(data),
                            content_type='application/json')
-        assert rv.status_code == 200
+        assert rv.status_code == 201
