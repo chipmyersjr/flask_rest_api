@@ -17,7 +17,7 @@ def create_app(**config_overrides):
     db.init_app(app)
 
     # import blueprints
-    from products.views import product_app
+    from product.views import product_app
 
     # register blueprints
     app.register_blueprint(product_app)
