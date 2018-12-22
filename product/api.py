@@ -1,8 +1,33 @@
-from flask import Blueprint
+from flask.views import MethodView
+from flask import jsonify, request, abort
+from jsonschema import Draft4Validator
+from jsonschema.exceptions import best_match
+import uuid
 
-product_app = Blueprint('product_app', __name__)
+
+from product.models import Product
+from product.schema import schema
 
 
-@product_app.route('/')
-def home():
-    return "Here are some products"
+class ProductAPI(MethodView):
+
+    def __init__(self):
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def post(self):
+        product_json = request.json
+        error = best_match(Draft4Validator(schema).iter_errors(product_json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        product = Product(
+            id=str(uuid.uuid4()),
+            title=product_json.get("title")
+        ).save()
+
+        response = {
+            "result": "ok",
+            "pet": pet_obj(pet)
+        }
+        return jsonify(response), 201
