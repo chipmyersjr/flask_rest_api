@@ -37,3 +37,14 @@ class ProductTest(unittest.TestCase):
                            data=json.dumps(data),
                            content_type='application/json')
         assert rv.status_code == 201
+
+        """test that missing field returns 400"""
+        data = {
+            "title": "Laptop",
+            "product_type": "Electronics"
+        }
+        rv = self.app.post('/product/',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert "is a required property" in str(rv.data)
