@@ -62,6 +62,18 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 200
         assert "PS4" in str(rv.data)
 
+        # edit a product
+        data = {
+            "title": "PS5",
+            "product_type": "Electronics",
+            "vendor": "Sony"
+        }
+        rv = self.app.put('/pets/' + product_id,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
+
         # test delete product
         rv = self.app.delete('/product/' + product_id,
                              content_type='application/json')

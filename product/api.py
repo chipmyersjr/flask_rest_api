@@ -93,6 +93,28 @@ class ProductAPI(MethodView):
         }
         return jsonify(response), 201
 
+    def put(self, product_id):
+        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+        if not product:
+            return jsonify({}), 404
+
+        product_json = request.json
+        error = best_match(Draft4Validator(schema).iter_errors(product_json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        product.title = product_json.get("title")
+        product.product_type = product_json.get("product_type")
+        product.vendor = product_json.get("vendor")
+        product.updated_at = datetime.utcnow()
+        product.save()
+
+        response = {
+            "result": "ok",
+            "product": product_obj(product)
+        }
+        return jsonify(response), 201
+
     def delete(self, product_id):
         """
         delete a specific product by providing product id
