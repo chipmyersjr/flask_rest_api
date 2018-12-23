@@ -3,6 +3,7 @@ from flask import jsonify, request, abort
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 import uuid
+from datetime import datetime
 
 
 from product.models import Product
@@ -13,6 +14,7 @@ from product.templates import product_obj
 class ProductAPI(MethodView):
 
     def __init__(self):
+        self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
@@ -36,7 +38,7 @@ class ProductAPI(MethodView):
         }
         """
         if product_id:
-            product = Product.objects.filter(product_id=product_id).first()
+            product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
             if product:
                 response = {
                     "result": "ok",
@@ -82,7 +84,7 @@ class ProductAPI(MethodView):
             product_id=str(uuid.uuid4().int),
             title=product_json.get("title"),
             product_type=product_json.get("product_type"),
-            vendor=product_json.get("product_type")
+            vendor=product_json.get("vendor")
         ).save()
 
         response = {
@@ -90,3 +92,17 @@ class ProductAPI(MethodView):
             "product": product_obj(product)
         }
         return jsonify(response), 201
+
+    def delete(self, product_id):
+        """
+        delete a specific product by providing product id
+
+        Endpoint: /product/88517737685737189039085760589870132011
+        """
+        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+        if not product:
+            return jsonify({}), 404
+        product.deleted_at = datetime.utcnow()
+        product.save()
+
+        return jsonify({}), 204

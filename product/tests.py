@@ -4,6 +4,7 @@ import unittest
 import json
 
 from settings import MONGODB_HOST
+from product.models import Product
 
 
 class ProductTest(unittest.TestCase):
@@ -41,6 +42,7 @@ class ProductTest(unittest.TestCase):
                            content_type='application/json')
         product_id = json.loads(rv.data.decode('utf-8')).get("product")['product_id']
         assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
 
         """test that missing field returns 400"""
         data = {
@@ -58,3 +60,9 @@ class ProductTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 200
         assert "PS4" in str(rv.data)
+
+        "test delete product"
+        rv = self.app.delete('/product/' + product_id,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 0
