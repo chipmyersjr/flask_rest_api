@@ -16,6 +16,36 @@ class ProductAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    def get(self, product_id=None):
+        """
+        Gets a product by providing product_id
+
+        Endpoint: /product/242025312983347096410127212123600214518
+
+        Example response:
+        {
+        "pet": {
+             "created_at": "Sun, 23 Dec 2018 00:34:16 GMT",
+             "product_id": "242025312983347096410127212123600214518",
+             "product_type": "Furniture",
+             "title": "Table",
+             "updated_at": "Sun, 23 Dec 2018 00:34:16 GMT",
+             "vendor": "Furniture"
+        },
+        "result": "ok"
+        }
+        """
+        if product_id:
+            product = Product.objects.filter(product_id=product_id).first()
+            if product:
+                response = {
+                    "result": "ok",
+                    "pet": product_obj(product)
+                }
+                return jsonify(response), 200
+            else:
+                return jsonify({}), 404
+
     def post(self):
         """
         Creates a new product.
@@ -49,7 +79,7 @@ class ProductAPI(MethodView):
 
         print("ok")
         product = Product(
-            id=str(uuid.uuid4()),
+            product_id=str(uuid.uuid4().int),
             title=product_json.get("title"),
             product_type=product_json.get("product_type"),
             vendor=product_json.get("product_type")

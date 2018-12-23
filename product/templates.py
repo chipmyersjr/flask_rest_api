@@ -1,6 +1,6 @@
 def product_obj(product):
     return {
-      "id": product.id,
+      "product_id": product.id,
       "title": product.title,
       "product_type": product.product_type,
       "vendor": product.vendor,

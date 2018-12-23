@@ -26,6 +26,9 @@ class ProductTest(unittest.TestCase):
         db.client.drop_database(db)
 
     def test_product(self):
+        """
+        tests for the /product/ endpoint
+        """
         """test create a product"""
         data = {
                  "title": "PS4",
