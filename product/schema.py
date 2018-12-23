@@ -5,5 +5,5 @@ schema = {
         "product_type": {"type": "string"},
         "vendor":       {"type": "string"},
     },
-    "required": ["title", "product_type"]
+    "required": ["title", "product_type", "vendor"]
 }
