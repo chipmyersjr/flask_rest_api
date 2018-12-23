@@ -60,7 +60,7 @@ class ProductTest(unittest.TestCase):
         assert "is a required property" in str(rv.data)
 
         ####################################
-        "test get by product id method"
+        """test get by product id method"""
         ####################################
         rv = self.app.get('/product/' + product_id,
                           content_type='application/json')
