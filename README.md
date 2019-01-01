@@ -10,14 +10,10 @@ https://help.shopify.com/en/api/reference
 original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 
 **Fields:**
-
-id
-
-title
-
-product_type
-
-vendor
+* id
+* title
+* product_type
+* vendor
 
 created_at
 
