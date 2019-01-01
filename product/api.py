@@ -221,3 +221,11 @@ class ProductAPI(MethodView):
         product.save()
 
         return jsonify({}), 204
+
+
+class ProductCountAPI(MethodView):
+
+    def get(self):
+        data = {"result": "ok"}
+
+        return jsonify(data), 200
