@@ -6,7 +6,10 @@ def product_obj(product):
       "vendor": product.vendor,
       "created_at": product.created_at,
       "updated_at": product.updated_at,
-      "deleted_at": product.deleted_at
+      "deleted_at": product.deleted_at,
+      "links": [
+            {"rel": "self", "href": "/product/" + product.id}
+        ]
     }
 
 
