@@ -5,6 +5,7 @@ import json
 
 from settings import MONGODB_HOST
 from product.models import Product
+from application import fixtures
 
 
 class ProductTest(unittest.TestCase):
@@ -68,7 +69,7 @@ class ProductTest(unittest.TestCase):
             "product_type": "Electronics",
             "vendor": "Sony"
         }
-        rv = self.app.put('/pets/' + product_id,
+        rv = self.app.put('/product/' + product_id,
                           data=json.dumps(data),
                           content_type='application/json')
         assert rv.status_code == 201
@@ -79,3 +80,28 @@ class ProductTest(unittest.TestCase):
                              content_type='application/json')
         assert rv.status_code == 204
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 0
+
+    def test_get_product_list(self):
+        """
+        Tests for the get product list endpoint
+        """
+
+        fixtures(self.db_name, "product", "product/fixtures/products.json")
+
+        # test default get page 1
+        rv = self.app.get('/product/',
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["products"]) > 0
+        assert data["links"][0]["href"] == "/product/?page=1"
+        assert data["links"][1]["rel"] == "next"
+
+        # test that you can get a specific page
+        rv = self.app.get('/product/?page=2',
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["products"]) > 0
+        assert data["links"][0]["href"] == "/product/?page=2"
+        assert data["links"][1]["rel"] == "previous"
