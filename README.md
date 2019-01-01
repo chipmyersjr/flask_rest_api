@@ -14,36 +14,13 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 * title
 * product_type
 * vendor
-
-created_at
-
-updated_at
+* created_at
+* updated_at
 
 **Methods:**
-
-GET /products
-
-Retrieves a list of products
-
-
-GET /products/count
-Retrieves a count of products
-
-
-GET /products/{product_id}
-Retrieves a single product
-
-
-POST /products
-
-Creates a new product
-
-
-PUT /products/{product_id}
-
-Updates a product
-
-
-DELETE /admin/products/#{product_id}
-
-Deletes a product
+* GET /products  (Retrieves a list of products)
+* GET /products/count   (Retrieves a count of products)
+* GET /products/{product_id}   (Retrieves a single product)
+* POST /products   (Creates a new product)
+* PUT /products/{product_id}   (Updates a product)
+* DELETE /admin/products/#{product_id}   (Deletes a product)
