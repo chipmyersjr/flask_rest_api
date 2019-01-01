@@ -105,6 +105,11 @@ class ProductTest(unittest.TestCase):
         assert data["links"][0]["href"] == "/product/?page=2"
         assert data["links"][1]["rel"] == "previous"
 
+        # test that not exisiting page returns 404
+        rv = self.app.get('/product/?page=100',
+                          content_type='application/json')
+        assert rv.status_code == 404
+
     def test_product_count(self):
         """
         Tests for the /product/count/ endpoint
