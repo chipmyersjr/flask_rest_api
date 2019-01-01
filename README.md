@@ -35,7 +35,7 @@ Retrieves a count of products
 
 
 GET /products/{product_id}
-Retrieves a single product
+/nRetrieves a single product
 
 
 POST /products
