@@ -31,12 +31,10 @@ Retrieves a list of products
 
 
 GET /products/count
-
 Retrieves a count of products
 
 
 GET /products/{product_id}
-
 Retrieves a single product
 
 
