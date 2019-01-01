@@ -226,6 +226,20 @@ class ProductAPI(MethodView):
 class ProductCountAPI(MethodView):
 
     def get(self):
-        data = {"result": "ok"}
+        """
+        Returns a count of all products
 
-        return jsonify(data), 200
+        Endpoint = /product/count/
+
+        Example response:
+        {
+          "count": "20",
+          "result": "ok"
+        }
+        """
+        response = {
+                      "result": "ok",
+                      "count": str(Product.objects.count())
+                   }
+
+        return jsonify(response), 200
