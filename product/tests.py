@@ -22,6 +22,7 @@ class ProductTest(unittest.TestCase):
     def setUp(self):
         self.app_factory = self.create_app()
         self.app = self.app_factory.test_client()
+        fixtures(self.db_name, "product", "product/fixtures/products.json")
 
     def tearDown(self):
         db = _get_db()
@@ -86,8 +87,6 @@ class ProductTest(unittest.TestCase):
         Tests for the get product list endpoint
         """
 
-        fixtures(self.db_name, "product", "product/fixtures/products.json")
-
         # test default get page 1
         rv = self.app.get('/product/',
                           content_type='application/json')
@@ -105,3 +104,16 @@ class ProductTest(unittest.TestCase):
         assert len(data["products"]) > 0
         assert data["links"][0]["href"] == "/product/?page=2"
         assert data["links"][1]["rel"] == "previous"
+
+    def test_product_count(self):
+        """
+        Tests for the /product/count/ endpoint
+        """
+
+        # test that enpoint returns the correct count of products
+        rv = self.app.get('/product/count',
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+
+        assert rv.status_code == 200
+        assert data["count"] == "19"
