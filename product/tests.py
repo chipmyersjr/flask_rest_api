@@ -47,6 +47,10 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
 
+        # test that links were created for product
+        data = json.loads(rv.get_data(as_text=True))
+        assert data["product"]["links"][0]["rel"] == "self"
+
         # test that missing field returns 400
         data = {
             "title": "Laptop",
