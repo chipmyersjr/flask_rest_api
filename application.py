@@ -21,9 +21,11 @@ def create_app(**config_overrides):
 
     # import blueprints
     from product.views import product_app
+    from store.views import store_app
 
     # register blueprints
     app.register_blueprint(product_app)
+    app.register_blueprint(store_app)
 
     return app
 
