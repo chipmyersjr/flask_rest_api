@@ -20,7 +20,7 @@ class Store(db.Document):
 
 class AccessToken(db.Document):
     store_id = db.ReferenceField(Store, db_field="store_id")
-    token = db.StringField(db_field="name")
+    token = db.StringField(db_field="name", default=str(uuid.uuid4().int))
     expires_at = db.DateTimeField(default=datetime.now() + timedelta(hours=24))
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())

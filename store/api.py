@@ -2,9 +2,10 @@ from flask import request, abort, jsonify
 from flask.views import MethodView
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
+import uuid
 
-from store.schema import schema
-from store.models import Store
+from store.schema import schema, token_request_schema
+from store.models import Store, AccessToken
 from store.templates import store_obj
 
 
@@ -15,16 +16,16 @@ class StoreAPI(MethodView):
             abort(400)
 
     def post(self):
-        product_json = request.json
-        error = best_match(Draft4Validator(schema).iter_errors(product_json))
+        store_json = request.json
+        error = best_match(Draft4Validator(schema).iter_errors(store_json))
         if error:
             return jsonify({"error": error.message}), 400
 
         store = Store(
-            name=product_json.get("name"),
-            tagline=product_json.get("tagline"),
-            app_id=product_json.get("app_id"),
-            app_secret=product_json.get("app_secret")
+            name=store_json.get("name"),
+            tagline=store_json.get("tagline"),
+            app_id=store_json.get("app_id"),
+            app_secret=store_json.get("app_secret")
         ).save()
 
         response = {
@@ -32,3 +33,38 @@ class StoreAPI(MethodView):
             "store": store_obj(store)
         }
         return jsonify(response), 201
+
+
+class StoreTokenAPI(MethodView):
+
+    def __init__(self):
+        if request.method != 'POST' or not request.json:
+            abort(400)
+
+    def post(self):
+        request_json = request.json
+        error = best_match(Draft4Validator(token_request_schema).iter_errors(request_json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        store = Store.objects.filter(app_id=request_json.get("app_id")).first()
+
+        if not store:
+            error = {
+                "code": "APP_ID NOT FOUND"
+            }
+            return jsonify({'error': error}), 400
+
+        if request.json.get('app_secret') != store.app_secret:
+            error = {
+                "code": "APP_SECRET IS INCORRECT"
+            }
+            return jsonify({'error': error}), 400
+
+        AccessToken.objects.filter(store_id=store).delete()
+
+        token = AccessToken(
+                store_id=store
+        ).save()
+
+        return jsonify({'token': token.token, 'expires_at': token.expires_at}), 200
