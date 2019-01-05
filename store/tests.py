@@ -2,6 +2,7 @@ from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
 import json
+from datetime import datetime, timedelta
 
 from settings import MONGODB_HOST
 from store.models import Store, AccessToken
@@ -103,3 +104,41 @@ class StoreTest(unittest.TestCase):
                           data=json.dumps(data),
                           content_type='application/json')
         assert rv.status_code == 403
+
+        # test get store method
+        headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": token
+        }
+        rv = self.app.get('/store/',
+                          headers=headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.data.decode('utf-8')).get("store")["name"] == "Furniture Store"
+
+        # test bad token
+        headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": 'bad-token'
+        }
+        rv = self.app.get('/store/',
+                          headers=headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+
+        # test expired token
+        headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": token
+        }
+        now = datetime.utcnow().replace(second=0, microsecond=0)
+        expires = now + timedelta(days=-31)
+        access = AccessToken.objects.first()
+        access.expires_at = expires
+        access.save()
+        rv = self.app.get('/store/',
+                          headers=headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "TOKEN_EXPIRED"

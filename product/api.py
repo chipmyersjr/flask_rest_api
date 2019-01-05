@@ -90,7 +90,7 @@ class ProductAPI(MethodView):
             if product:
                 response = {
                     "result": "ok",
-                    "pet": product_obj(product)
+                    "product": product_obj(product)
                 }
                 return jsonify(response), 200
             else:

@@ -18,8 +18,37 @@ class StoreAPI(MethodView):
 
     @token_required
     def get(self):
-        return "Something", 200
+        """
+        returns info on the current store. Store is determined by app-id provided in header
 
+        Endpoint = /store/
+
+        Example response:
+        {
+            "result": "ok",
+            "store": {
+                "created_at": "Sat, 05 Jan 2019 22:21:54 GMT",
+                "deleted_at": null,
+                "links": [
+                    {
+                        "href": "/store/296194664480373992904103034340308325889",
+                        "rel": "self"
+                    }
+                ],
+                "name": "Food Store",
+                "store_id": "296194664480373992904103034340308325889",
+                "tagline": "Yummmmmm",
+                "updated_at": "Sat, 05 Jan 2019 22:21:54 GMT"
+            }
+        }
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        if store:
+            response = {
+                "result": "ok",
+                "store": store_obj(store)
+            }
+            return jsonify(response), 200
 
     def post(self):
         """
@@ -108,7 +137,7 @@ class StoreTokenAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
-        store = Store.objects.filter(app_id=request_json.get("app_id")).first()
+        store = Store.objects.filter(app_id=request_json.get("app_id"), deleted_at=None).first()
 
         if not store:
             return jsonify({'error': "APP_ID NOT FOUND"}), 400
