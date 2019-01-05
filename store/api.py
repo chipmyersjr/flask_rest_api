@@ -16,6 +16,38 @@ class StoreAPI(MethodView):
             abort(400)
 
     def post(self):
+        """
+        Creates a new store
+
+        Endpoint: /store/
+
+        Example Post Body:
+        {
+            "name": "Electronics Store",
+            "tagline": "A really good electronics store",
+            "app_id": "my_electronics_app",
+            "app_secret": "my_electronics_secret"
+        }
+
+        Example Response:
+        {
+            "result": "ok",
+            "store": {
+                "created_at": "Sat, 05 Jan 2019 21:11:30 GMT",
+                "deleted_at": null,
+                "links": [
+                    {
+                        "href": "/store/241787390524523237447764623791517213747",
+                        "rel": "self"
+                    }
+                ],
+                "name": "Electronics Store",
+                "store_id": "241787390524523237447764623791517213747",
+                "tagline": "A really good electronics store",
+                "updated_at": "Sat, 05 Jan 2019 21:11:30 GMT"
+            }
+        }
+        """
         store_json = request.json
         error = best_match(Draft4Validator(schema).iter_errors(store_json))
         if error:
@@ -42,6 +74,25 @@ class StoreTokenAPI(MethodView):
             abort(400)
 
     def post(self):
+        """
+        Creates a token for a given app_id that expires in 24 hours.  The token will be passed in the headers as the
+        authentication method.
+
+        Endpoint = /store/token/
+
+        Example Post Body:
+        {
+            "app_id": "my_electronics_app",
+            "app_secret": "my_electronics_secret"
+        }
+
+        Example Response:
+        {
+            "expires_at": "Sun, 06 Jan 2019 21:15:49 GMT",
+             "token": "303137304782462606160050118190185819344"
+        }
+
+        """
         request_json = request.json
         error = best_match(Draft4Validator(token_request_schema).iter_errors(request_json))
         if error:

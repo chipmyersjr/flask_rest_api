@@ -51,7 +51,7 @@ class StoreTest(unittest.TestCase):
             "app_secret": "my_furniture_secret"
         }
 
-        rv = self.app.post('/store/token',
+        rv = self.app.post('/store/token/',
                            data=json.dumps(data),
                            content_type='application/json')
         token = json.loads(rv.data.decode('utf-8')).get("token")
@@ -62,7 +62,7 @@ class StoreTest(unittest.TestCase):
         data = {
             "app_secret": "my_furniture_secret"
         }
-        rv = self.app.post('/store/token',
+        rv = self.app.post('/store/token/',
                            data=json.dumps(data),
                            content_type='application/json')
         assert rv.status_code == 400
@@ -73,7 +73,7 @@ class StoreTest(unittest.TestCase):
             "app_id": "my_furniture_app2",
             "app_secret": "my_furniture_secret"
         }
-        rv = self.app.post('/store/token',
+        rv = self.app.post('/store/token/',
                            data=json.dumps(data),
                            content_type='application/json')
         assert rv.status_code == 400
@@ -84,7 +84,7 @@ class StoreTest(unittest.TestCase):
             "app_id": "my_furniture_app",
             "app_secret": "my_furniture_secret2"
         }
-        rv = self.app.post('/store/token',
+        rv = self.app.post('/store/token/',
                            data=json.dumps(data),
                            content_type='application/json')
         assert rv.status_code == 400
