@@ -29,6 +29,6 @@ class StoreAPI(MethodView):
 
         response = {
             "result": "ok",
-            "product": store_obj(store)
+            "store": store_obj(store)
         }
         return jsonify(response), 201

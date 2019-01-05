@@ -1,5 +1,6 @@
 def store_obj(store):
     return {
+      "store_id": store.store_id,
       "name": store.name,
       "tagline": store.tagline,
       "created_at": store.created_at,
