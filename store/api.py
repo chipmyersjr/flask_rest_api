@@ -53,6 +53,10 @@ class StoreAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
+        store = Store.objects.filter(app_id=store_json.get("app_id")).first()
+        if store:
+            return jsonify({"error": "APP_ID_ALREADY_EXISTS"}), 400
+
         store = Store(
             name=store_json.get("name"),
             tagline=store_json.get("tagline"),

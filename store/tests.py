@@ -45,6 +45,13 @@ class StoreTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Store.objects.filter(store_id=store_id, deleted_at=None).count() == 1
 
+        # test that we can't create the same app_id twice
+        rv = self.app.post('/store/',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_ID_ALREADY_EXISTS"
+
         # test get access token
         data = {
             "app_id": "my_furniture_app",
