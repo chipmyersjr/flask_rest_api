@@ -7,6 +7,7 @@ import uuid
 from store.schema import schema, token_request_schema
 from store.models import Store, AccessToken
 from store.templates import store_obj
+from store.decorators import token_required
 
 
 class StoreAPI(MethodView):
@@ -14,6 +15,11 @@ class StoreAPI(MethodView):
     def __init__(self):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
+
+    @token_required
+    def get(self):
+        return "Something", 200
+
 
     def post(self):
         """

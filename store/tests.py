@@ -96,3 +96,10 @@ class StoreTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_SECRET IS INCORRECT"
+
+
+        # test that decorator requires app_id and token
+        rv = self.app.get('/store/',
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 403
