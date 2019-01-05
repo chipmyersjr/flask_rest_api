@@ -116,6 +116,29 @@ class StoreTest(unittest.TestCase):
         assert rv.status_code == 200
         assert json.loads(rv.data.decode('utf-8')).get("store")["name"] == "Furniture Store"
 
+        # test put method
+        data = {
+            "tagline": "A really great furniture store",
+        }
+        rv = self.app.put('/store/',
+                          headers=headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        print(rv.status_code)
+        assert rv.status_code == 201
+        assert json.loads(rv.data.decode('utf-8')).get("store")["tagline"] == "A really great furniture store"
+
+        # test put method with incorrect fields
+        data = {
+            "incorrect_filed_name": "A really great furniture store",
+        }
+        rv = self.app.put('/store/',
+                          headers=headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "No fields to update were supplied"
+
         # test bad token
         headers = {
             "APP-ID": "my_furniture_app",
@@ -125,7 +148,6 @@ class StoreTest(unittest.TestCase):
                           headers=headers,
                           content_type='application/json')
         assert rv.status_code == 403
-
 
         # test expired token
         headers = {

@@ -198,7 +198,7 @@ class ProductAPI(MethodView):
         product.title = product_json.get("title")
         product.product_type = product_json.get("product_type")
         product.vendor = product_json.get("vendor")
-        product.updated_at = datetime.utcnow()
+        product.updated_at = datetime.now()
         product.save()
 
         response = {

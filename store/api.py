@@ -2,7 +2,7 @@ from flask import request, abort, jsonify
 from flask.views import MethodView
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
-import uuid
+from datetime import datetime
 
 from store.schema import schema, token_request_schema
 from store.models import Store, AccessToken
@@ -98,6 +98,31 @@ class StoreAPI(MethodView):
             app_id=store_json.get("app_id"),
             app_secret=store_json.get("app_secret")
         ).save()
+
+        response = {
+            "result": "ok",
+            "store": store_obj(store)
+        }
+        return jsonify(response), 201
+
+
+    @token_required
+    def put(self):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        request_json = request.json
+        name = request_json.get("name")
+        tagline = request_json.get("tagline")
+
+        if name is None and tagline is None:
+            return jsonify({"error": "No fields to update were supplied"}), 400
+
+        if name:
+            store.name = name
+        if tagline:
+            store.tagline = tagline
+        store.updated_at = datetime.now()
+        store.save()
 
         response = {
             "result": "ok",
