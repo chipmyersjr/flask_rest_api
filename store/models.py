@@ -9,8 +9,8 @@ class Store(db.Document):
     tagline = db.StringField(db_field="tagline")
     app_id = db.StringField(db_field="app_id")
     app_secret = db.StringField(db_field="app_secret")
-    created_at = db.DateTimeField(default=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.utcnow)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
 
     meta = {
@@ -21,9 +21,9 @@ class Store(db.Document):
 class AccessToken(db.Document):
     store_id = db.ReferenceField(Store, db_field="store_id")
     token = db.StringField(db_field="name")
-    expires_at = db.DateTimeField(default=datetime.utcnow + timedelta(hours=24))
-    created_at = db.DateTimeField(default=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.utcnow)
+    expires_at = db.DateTimeField(default=datetime.now() + timedelta(hours=24))
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
 
     meta = {
