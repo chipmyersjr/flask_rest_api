@@ -23,8 +23,6 @@ class AccessToken(db.Document):
     token = db.StringField(db_field="name", default=str(uuid.uuid4().int))
     expires_at = db.DateTimeField(default=datetime.now() + timedelta(hours=24))
     created_at = db.DateTimeField(default=datetime.now())
-    updated_at = db.DateTimeField(default=datetime.now())
-    deleted_at = db.DateTimeField()
 
     meta = {
         'indexes': ['store_id']

@@ -4,7 +4,7 @@ import unittest
 import json
 
 from settings import MONGODB_HOST
-from store.models import Store
+from store.models import Store, AccessToken
 
 
 class StoreTest(unittest.TestCase):
@@ -44,3 +44,48 @@ class StoreTest(unittest.TestCase):
         store_id = json.loads(rv.data.decode('utf-8')).get("store")['store_id']
         assert rv.status_code == 201
         assert Store.objects.filter(store_id=store_id, deleted_at=None).count() == 1
+
+        # test get access token
+        data = {
+            "app_id": "my_furniture_app",
+            "app_secret": "my_furniture_secret"
+        }
+
+        rv = self.app.post('/store/token',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        token = json.loads(rv.data.decode('utf-8')).get("token")
+        assert rv.status_code == 201
+        assert AccessToken.objects.filter(token=token).count() == 1
+
+        # test malformed token request
+        data = {
+            "app_secret": "my_furniture_secret"
+        }
+        rv = self.app.post('/store/token',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "'app_id' is a required property"
+
+        # test app not found for token request
+        data = {
+            "app_id": "my_furniture_app2",
+            "app_secret": "my_furniture_secret"
+        }
+        rv = self.app.post('/store/token',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_ID NOT FOUND"
+
+        # test incorrect app_secret for token request
+        data = {
+            "app_id": "my_furniture_app",
+            "app_secret": "my_furniture_secret2"
+        }
+        rv = self.app.post('/store/token',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_SECRET IS INCORRECT"

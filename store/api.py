@@ -50,16 +50,10 @@ class StoreTokenAPI(MethodView):
         store = Store.objects.filter(app_id=request_json.get("app_id")).first()
 
         if not store:
-            error = {
-                "code": "APP_ID NOT FOUND"
-            }
-            return jsonify({'error': error}), 400
+            return jsonify({'error': "APP_ID NOT FOUND"}), 400
 
         if request.json.get('app_secret') != store.app_secret:
-            error = {
-                "code": "APP_SECRET IS INCORRECT"
-            }
-            return jsonify({'error': error}), 400
+            return jsonify({'error': "APP_SECRET IS INCORRECT"}), 400
 
         AccessToken.objects.filter(store_id=store).delete()
 
@@ -67,4 +61,5 @@ class StoreTokenAPI(MethodView):
                 store_id=store
         ).save()
 
-        return jsonify({'token': token.token, 'expires_at': token.expires_at}), 200
+        return jsonify({'token': token.token, 'expires_at': token.expires_at}), 201
+
