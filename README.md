@@ -14,6 +14,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 * title
 * product_type
 * vendor
+* store_id
 * created_at
 * updated_at
 * deleted_at
