@@ -16,6 +16,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 * vendor
 * created_at
 * updated_at
+* deleted_at
 
 **Methods:**
 * GET /products/  (Retrieves a list of products)
@@ -35,6 +36,9 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/2
 * tagline
 * app_id
 * app_secret
+* created_at
+* updated_at
+* deleted_at
 
 **Methods:**
 * GET /store/  (Retrieves current store based on APP-ID)
