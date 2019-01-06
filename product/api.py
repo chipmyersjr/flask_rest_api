@@ -90,7 +90,7 @@ class ProductAPI(MethodView):
             if product:
                 response = {
                     "result": "ok",
-                    "pet": product_obj(product)
+                    "product": product_obj(product)
                 }
                 return jsonify(response), 200
             else:
@@ -160,7 +160,6 @@ class ProductAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
-        print("ok")
         product = Product(
             product_id=str(uuid.uuid4().int),
             title=product_json.get("title"),
@@ -199,7 +198,7 @@ class ProductAPI(MethodView):
         product.title = product_json.get("title")
         product.product_type = product_json.get("product_type")
         product.vendor = product_json.get("vendor")
-        product.updated_at = datetime.utcnow()
+        product.updated_at = datetime.now()
         product.save()
 
         response = {
@@ -217,7 +216,7 @@ class ProductAPI(MethodView):
         product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
         if not product:
             return jsonify({}), 404
-        product.deleted_at = datetime.utcnow()
+        product.deleted_at = datetime.now()
         product.save()
 
         return jsonify({}), 204

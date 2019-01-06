@@ -7,8 +7,8 @@ class Product(db.Document):
     title = db.StringField(db_field="title")
     product_type = db.StringField(db_field="product_type")
     vendor = db.StringField(db_field="vendor")
-    created_at = db.DateTimeField(default=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.utcnow)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
 
     meta = {
