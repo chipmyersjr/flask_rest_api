@@ -226,7 +226,8 @@ class ProductAPI(MethodView):
 
         Endpoint: /product/88517737685737189039085760589870132011
         """
-        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        product = Product.objects.filter(product_id=product_id, store=store, deleted_at=None).first()
         if not product:
             return jsonify({}), 404
         product.deleted_at = datetime.now()
@@ -250,9 +251,11 @@ class ProductCountAPI(MethodView):
           "result": "ok"
         }
         """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
         response = {
                       "result": "ok",
-                      "count": str(Product.objects.count())
+                      "count": str(Product.objects.filter(store=store).count())
                    }
 
         return jsonify(response), 200
