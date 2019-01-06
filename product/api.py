@@ -216,7 +216,7 @@ class ProductAPI(MethodView):
         product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
         if not product:
             return jsonify({}), 404
-        product.deleted_at = datetime.utcnow()
+        product.deleted_at = datetime.now()
         product.save()
 
         return jsonify({}), 204

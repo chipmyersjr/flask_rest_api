@@ -154,7 +154,7 @@ class StoreTest(unittest.TestCase):
             "APP-ID": "my_furniture_app",
             "ACCESS-TOKEN": token
         }
-        now = datetime.utcnow().replace(second=0, microsecond=0)
+        now = datetime.now().replace(second=0, microsecond=0)
         expires = now + timedelta(days=-31)
         access = AccessToken.objects.first()
         access.expires_at = expires
@@ -164,3 +164,13 @@ class StoreTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
         assert json.loads(rv.data.decode('utf-8')).get("error") == "TOKEN_EXPIRED"
+
+        access.expires_at = datetime.now().replace(second=0, microsecond=0)
+        access.save()
+
+        # test delete method
+        rv = self.app.delete('/store/',
+                             headers=headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Store.objects.filter(app_id="my_furniture_app", deleted_at=None).count() == 0

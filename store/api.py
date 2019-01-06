@@ -16,8 +16,9 @@ class StoreAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @classmethod
     @token_required
-    def get(self):
+    def get(cls):
         """
         returns info on the current store. Store is determined by app-id provided in header
 
@@ -50,7 +51,8 @@ class StoreAPI(MethodView):
             }
             return jsonify(response), 200
 
-    def post(self):
+    @classmethod
+    def post(cls):
         """
         Creates a new store
 
@@ -105,9 +107,9 @@ class StoreAPI(MethodView):
         }
         return jsonify(response), 201
 
-
+    @classmethod
     @token_required
-    def put(self):
+    def put(cls):
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         request_json = request.json
@@ -130,6 +132,21 @@ class StoreAPI(MethodView):
         }
         return jsonify(response), 201
 
+    @classmethod
+    def delete(cls):
+        """
+        deletes the current store based on the app-id header
+
+        Endpoint: /store/
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        if not store:
+            return jsonify({}), 404
+        store.deleted_at = datetime.now()
+        store.save()
+
+        return jsonify({}), 204
+
 
 class StoreTokenAPI(MethodView):
 
@@ -137,7 +154,8 @@ class StoreTokenAPI(MethodView):
         if request.method != 'POST' or not request.json:
             abort(400)
 
-    def post(self):
+    @classmethod
+    def post(cls):
         """
         Creates a token for a given app_id that expires in 24 hours.  The token will be passed in the headers as the
         authentication method.
