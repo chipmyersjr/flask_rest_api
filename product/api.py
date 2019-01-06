@@ -9,6 +9,8 @@ from datetime import datetime
 from product.models import Product
 from product.schema import schema
 from product.templates import product_obj, products_obj
+from store.models import Store
+from store.decorators import token_required
 
 
 class ProductAPI(MethodView):
@@ -18,6 +20,7 @@ class ProductAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self, product_id=None):
         """
         Gets a product by providing product_id
@@ -85,8 +88,10 @@ class ProductAPI(MethodView):
            "result": "ok"
         }
         """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
         if product_id:
-            product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+            product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
             if product:
                 response = {
                     "result": "ok",
@@ -98,7 +103,7 @@ class ProductAPI(MethodView):
         else:
             href = "/product/?page=%s"
 
-            products = Product.objects.filter(deleted_at=None)
+            products = Product.objects.filter(store=store, deleted_at=None)
 
             page = int(request.args.get('page', 1))
             products = products.paginate(page=page, per_page=self.PER_PAGE)
@@ -129,7 +134,9 @@ class ProductAPI(MethodView):
                 )
             return jsonify(response), 200
 
-    def post(self):
+    @classmethod
+    @token_required
+    def post(cls):
         """
         Creates a new product.
 
@@ -160,11 +167,13 @@ class ProductAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
         product = Product(
             product_id=str(uuid.uuid4().int),
             title=product_json.get("title"),
             product_type=product_json.get("product_type"),
-            vendor=product_json.get("vendor")
+            vendor=product_json.get("vendor"),
+            store=store
         ).save()
 
         response = {
@@ -173,7 +182,9 @@ class ProductAPI(MethodView):
         }
         return jsonify(response), 201
 
-    def put(self, product_id):
+    @classmethod
+    @token_required
+    def put(cls, product_id):
         """
         update a specific product
 
@@ -207,7 +218,9 @@ class ProductAPI(MethodView):
         }
         return jsonify(response), 201
 
-    def delete(self, product_id):
+    @classmethod
+    @token_required
+    def delete(cls, product_id):
         """
         delete a specific product by providing product id
 
@@ -223,8 +236,9 @@ class ProductAPI(MethodView):
 
 
 class ProductCountAPI(MethodView):
-
-    def get(self):
+    @classmethod
+    @token_required
+    def get(cls):
         """
         Returns a count of all products
 
