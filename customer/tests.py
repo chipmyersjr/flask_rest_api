@@ -90,6 +90,46 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
         assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 3
 
+    def test_method_authenications(self):
+        """
+        test that methods can't be be accessed without auth headers
+        """
+        data = {
+            "currency": "USD",
+            "email": "johnsmith@gmail.com",
+            "first_name": "John",
+            "last_name": "Smith5",
+            "addresses":
+                [
+                    {
+                        "street": "1236 Main Street",
+                        "city": "townsville",
+                        "zip": "1234",
+                        "state": "CA",
+                        "country": "USA",
+                        "is_primary": "true"
+                    },
+                    {
+                        "street": "1215 Main Street",
+                        "city": "townsville",
+                        "zip": "500",
+                        "state": "CA",
+                        "country": "USA"
+                    },
+                    {
+                        "street": "1216 Main Street",
+                        "city": "townsville",
+                        "zip": "500",
+                        "state": "CA",
+                        "country": "USA"
+                    }
+                ]
+        }
+        rv = self.app.post('/customer/',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
 
 if __name__ == '__main__':
     unittest.main()
