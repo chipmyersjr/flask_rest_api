@@ -3,6 +3,7 @@ from flask import jsonify, request, abort
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 import uuid
+from datetime import datetime
 
 from store.models import Store
 from store.decorators import token_required
@@ -218,6 +219,52 @@ class CustomerAPI(MethodView):
 
     @token_required
     def put(self, customer_id):
+        """
+        update one or more customer fields
+
+        Endpoint: /customer/209485626598208918917359936593901836672
+
+        Example Post Body:
+        {
+           "currency": "GBR"
+        }
+
+        Example Response:
+        {
+            "customer": {
+                "addresses": [
+                    {
+                        "address_id": "160725188092123457335884996198595450510",
+                        "city": "townsville",
+                        "created_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                        "deleted_at": null,
+                        "is_primary": true,
+                        "state": "CA",
+                        "street": "1236 Main Street",
+                        "updated_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                        "zip": "1234"
+                    }
+                ],
+                "created_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                "currency": "GBR",
+                "customer_id": "209485626598208918917359936593901836672",
+                "deleted_at": null,
+                "email": "johnsmith@gmail.com",
+                "first_name": "John",
+                "last_name": "Smith4",
+                "last_order_date": null,
+                "links": [
+                    {
+                        "href": "/customer/209485626598208918917359936593901836672",
+                        "rel": "self"
+                    }
+                ],
+                "total_spent": "0.00",
+                "updated_at": "Sun, 13 Jan 2019 19:48:27 GMT"
+            },
+            "result": "ok"
+        }
+        """
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         customer = Customer.objects.filter(customer_id=customer_id, deleted_at=None, store_id=store).first()
@@ -251,3 +298,19 @@ class CustomerAPI(MethodView):
             "customer": customer_obj(customer)
         }
         return jsonify(response), 201
+
+    @token_required
+    def delete(self, customer_id):
+        """
+        delete a specific product by providing product id
+
+        Endpoint: /product/88517737685737189039085760589870132011
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+        if not customer:
+            return jsonify({}), 404
+        customer.deleted_at = datetime.now()
+        customer.save()
+
+        return jsonify({}), 204

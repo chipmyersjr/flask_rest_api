@@ -139,6 +139,13 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get('error') == "No fields supplied for update"
 
+        # test delete customer
+        rv = self.app.delete('/customer/' + customer_id,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 0
+
     def test_method_authenications(self):
         """
         test that methods can't be be accessed without auth headers
