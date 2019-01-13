@@ -90,12 +90,54 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
         assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 3
 
+        # test that missing field returns 400
+        data = {
+            "currency": "USD",
+            "email": "johnsmith2@gmail.com",
+            "first_name": "John"
+        }
+        rv = self.app.post('/customer/',
+                           data=json.dumps(data),
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert "is a required property" in str(rv.data)
+
         # test get by customer id
         rv = self.app.get('/customer/' + customer_id,
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
         assert json.loads(rv.data.decode('utf-8')).get('customer')['email'] == "johnsmith@gmail.com"
+
+        # edit a product
+        data = {
+            "currency": "EUR"
+        }
+        rv = self.app.put('/customer/' + customer_id,
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert json.loads(rv.data.decode('utf-8')).get('customer')['currency'] == "EUR"
+
+        # test incorrect customer id return 404
+        rv = self.app.put('/customer/' + str(1),
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        # test invalid fields returns 400
+        data = {
+            "currency_wrong": "EUR"
+        }
+        rv = self.app.put('/customer/' + customer_id,
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get('error') == "No fields supplied for update"
 
     def test_method_authenications(self):
         """

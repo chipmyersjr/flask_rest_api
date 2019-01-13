@@ -3,8 +3,8 @@ schema = {
         "properties": {
             "currency":  {"type": "string"},
             "email":     {"type": "string"},
-            "firstname": {"type": "string"},
-            "lastname":  {"type": "string"},
+            "first_name": {"type": "string"},
+            "last_name":  {"type": "string"},
             "addresses": {
                 "type": "array",
                 "items": {
@@ -20,8 +20,8 @@ schema = {
                 },
                 "required": ["street", "city", "state", "country"]
             },
-            "required": ["currency", "email", "firstname", "lastname"]
-        }
+        },
+        "required": ["currency", "email", "first_name", "last_name"]
 }
 
 

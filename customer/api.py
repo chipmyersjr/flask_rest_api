@@ -18,10 +18,51 @@ class CustomerAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
-
-    @classmethod
     @token_required
     def get(self, customer_id=None):
+        """
+        Gets a customer by providing customer_id
+
+        Endpoint: /customer/209485626598208918917359936593901836672
+
+        Example Response:
+
+        {
+            "customer": {
+                "addresses": [
+                    {
+                        "address_id": "160725188092123457335884996198595450510",
+                        "city": "townsville",
+                        "created_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                        "deleted_at": null,
+                        "is_primary": true,
+                        "state": "CA",
+                        "street": "1236 Main Street",
+                        "updated_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                        "zip": "1234"
+                    }
+                ],
+                "created_at": "Sun, 13 Jan 2019 19:48:27 GMT",
+                "currency": "USD",
+                "customer_id": "209485626598208918917359936593901836672",
+                "deleted_at": null,
+                "email": "johnsmith@gmail.com",
+                "first_name": "John",
+                "last_name": "Smith4",
+                "last_order_date": null,
+                "links": [
+                    {
+                        "href": "/customer/209485626598208918917359936593901836672",
+                        "rel": "self"
+                    }
+                ],
+                "total_spent": "0.00",
+                "updated_at": "Sun, 13 Jan 2019 19:48:27 GMT"
+            },
+            "result": "ok"
+        }
+        """
+
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         if customer_id:
@@ -37,10 +78,8 @@ class CustomerAPI(MethodView):
         else:
             href = "/product/?page=%s"
 
-
-    @classmethod
     @token_required
-    def post(cls):
+    def post(self):
         """
         Creates a new customer
 
@@ -170,6 +209,42 @@ class CustomerAPI(MethodView):
 
             for add in addresses:
                 Address.objects.insert(add)
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 201
+
+    @token_required
+    def put(self, customer_id):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        customer = Customer.objects.filter(customer_id=customer_id, deleted_at=None, store_id=store).first()
+        if not customer:
+            return jsonify({}), 404
+
+        customer_json = request.json
+
+        items_updated = 0
+        if customer_json.get("currency"):
+            customer.currency = customer_json.get("currency")
+            items_updated += 1
+
+        if customer_json.get("email"):
+            customer.email = customer_json.get("email")
+            items_updated += 1
+
+        if customer_json.get("first_name"):
+            customer.first_name = customer_json.get("first_name")
+            items_updated += 1
+
+        if customer_json.get("last_name"):
+            customer.first_name = customer_json.get("last_name")
+            items_updated += 1
+
+        if items_updated == 0:
+            return jsonify({"error": "No fields supplied for update"}), 400
 
         response = {
             "result": "ok",
