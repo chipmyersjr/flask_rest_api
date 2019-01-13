@@ -8,7 +8,7 @@ def customer_obj(customer):
       "email": customer.email,
       "first_name": customer.first_name,
       "last_name": customer.last_name,
-      "total_spent": customer.total_spent,
+      "total_spent": str(customer.total_spent),
       "last_order_date": customer.last_order_date,
       "created_at": customer.created_at,
       "updated_at": customer.updated_at,

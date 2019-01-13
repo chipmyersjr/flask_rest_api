@@ -18,6 +18,26 @@ class CustomerAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+
+    @classmethod
+    @token_required
+    def get(self, customer_id=None):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        if customer_id:
+            customer = Customer.objects.filter(customer_id=customer_id, deleted_at=None, store_id=store).first()
+            if customer:
+                response = {
+                    "result": "ok",
+                    "customer": customer_obj(customer)
+                }
+                return jsonify(response), 200
+            else:
+                return jsonify({}), 404
+        else:
+            href = "/product/?page=%s"
+
+
     @classmethod
     @token_required
     def post(cls):

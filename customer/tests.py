@@ -90,10 +90,19 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
         assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 3
 
+        # test get by customer id
+        rv = self.app.get('/customer/' + customer_id,
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.data.decode('utf-8')).get('customer')['email'] == "johnsmith@gmail.com"
+
     def test_method_authenications(self):
         """
         test that methods can't be be accessed without auth headers
         """
+
+        # test create a customer
         data = {
             "currency": "USD",
             "email": "johnsmith@gmail.com",
