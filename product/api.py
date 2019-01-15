@@ -257,7 +257,7 @@ class ProductCountAPI(MethodView):
 
         response = {
                       "result": "ok",
-                      "count": str(Product.objects.filter(store=store).count())
+                      "count": str(Product.objects.filter(store=store, deleted_at=None).count())
                    }
 
         return jsonify(response), 200

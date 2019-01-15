@@ -6,7 +6,7 @@ from store.models import Store
 
 
 class Customer(db.Document):
-    customer_id = db.StringField(db_field="customer_id", primary_key=True, default=str(uuid.uuid4().int))
+    customer_id = db.StringField(db_field="customer_id", primary_key=True)
     store_id = db.ReferenceField(Store, db_field="store_id")
     currency = db.StringField(db_field="currency")
     email = db.StringField(db_field="email")

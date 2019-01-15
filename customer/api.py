@@ -9,7 +9,8 @@ from store.models import Store
 from store.decorators import token_required
 from customer.schema import schema
 from customer.models import Customer, Address
-from customer.templates import customer_obj
+from customer.templates import customer_obj, customer_objs
+from utils import paginated_results
 
 
 class CustomerAPI(MethodView):
@@ -77,7 +78,9 @@ class CustomerAPI(MethodView):
             else:
                 return jsonify({}), 404
         else:
-            href = "/product/?page=%s"
+            customers = Customer.objects.filter(store_id=store, deleted_at=None)
+            return paginated_results(objects=customers, collection_name='customer', request=request
+                                     , per_page=self.PER_PAGE, serialization_func=customer_objs), 200
 
     @token_required
     def post(self):
@@ -187,6 +190,7 @@ class CustomerAPI(MethodView):
             email=customer_json.get("email"),
             first_name=customer_json.get("first_name"),
             last_name=customer_json.get("last_name"),
+            customer_id=str(uuid.uuid4().int),
             store_id=store
         ).save()
 
@@ -314,3 +318,25 @@ class CustomerAPI(MethodView):
         customer.save()
 
         return jsonify({}), 204
+
+
+class CustomerCountAPI(MethodView):
+    @token_required
+    def get(self):
+        """
+        Returns a count of all customers for current store
+
+        Endpoint = /customer/count/
+
+        Example response:
+        {
+          "count": "20",
+          "result": "ok"
+        }
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        response = {
+            "result": "ok",
+            "count": str(Customer.objects.filter(store_id=store, deleted_at=None).count())
+        }
+        return jsonify(response), 200

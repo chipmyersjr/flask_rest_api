@@ -44,3 +44,10 @@ def addresses_obj(addresses):
     for address in addresses:
         addresses_obj_list.append(address_obj(address))
     return addresses_obj_list
+
+
+def customer_objs(customers):
+    customer_obj_list = []
+    for customer in customers.items:
+        customer_obj_list.append(customer_obj(customer))
+    return customer_obj_list

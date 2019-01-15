@@ -24,6 +24,7 @@ class CustomerTest(unittest.TestCase):
         self.app_factory = self.create_app()
         self.app = self.app_factory.test_client()
         fixtures(self.db_name, "store", "store/fixtures/stores")
+        fixtures(self.db_name, "customer", "customer/fixtures/customers")
 
         data = {
             "app_id": "my_furniture_app",
@@ -187,6 +188,51 @@ class CustomerTest(unittest.TestCase):
                            data=json.dumps(data),
                            content_type='application/json')
         assert rv.status_code == 403
+
+    def test_get_customer_list(self):
+        """
+        Tests for the get customer list endpoint
+        """
+
+        # test default get page 1
+        rv = self.app.get('/customer/',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["customers"]) > 0
+        assert data["links"][0]["href"] == "/customer/?page=1"
+        assert data["links"][1]["rel"] == "next"
+
+        # test that you can get a specific page
+        rv = self.app.get('/customer/?page=2',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["customers"]) > 0
+        assert data["links"][0]["href"] == "/customer/?page=2"
+        assert data["links"][1]["rel"] == "previous"
+
+        # test that not exisiting page returns 404
+        rv = self.app.get('/customer/?page=100',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+    def test_product_count(self):
+        """
+        Tests for the /customer/count/ endpoint
+        """
+
+        # test that enpoint returns the correct count of products
+        rv = self.app.get('/customer/count',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+
+        assert rv.status_code == 200
+        assert data["count"] == "19"
 
 
 if __name__ == '__main__':
