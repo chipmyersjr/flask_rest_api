@@ -41,6 +41,21 @@ class CustomerTest(unittest.TestCase):
             "ACCESS-TOKEN": token
         }
 
+        data = {
+            "app_id": "my_dog_app",
+            "app_secret": "my_dog_secret"
+        }
+
+        rv = self.app.post('/store/token/',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        token = json.loads(rv.data.decode('utf-8')).get("token")
+
+        self.other_store_headers = {
+            "APP-ID": "my_dog_app",
+            "ACCESS-TOKEN": token
+        }
+
     def tearDown(self):
         db = _get_db()
         db.client.drop_database(db)
@@ -220,7 +235,7 @@ class CustomerTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 404
 
-    def test_product_count(self):
+    def test_customer_count(self):
         """
         Tests for the /customer/count/ endpoint
         """
@@ -233,6 +248,31 @@ class CustomerTest(unittest.TestCase):
 
         assert rv.status_code == 200
         assert data["count"] == "19"
+
+    def test_customer_store_relationship(self):
+        """
+        Tests that store can only access its own products
+        """
+        # test get customer list
+        rv = self.app.get('/customer/',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.data.decode('utf-8')).get("customers")) == 0
+
+        # test get customer
+        rv = self.app.get('/customer/7703254127253629093471751051825874859',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.get('/customer/count',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+
+        assert rv.status_code == 200
+        assert data["count"] == "0"
 
 
 if __name__ == '__main__':
