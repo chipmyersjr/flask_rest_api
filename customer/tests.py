@@ -167,6 +167,11 @@ class CustomerTest(unittest.TestCase):
         test that methods can't be be accessed without auth headers
         """
 
+        self.incorrect_headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": "INCORRECT_TOKEN"
+        }
+
         # test create a customer
         data = {
             "currency": "USD",
@@ -202,6 +207,50 @@ class CustomerTest(unittest.TestCase):
         rv = self.app.post('/customer/',
                            data=json.dumps(data),
                            content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/customer/',
+                           headers=self.incorrect_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/',
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.put('/customer/70141961588007884983637788286212381370',
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.put('/customer/70141961588007884983637788286212381370',
+                          headers=self.incorrect_headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/70141961588007884983637788286212381370',
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/70141961588007884983637788286212381370',
+                             headers=self.incorrect_headers,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/count',
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/count',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
         assert rv.status_code == 403
 
     def test_get_customer_list(self):
