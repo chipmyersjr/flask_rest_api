@@ -117,21 +117,15 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
 
-        # test delete product
-        rv = self.app.delete('/product/' + product_id,
-                             headers=self.headers,
-                             content_type='application/json')
-        assert rv.status_code == 204
-        assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 0
-
         # test increase product inventory
         data = {
             "amount": 5
         }
-        rv = self.app.put('/product/inventory' + product_id,
+        rv = self.app.put('/product/' + product_id + '/inventory',
                           data=json.dumps(data),
                           headers=self.headers,
                           content_type='application/json')
+        print(rv.status_code)
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 15
 
@@ -139,23 +133,41 @@ class ProductTest(unittest.TestCase):
         data = {
             "amount": -1
         }
-        rv = self.app.put('/product/inventory' + product_id,
+        rv = self.app.put('/product/' + product_id + '/inventory',
                           data=json.dumps(data),
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 201
-        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 13
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 14
 
         # test decrease product inventory too much return error
         data = {
             "amount": -20
         }
-        rv = self.app.put('/product/inventory' + product_id,
+        rv = self.app.put('/product/' + product_id + '/inventory',
                           data=json.dumps(data),
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get('error') == "PRODUCT_INVENTORY_MUST_BE_MORE_THAN_ZERO"
+
+        # test setting product
+        data = {
+            "set": 10
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
+
+        # test delete product
+        rv = self.app.delete('/product/' + product_id,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 0
 
     def test_get_product_list(self):
         """
@@ -266,4 +278,12 @@ class ProductTest(unittest.TestCase):
 
         rv = self.app.get('/product/count',
                            content_type='application/json')
+        assert rv.status_code == 403
+
+        data = {
+            "set": 20
+        }
+        rv = self.app.put('/product/317549464512162266815167094822029596360/inventory',
+                          data=json.dumps(data),
+                          content_type='application/json')
         assert rv.status_code == 403

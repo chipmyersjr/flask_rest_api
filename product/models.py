@@ -4,6 +4,10 @@ from datetime import datetime
 from store.models import Store
 
 
+class ProductInventoryLessThanZeroException(Exception):
+    pass
+
+
 class Product(db.Document):
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
@@ -16,5 +20,18 @@ class Product(db.Document):
     deleted_at = db.DateTimeField()
 
     meta = {
-        'indexes': ['id']
+        'indexes': [('id', 'store', 'deleted_at')]
     }
+
+    def adjust_inventory(self, amount):
+        new_amount = amount + self.inventory
+        if new_amount < 0:
+            raise ProductInventoryLessThanZeroException
+        self.inventory = new_amount
+        self.save()
+
+    def set_inventory(self, amount):
+        if amount < 0:
+            raise ProductInventoryLessThanZeroException
+        self.inventory = amount
+        self.save()
