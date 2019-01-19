@@ -48,3 +48,42 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/2
 * PUT /store/   (Updates store based on APP-ID)
 * DELETE /store/ (Deletes a store based on APP-ID)
 * DELETE /admin/products/#{product_id}   (Deletes a product)
+
+
+
+# Customer
+original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
+
+**fields:**
+
+*customer:*
+* customer_id
+* currency
+* email
+* firstname
+* lastname
+* total_spent
+* last_order_date
+* created_at
+* updated_at
+* deleted_at
+
+address:
+* address_id
+* street
+* city
+* zip
+* state
+* country
+* is_primary
+* created_at
+* updated_at
+* deleted_at
+
+**Methods:**
+* GET /admin/customers.json      (Retrieves a list of customers)
+* GET /admin/customers/{customer-id}      (Retrieves a single customer)
+* POST /admin/customers      (Creates a customer)
+* PUT /admin/customers/{customer-id}    (Updates a customer)
+* DELETE /admin/customers/#{customer-id}    (Deletes a customer)
+* GET /admin/customers/count/         (Retrieves a count of customers)
