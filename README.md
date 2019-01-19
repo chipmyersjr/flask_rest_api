@@ -68,7 +68,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * updated_at
 * deleted_at
 
-address:
+*address:*
 * address_id
 * street
 * city
