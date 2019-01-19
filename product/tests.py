@@ -200,6 +200,14 @@ class ProductTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 404
 
+        # test query string parameters
+        rv = self.app.get('/product/?vendor=Sony&producttype=Electronics',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["products"]) == 3
+
     def test_product_count(self):
         """
         Tests for the /product/count/ endpoint

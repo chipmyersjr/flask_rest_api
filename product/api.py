@@ -105,6 +105,14 @@ class ProductAPI(MethodView):
 
             products = Product.objects.filter(store=store, deleted_at=None)
 
+            if "vendor" in request.args:
+                products = products.filter(vendor=request.args.get('vendor'))
+                href += "&vendor=" + request.args.get('vendor')
+
+            if "producttype" in request.args:
+                products = products.filter(product_type=request.args.get('producttype'))
+                href += "&producttype=" + request.args.get('producttype')
+
             page = int(request.args.get('page', 1))
             products = products.paginate(page=page, per_page=self.PER_PAGE)
 
