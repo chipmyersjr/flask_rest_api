@@ -6,7 +6,6 @@ import json
 from settings import MONGODB_HOST
 from product.models import Product
 from application import fixtures
-from store.models import AccessToken
 
 
 class ProductTest(unittest.TestCase):
@@ -23,8 +22,8 @@ class ProductTest(unittest.TestCase):
     def setUp(self):
         self.app_factory = self.create_app()
         self.app = self.app_factory.test_client()
-        fixtures(self.db_name, "product", "product/fixtures/products.json")
         fixtures(self.db_name, "store", "store/fixtures/stores")
+        fixtures(self.db_name, "product", "product/fixtures/products.json")
 
         data = {
             "app_id": "my_dog_app",
