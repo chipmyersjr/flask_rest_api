@@ -197,7 +197,9 @@ class ProductAPI(MethodView):
                 "vendor": "Pet Co"
             }
         """
-        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
         if not product:
             return jsonify({}), 404
 
@@ -255,7 +257,7 @@ class ProductCountAPI(MethodView):
 
         response = {
                       "result": "ok",
-                      "count": str(Product.objects.filter(store=store).count())
+                      "count": str(Product.objects.filter(store=store, deleted_at=None).count())
                    }
 
         return jsonify(response), 200

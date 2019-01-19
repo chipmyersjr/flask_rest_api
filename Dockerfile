@@ -15,10 +15,10 @@ RUN apt-get update && apt-get install -y \
     mongodb
 
 ## make a local directory
-RUN mkdir /opt/pets-api
+RUN mkdir /opt/store-api
 
 # set "pets-api" as the working directory from which CMD, RUN, ADD references
-WORKDIR /opt/pets-api
+WORKDIR /opt/store-api
 
 # now copy all the files in this directory to /code
 ADD . .

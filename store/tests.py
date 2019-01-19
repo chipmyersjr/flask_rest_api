@@ -124,7 +124,6 @@ class StoreTest(unittest.TestCase):
                           headers=headers,
                           data=json.dumps(data),
                           content_type='application/json')
-        print(rv.status_code)
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get("store")["tagline"] == "A really great furniture store"
 
