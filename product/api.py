@@ -267,6 +267,25 @@ class ProductCountAPI(MethodView):
 class ProductInventoryAPI(MethodView):
     @token_required
     def put(self, product_id):
+        """
+        Endpoint /product/58829620864631543564022316902169146987/inventory
+
+        Add to or subtract from inventory amount by supplying amount in the post body
+
+        Example Post Body:
+        {
+            "amount": 5
+        }
+        Or
+        {
+            "amount": -5
+        }
+
+        Set inventory to a specific amount
+        {
+            "set": 5
+        }
+        """
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
