@@ -124,6 +124,18 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 204
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 0
 
+        # test increase product inventory
+        data = {
+            "amount": 5
+        }
+        rv = self.app.put('/product/' + product_id,
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
+
+
     def test_get_product_list(self):
         """
         Tests for the get product list endpoint

@@ -173,6 +173,7 @@ class ProductAPI(MethodView):
             title=product_json.get("title"),
             product_type=product_json.get("product_type"),
             vendor=product_json.get("vendor"),
+            inventory=product_json.get("inventory"),
             store=store
         ).save()
 
@@ -261,3 +262,7 @@ class ProductCountAPI(MethodView):
                    }
 
         return jsonify(response), 200
+
+
+class ProductInventoryAPI(MethodView):
+    pass

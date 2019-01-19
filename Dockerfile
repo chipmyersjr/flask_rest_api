@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     mongodb
 
+RUN apt-get install vim
+
 ## make a local directory
 RUN mkdir /opt/store-api
 

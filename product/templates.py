@@ -4,6 +4,7 @@ def product_obj(product):
       "title": product.title,
       "product_type": product.product_type,
       "vendor": product.vendor,
+      "inventory": product.inventory,
       "created_at": product.created_at,
       "updated_at": product.updated_at,
       "deleted_at": product.deleted_at,
