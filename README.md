@@ -15,6 +15,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 * product_type
 * vendor
 * store_id
+* inventory
 * created_at
 * updated_at
 * deleted_at
@@ -26,6 +27,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 * POST /products/   (Creates a new product)
 * PUT /products/{product_id}   (Updates a product)
 * DELETE /admin/products/{product_id}   (Deletes a product)
+* PUT /product/{product_id}/inventory   (Add to, Subtract From, or Set inventory amount)
 
 
 # Store
