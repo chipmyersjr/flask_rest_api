@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 
-from product.models import Product
+from product.models import Product, ProductInventoryLessThanZeroException
 from product.schema import schema
 from product.templates import product_obj, products_obj
 from store.models import Store
@@ -173,6 +173,7 @@ class ProductAPI(MethodView):
             title=product_json.get("title"),
             product_type=product_json.get("product_type"),
             vendor=product_json.get("vendor"),
+            inventory=product_json.get("inventory"),
             store=store
         ).save()
 
@@ -261,3 +262,40 @@ class ProductCountAPI(MethodView):
                    }
 
         return jsonify(response), 200
+
+
+class ProductInventoryAPI(MethodView):
+    @token_required
+    def put(self, product_id):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        if "amount" in request.json and "set" in request.json:
+            return jsonify({"error": "DONT_INCLUDE_SET_AND_AMOUNT_IN_SAME_REQUEST"}), 400
+
+        if "amount" in request.json:
+            try:
+                product.adjust_inventory(request.json.get("amount"))
+            except ProductInventoryLessThanZeroException:
+                return jsonify({"error": "PRODUCT_INVENTORY_MUST_BE_MORE_THAN_ZERO"}), 400
+            response = {
+                "result": "ok",
+                "product": product_obj(product)
+            }
+            return jsonify(response), 201
+
+        if "set" in request.json:
+            try:
+                product.set_inventory(request.json.get("set"))
+            except ProductInventoryLessThanZeroException:
+                return jsonify({"error": "PRODUCT_INVENTORY_MUST_BE_MORE_THAN_ZERO"}), 400
+            response = {
+                "result": "ok",
+                "product": product_obj(product)
+            }
+            return jsonify(response), 201
+
+        return jsonify({"error": "INCLUDE_SET_OR_AMOUNT_IN_REQUEST"}), 400

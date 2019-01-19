@@ -68,7 +68,8 @@ class ProductTest(unittest.TestCase):
         data = {
                  "title": "PS4",
                  "product_type": "Electronics",
-                 "vendor": "Sony"
+                 "vendor": "Sony",
+                 "inventory": 10
                }
 
         rv = self.app.post('/product/',
@@ -78,6 +79,7 @@ class ProductTest(unittest.TestCase):
         product_id = json.loads(rv.data.decode('utf-8')).get("product")['product_id']
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
 
         # test that links were created for product
         data = json.loads(rv.get_data(as_text=True))
@@ -114,6 +116,51 @@ class ProductTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
+
+        # test increase product inventory
+        data = {
+            "amount": 5
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        print(rv.status_code)
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 15
+
+        # test decrease product inventory
+        data = {
+            "amount": -1
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 14
+
+        # test decrease product inventory too much return error
+        data = {
+            "amount": -20
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get('error') == "PRODUCT_INVENTORY_MUST_BE_MORE_THAN_ZERO"
+
+        # test setting product
+        data = {
+            "set": 10
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
 
         # test delete product
         rv = self.app.delete('/product/' + product_id,
@@ -192,6 +239,16 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 200
         assert data["count"] == "19"
 
+        # test cannot effect other store's product inventory
+        data = {
+            "set": 20
+        }
+        rv = self.app.put('/product/131077205055504776670923389866612113556/inventory',
+                          headers=self.other_store_headers,
+                          data=data,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
     def test_method_authenications(self):
         """
         test that methods can't be be accessed without auth headers
@@ -221,4 +278,12 @@ class ProductTest(unittest.TestCase):
 
         rv = self.app.get('/product/count',
                            content_type='application/json')
+        assert rv.status_code == 403
+
+        data = {
+            "set": 20
+        }
+        rv = self.app.put('/product/317549464512162266815167094822029596360/inventory',
+                          data=json.dumps(data),
+                          content_type='application/json')
         assert rv.status_code == 403
