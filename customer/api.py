@@ -185,6 +185,11 @@ class CustomerAPI(MethodView):
             return jsonify({"error": error.message}), 400
 
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        existing_customer = Customer.objects.filter(email=customer_json.get("email"), store_id=store).first()
+
+        if existing_customer:
+            return jsonify({"error": "CUSTOMER_ALREADY_EXISTS"}), 400
+
         customer = Customer(
             currency=customer_json.get("currency"),
             email=customer_json.get("email"),

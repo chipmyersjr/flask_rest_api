@@ -106,6 +106,14 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
         assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 3
 
+        # test that we cannot make duplicate email
+        rv = self.app.post('/customer/',
+                           data=json.dumps(data),
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get('error') == "CUSTOMER_ALREADY_EXISTS"
+
         # test that missing field returns 400
         data = {
             "currency": "USD",
