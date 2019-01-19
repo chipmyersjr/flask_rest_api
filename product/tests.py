@@ -222,6 +222,14 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 200
         assert data["count"] == "19"
 
+        # test query string parameters
+        rv = self.app.get('/product/count?vendor=Sony&producttype=Electronics',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert data["count"] == "3"
+
     def test_product_store_relationship(self):
         """
         Tests that store can only access its own products

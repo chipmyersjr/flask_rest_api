@@ -264,9 +264,17 @@ class ProductCountAPI(MethodView):
         """
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
+        products = Product.objects.filter(store=store, deleted_at=None)
+
+        if "vendor" in request.args:
+            products = products.filter(vendor=request.args.get('vendor'))
+
+        if "producttype" in request.args:
+            products = products.filter(product_type=request.args.get('producttype'))
+
         response = {
                       "result": "ok",
-                      "count": str(Product.objects.filter(store=store, deleted_at=None).count())
+                      "count": str(products.count())
                    }
 
         return jsonify(response), 200
