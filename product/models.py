@@ -10,6 +10,7 @@ class Product(db.Document):
     product_type = db.StringField(db_field="product_type")
     vendor = db.StringField(db_field="vendor")
     store = db.ReferenceField(Store, db_field="store_id")
+    inventory = db.IntField(db_field="inventory", default=0)
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()

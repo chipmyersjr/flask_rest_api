@@ -68,7 +68,8 @@ class ProductTest(unittest.TestCase):
         data = {
                  "title": "PS4",
                  "product_type": "Electronics",
-                 "vendor": "Sony"
+                 "vendor": "Sony",
+                 "inventory": 10
                }
 
         rv = self.app.post('/product/',
@@ -78,6 +79,7 @@ class ProductTest(unittest.TestCase):
         product_id = json.loads(rv.data.decode('utf-8')).get("product")['product_id']
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
 
         # test that links were created for product
         data = json.loads(rv.get_data(as_text=True))
