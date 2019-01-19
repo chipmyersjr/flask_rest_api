@@ -85,5 +85,5 @@ address:
 * GET /admin/customers/{customer-id}      (Retrieves a single customer)
 * POST /admin/customers      (Creates a customer)
 * PUT /admin/customers/{customer-id}    (Updates a customer)
-* DELETE /admin/customers/#{customer-id}    (Deletes a customer)
+* DELETE /admin/customers/{customer-id}    (Deletes a customer)
 * GET /admin/customers/count/         (Retrieves a count of customers)
