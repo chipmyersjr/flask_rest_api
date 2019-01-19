@@ -128,13 +128,34 @@ class ProductTest(unittest.TestCase):
         data = {
             "amount": 5
         }
-        rv = self.app.put('/product/' + product_id,
+        rv = self.app.put('/product/inventory' + product_id,
                           data=json.dumps(data),
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 201
-        assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 15
 
+        # test decrease product inventory
+        data = {
+            "amount": -1
+        }
+        rv = self.app.put('/product/inventory' + product_id,
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 13
+
+        # test decrease product inventory too much return error
+        data = {
+            "amount": -20
+        }
+        rv = self.app.put('/product/inventory' + product_id,
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get('error') == "PRODUCT_INVENTORY_MUST_BE_MORE_THAN_ZERO"
 
     def test_get_product_list(self):
         """
@@ -205,6 +226,16 @@ class ProductTest(unittest.TestCase):
 
         assert rv.status_code == 200
         assert data["count"] == "19"
+
+        # test cannot effect other store's product inventory
+        data = {
+            "set": 20
+        }
+        rv = self.app.put('/product/131077205055504776670923389866612113556/inventory',
+                          headers=self.other_store_headers,
+                          data=data,
+                          content_type='application/json')
+        assert rv.status_code == 404
 
     def test_method_authenications(self):
         """

@@ -265,4 +265,11 @@ class ProductCountAPI(MethodView):
 
 
 class ProductInventoryAPI(MethodView):
-    pass
+    def put(self, product_id):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        
