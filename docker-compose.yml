@@ -5,10 +5,10 @@ services:
     ports:
       - "80:5000"
     volumes:
-      - .:/opt/pets-api
+      - .:/opt/store-api
     links:
       - db:mongodb
-    container_name: petsapi_web_1
+    container_name: store-web
   db:
     image: mongo:3.0.2
-    container_name: petsapi_db_1
+    container_name: store-db

@@ -114,6 +114,16 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get('error') == "CUSTOMER_ALREADY_EXISTS"
 
+        # test that only one primary address can be supplied
+        data['addresses'][1]['is_primary'] = 'true'
+        data['email'] = 'another_email_address@gmail.com'
+        rv = self.app.post('/customer/',
+                           data=json.dumps(data),
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert json.loads(rv.data.decode('utf-8')).get('error') == "MULTIPLE_PRIMARY_ADDRESSES_SUPPLIED"
+
         # test that missing field returns 400
         data = {
             "currency": "USD",
