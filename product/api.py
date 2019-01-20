@@ -43,6 +43,10 @@ class ProductAPI(MethodView):
 
         Endpoint: /product/
 
+        Query String Parameters:
+        vendor  (Filter by vendor)
+        producttype (Filter by product_type)
+
         Example response:
         {
            "links": [
@@ -104,6 +108,14 @@ class ProductAPI(MethodView):
             href = "/product/?page=%s"
 
             products = Product.objects.filter(store=store, deleted_at=None)
+
+            if "vendor" in request.args:
+                products = products.filter(vendor=request.args.get('vendor'))
+                href += "&vendor=" + request.args.get('vendor')
+
+            if "producttype" in request.args:
+                products = products.filter(product_type=request.args.get('producttype'))
+                href += "&producttype=" + request.args.get('producttype')
 
             page = int(request.args.get('page', 1))
             products = products.paginate(page=page, per_page=self.PER_PAGE)
@@ -248,6 +260,10 @@ class ProductCountAPI(MethodView):
 
         Endpoint = /product/count/
 
+        Query String Parameters:
+        vendor  (Filter by vendor)
+        producttype (Filter by product_type)
+
         Example response:
         {
           "count": "20",
@@ -256,9 +272,17 @@ class ProductCountAPI(MethodView):
         """
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
+        products = Product.objects.filter(store=store, deleted_at=None)
+
+        if "vendor" in request.args:
+            products = products.filter(vendor=request.args.get('vendor'))
+
+        if "producttype" in request.args:
+            products = products.filter(product_type=request.args.get('producttype'))
+
         response = {
                       "result": "ok",
-                      "count": str(Product.objects.filter(store=store, deleted_at=None).count())
+                      "count": str(products.count())
                    }
 
         return jsonify(response), 200
@@ -267,6 +291,25 @@ class ProductCountAPI(MethodView):
 class ProductInventoryAPI(MethodView):
     @token_required
     def put(self, product_id):
+        """
+        Endpoint /product/58829620864631543564022316902169146987/inventory
+
+        Add to or subtract from inventory amount by supplying amount in the post body
+
+        Example Post Body:
+        {
+            "amount": 5
+        }
+        Or
+        {
+            "amount": -5
+        }
+
+        Set inventory to a specific amount
+        {
+            "set": 5
+        }
+        """
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
