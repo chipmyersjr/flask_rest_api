@@ -43,6 +43,10 @@ class ProductAPI(MethodView):
 
         Endpoint: /product/
 
+        Query String Parameters:
+        vendor  (Filter by vendor)
+        producttype (Filter by product_type)
+
         Example response:
         {
            "links": [
@@ -255,6 +259,10 @@ class ProductCountAPI(MethodView):
         Returns a count of all products
 
         Endpoint = /product/count/
+
+        Query String Parameters:
+        vendor  (Filter by vendor)
+        producttype (Filter by product_type)
 
         Example response:
         {
