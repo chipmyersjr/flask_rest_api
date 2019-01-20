@@ -9,6 +9,10 @@ https://help.shopify.com/en/api/reference
 # Product
 original issue: https://github.com/chipmyersjr/flask_rest_api/issues/1
 
+Query String Parameters:
+vendor  (Filter by vendor)
+producttype (Filter by product_type)
+
 **Fields:**
 * id
 * title
