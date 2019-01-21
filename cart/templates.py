@@ -6,5 +6,8 @@ def cart_obj(cart):
         "last_item_added_at": cart.last_item_added_at,
         "invoice_created_at": cart.invoice_created_at,
         "closed_at": cart.closed_at,
-        "deleted_at": cart.deleted_at
+        "links": [
+            {"rel": "self", "href": "/customer/" + cart.customer_id.customer_id + "/cart"},
+            {"rel": "customer", "href": "/customer/" + cart.customer_id.customer_id}
+        ]
     }

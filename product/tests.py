@@ -125,7 +125,6 @@ class ProductTest(unittest.TestCase):
                           data=json.dumps(data),
                           headers=self.headers,
                           content_type='application/json')
-        print(rv.status_code)
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 15
 

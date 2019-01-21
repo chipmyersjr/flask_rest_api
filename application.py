@@ -23,13 +23,16 @@ def create_app(**config_overrides):
     from product.views import product_app
     from store.views import store_app
     from customer.views import customer_app
+    from cart.views import cart_app
 
     # register blueprints
     app.register_blueprint(product_app)
     app.register_blueprint(store_app)
     app.register_blueprint(customer_app)
+    app.register_blueprint(cart_app)
 
     return app
+
 
 
 def fixtures(test_db, collection, fixture):
