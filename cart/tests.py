@@ -89,14 +89,14 @@ class CartTest(unittest.TestCase):
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
 
         # test close cart
-        rv = self.app.put('/customer/' + customer_id + '/cart/close',
+        rv = self.app.delete('/customer/' + customer_id + '/cart',
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 0
 
         # test close cart with no open cart return 404
-        rv = self.app.put('/customer/' + customer_id + '/cart/close',
+        rv = self.app.delete('/customer/' + customer_id + '/cart',
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 404
