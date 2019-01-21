@@ -23,7 +23,6 @@ class Customer(db.Document):
     }
 
 
-
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))
     customer_id = db.ReferenceField(Customer, db_field="customer_id")

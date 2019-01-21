@@ -20,7 +20,8 @@ class Product(db.Document):
     deleted_at = db.DateTimeField()
 
     meta = {
-        'indexes': [('id', 'store', 'deleted_at')]
+        'indexes': [('id', 'store', 'deleted_at'), ('vendor', 'product_type', 'store', 'deleted_at')
+                    , ('product_type', 'store', 'deleted_at'), ('vendor', 'store', 'deleted_at')]
     }
 
     def adjust_inventory(self, amount):
