@@ -64,8 +64,6 @@ class CartAPI(MethodView):
         }
         return jsonify(response), 201
 
-
-class CartCloseAPI(MethodView):
     def put(self, customer_id):
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
         customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
