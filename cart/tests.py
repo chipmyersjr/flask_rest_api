@@ -89,6 +89,13 @@ class CartTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
 
+        # test get customer cart
+        rv = self.app.get('/customer/' + customer_id + '/cart',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert "items" in str(rv.data)
+
         # test add item to cart
         product_id = "314936113833628994682040857331370897627"
         data = {"quantity": 1}
