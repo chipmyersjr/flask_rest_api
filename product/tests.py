@@ -41,8 +41,8 @@ class ProductTest(unittest.TestCase):
         }
 
         data = {
-            "app_id": "my_furniture_app",
-            "app_secret": "my_furniture_secret"
+            "app_id": "my_cat_app",
+            "app_secret": "my_cat_secret"
         }
 
         rv = self.app.post('/store/token/',
@@ -51,7 +51,7 @@ class ProductTest(unittest.TestCase):
         token = json.loads(rv.data.decode('utf-8')).get("token")
 
         self.other_store_headers = {
-            "APP-ID": "my_furniture_app",
+            "APP-ID": "my_cat_app",
             "ACCESS-TOKEN": token
         }
 

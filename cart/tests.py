@@ -166,6 +166,15 @@ class CartTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 400
 
+        # test delete product
+        product_id = "314936113833628994682040857331370897630"
+        rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
+                             headers=self.headers,
+                             data=json.dumps(batch_data),
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert CartItem.objects.filter(cart_id=cart_id, removed_at=None, product_id=product_id).count() == 0
+
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',
                              headers=self.headers,

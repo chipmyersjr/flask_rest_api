@@ -1,18 +1,19 @@
 from flask.views import MethodView
 from flask import request, jsonify
 from datetime import datetime
-import uuid
-
 
 from customer.models import Customer
 from store.models import Store
 from store.decorators import token_required
-from cart.models import Cart, ProductNotFoundException
+from cart.models import Cart, CartItem, ProductNotFoundException
 from cart.templates import cart_obj
+from product.models import Product
 
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 NO_OPEN_CART = "NO_CART_IS_OPEN"
+PRODUCT_NOT_FOUND = "PRODUCT_NOT_FOUND"
+PRODUCT_NOT_IN_CART = "PRODUCT_NOT_IN_CART"
 
 
 class CartAPI(MethodView):
@@ -22,7 +23,7 @@ class CartAPI(MethodView):
         returns the open cart for the customer
 
         Endpoint: localhost/customer/203143206815474133956265931856458093780/cart
-        
+
         Example Response:
         {
             "cart": {
@@ -235,3 +236,33 @@ class CartItemAPI(MethodView):
             "cart": cart_obj(cart)
         }
         return jsonify(response), 201
+
+    @token_required
+    def delete(self, customer_id, product_id=None):
+        """
+        removes an item from the cart
+
+        Endpoint = localhost/customer/{customer_id}/cart/item/{product_id}
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
+        if cart is None:
+            return jsonify({"error": NO_OPEN_CART}), 404
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+        if product is None:
+            return jsonify({"error": PRODUCT_NOT_FOUND}), 404
+
+        cart_item = CartItem.objects.filter(cart_id=cart, removed_at=None, product_id=product.product_id).first()
+        if cart_item is None:
+            return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
+
+        cart_item.removed_at = datetime.now()
+        cart_item.save()
+
+        return jsonify({}), 204
