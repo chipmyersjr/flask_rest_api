@@ -98,7 +98,7 @@ class CartTest(unittest.TestCase):
                            content_type='application/json')
         cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
         assert rv.status_code == 201
-        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).count() == 1
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).count() == 1
 
         # test invalid customer for add cart item
         product_id = "314936113833628994682040857331370897628"
@@ -117,7 +117,7 @@ class CartTest(unittest.TestCase):
                            content_type='application/json')
         cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
         assert rv.status_code == 201
-        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).first().quantity == 1
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).first().quantity == 1
 
         # add cart item...test bad product id returns 400
         bad_product_id = "123"
@@ -136,8 +136,28 @@ class CartTest(unittest.TestCase):
                            content_type='application/json')
         cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
         assert rv.status_code == 201
-        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).count() == 1
-        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).first().quantity == 3
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).count() == 1
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).first().quantity == 3
+
+        # test add multiple products
+        batch_data = [{"product_id": "314936113833628994682040857331370897630", "quantity": 1},
+                      {"product_id": "314936113833628994682040857331370897631", "quantity": 1}]
+        rv = self.app.post('/customer/' + customer_id + '/cart/item',
+                           headers=self.headers,
+                           data=json.dumps(batch_data),
+                           content_type='application/json')
+        cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        assert rv.status_code == 201
+        assert CartItem.objects.filter(cart_id=cart_id, removed_at=None).count() == 4
+
+        # test add multiple products - malformed request
+        batch_data = [{"product_id": "314936113833628994682040857331370897630", "quantity": 1},
+                      {"product_id": "314936113833628994682040857331370897631"}]
+        rv = self.app.post('/customer/' + customer_id + '/cart/item',
+                           headers=self.headers,
+                           data=json.dumps(batch_data),
+                           content_type='application/json')
+        assert rv.status_code == 400
 
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',

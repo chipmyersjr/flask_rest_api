@@ -7,9 +7,8 @@ import uuid
 from customer.models import Customer
 from store.models import Store
 from store.decorators import token_required
-from cart.models import Cart, CartItem
+from cart.models import Cart, ProductNotFoundException
 from cart.templates import cart_obj
-from product.models import Product
 
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
@@ -99,29 +98,29 @@ class CartItemAPI(MethodView):
             cart = Cart.open_cart(customer)
 
         request_json = request.json
-        if request_json is None:
-            quantity = 1
-        else:
-            quantity = request_json.get("quantity", 1)
 
         if product_id:
-            product = Product.objects.filter(product_id=product_id, store=store, deleted_at=None).first()
-            if product is None:
-                return jsonify({"error": "PRODUCT_NOT_FOUND"}), 400
-
-            existing_cart_item = CartItem.objects.filter(cart_id=cart.cart_id, product_id=product.product_id
-                                                         , removed_at=None).first()
-
-            if existing_cart_item:
-                existing_cart_item.quantity += quantity
-                existing_cart_item.save()
+            if request_json is None:
+                quantity = 1
             else:
-                CartItem(
-                    cart_item_id=str(uuid.uuid4().int),
-                    product_id=product.product_id,
-                    cart_id=cart.cart_id,
-                    quantity=quantity
-                ).save()
+                quantity = request_json.get("quantity", 1)
+            try:
+                cart.add_item_to_cart(product_id, quantity)
+            except ProductNotFoundException:
+                return jsonify({"error": "PRODUCT_NOT_FOUND"}), 400
+        else:
+            cart_items_to_add = []
+            for cart_item in request_json:
+                try:
+                    new_item = dict()
+                    new_item["product_id"] = cart_item["product_id"]
+                    new_item["quantity"] = cart_item["quantity"]
+                    cart_items_to_add.append(new_item)
+                except KeyError:
+                    return jsonify({}), 400
+
+            for item in cart_items_to_add:
+                cart.add_item_to_cart(item["product_id"], item["quantity"])
 
         response = {
             "result": "ok",

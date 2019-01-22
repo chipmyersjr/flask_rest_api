@@ -6,6 +6,13 @@ from product.models import Product
 from customer.models import Customer
 
 
+class ProductNotFoundException(Exception):
+    """
+    Exception when product is not found
+    """
+    pass
+
+
 class Cart(db.Document):
     cart_id = db.StringField(db_field="cart_id", primary_key=True)
     customer_id = db.ReferenceField(Customer, db_field="customer_id")
@@ -34,6 +41,27 @@ class Cart(db.Document):
         ).save()
 
         return cart
+
+    def add_item_to_cart(self, product_id, quantity):
+        product = Product.objects.filter(product_id=product_id, store=self.customer_id.store_id, deleted_at=None).first()
+        if product is None:
+            raise ProductNotFoundException
+
+        existing_cart_item = CartItem.objects.filter(cart_id=self.cart_id, product_id=product.product_id
+                                                     , removed_at=None).first()
+
+        if existing_cart_item:
+            existing_cart_item.quantity += quantity
+            existing_cart_item.save()
+            return existing_cart_item
+        else:
+            cart_item = CartItem(
+                cart_item_id=str(uuid.uuid4().int),
+                product_id=product.product_id,
+                cart_id=self.cart_id,
+                quantity=quantity
+            ).save()
+            return cart_item
 
 
 class CartItem(db.Document):
