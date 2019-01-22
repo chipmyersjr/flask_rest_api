@@ -5,7 +5,7 @@ import json
 
 from settings import MONGODB_HOST
 from application import fixtures
-from cart.models import Cart
+from cart.models import Cart, CartItem
 
 
 class CartTest(unittest.TestCase):
@@ -24,6 +24,7 @@ class CartTest(unittest.TestCase):
         self.app = self.app_factory.test_client()
         fixtures(self.db_name, "store", "store/fixtures/stores")
         fixtures(self.db_name, "customer", "customer/fixtures/customers")
+        fixtures(self.db_name, "product", "product/fixtures/products.json")
 
         data = {
             "app_id": "my_furniture_app",
@@ -88,15 +89,74 @@ class CartTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
 
+        # test add item to cart
+        product_id = "314936113833628994682040857331370897627"
+        data = {"quantity": 1}
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        assert rv.status_code == 201
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).count() == 1
+
+        # test invalid customer for add cart item
+        product_id = "314936113833628994682040857331370897628"
+        bad_customer_id = "123"
+        rv = self.app.post('/customer/' + bad_customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+
+        # add cart item...test default quantity is 1
+        product_id = "314936113833628994682040857331370897629"
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps({}),
+                           content_type='application/json')
+        cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        assert rv.status_code == 201
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).first().quantity == 1
+
+        # add cart item...test bad product id returns 400
+        bad_product_id = "123"
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + bad_product_id,
+                           headers=self.headers,
+                           data=data,
+                           content_type='application/json')
+        assert rv.status_code == 400
+
+        # add cart item....test that adding existing product add to quantity
+        product_id = "314936113833628994682040857331370897627"
+        data = {"quantity": 2}
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        assert rv.status_code == 201
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).count() == 1
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id).first().quantity == 3
+
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',
-                          headers=self.headers,
-                          content_type='application/json')
+                             headers=self.headers,
+                             content_type='application/json')
         assert rv.status_code == 200
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 0
 
         # test close cart with no open cart return 404
         rv = self.app.delete('/customer/' + customer_id + '/cart',
-                          headers=self.headers,
-                          content_type='application/json')
+                             headers=self.headers,
+                             content_type='application/json')
         assert rv.status_code == 404
+
+        # test add item to cart with no cart will create new cart
+        product_id = "314936113833628994682040857331370897628"
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1

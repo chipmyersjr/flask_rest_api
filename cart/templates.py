@@ -26,7 +26,7 @@ def cart_item_obj(cart_item):
     return {
         "cart_item_id": cart_item.cart_item_id,
         "product_id": cart_item.product_id.product_id,
-        "product_title": cart_item.product_id.product_title,
+        "product_title": cart_item.product_id.title,
         "product_vendor": cart_item.product_id.vendor,
         "product_type": cart_item.product_id.product_type,
         "added_at": cart_item.added_at

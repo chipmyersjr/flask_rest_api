@@ -1,5 +1,6 @@
 from application import db
 from datetime import datetime
+import uuid
 
 from product.models import Product
 from customer.models import Customer
@@ -17,6 +18,22 @@ class Cart(db.Document):
     meta = {
         'indexes': [('customer_id', 'closed_at')]
     }
+
+    @classmethod
+    def open_cart(cls, customer):
+        existing_cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
+
+        if existing_cart:
+            existing_cart.closed_at = datetime.now()
+            existing_cart.state = "closed"
+            existing_cart.save()
+
+        cart = Cart(
+            cart_id=str(uuid.uuid4().int),
+            customer_id=customer.customer_id
+        ).save()
+
+        return cart
 
 
 class CartItem(db.Document):
