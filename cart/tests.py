@@ -25,6 +25,8 @@ class CartTest(unittest.TestCase):
         fixtures(self.db_name, "store", "store/fixtures/stores")
         fixtures(self.db_name, "customer", "customer/fixtures/customers")
         fixtures(self.db_name, "product", "product/fixtures/products.json")
+        fixtures(self.db_name, "cart", "cart/fixtures/cart")
+        fixtures(self.db_name, "cart_item", "cart/fixtures/cart_items")
 
         data = {
             "app_id": "my_furniture_app",
@@ -205,3 +207,63 @@ class CartTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 201
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
+
+    def test_cart_authentication(self):
+        """
+        test that methods can't be reached without auth
+        """
+        incorrect_headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": "INCORRECT_TOKEN"
+        }
+
+        customer_id = "180422867908286360754098232165804040712"
+        rv = self.app.post('/customer/' + customer_id + '/cart',
+                           headers=incorrect_headers,
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/customer/' + customer_id + '/cart',
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + '/cart',
+                          headers=incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + '/cart',
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        product_id = "314936113833628994682040857331370897627"
+        data = {"quantity": 1}
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=incorrect_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/' + customer_id + '/cart',
+                             headers=incorrect_headers,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/' + customer_id + '/cart',
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        product_id = "6451551371292750404649077474474125035"
+        rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
+                             headers=incorrect_headers,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
+                             content_type='application/json')
+        assert rv.status_code == 403

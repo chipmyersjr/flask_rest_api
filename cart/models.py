@@ -67,7 +67,7 @@ class Cart(db.Document):
 class CartItem(db.Document):
     cart_item_id = db.StringField(db_field="cart_item_id", primary_key=True)
     product_id = db.ReferenceField(Product, db_field="product_id")
-    cart_id = db.ReferenceField(Cart, db_field="customer_id")
+    cart_id = db.ReferenceField(Cart, db_field="cart_id")
     quantity = db.IntField()
     added_at = db.DateTimeField(default=datetime.now())
     removed_at = db.DateTimeField()
