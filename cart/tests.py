@@ -170,10 +170,19 @@ class CartTest(unittest.TestCase):
         product_id = "314936113833628994682040857331370897630"
         rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
                              headers=self.headers,
-                             data=json.dumps(batch_data),
                              content_type='application/json')
-        assert rv.status_code == 204
+        assert rv.status_code == 200
         assert CartItem.objects.filter(cart_id=cart_id, removed_at=None, product_id=product_id).count() == 0
+
+        # test delete batch product
+        delete_date = [{"product_id": "314936113833628994682040857331370897627"},
+                       {"product_id": "314936113833628994682040857331370897631"}]
+        rv = self.app.delete('/customer/' + customer_id + '/cart/item',
+                             headers=self.headers,
+                             data=json.dumps(delete_date),
+                             content_type='application/json')
+        assert rv.status_code == 200
+        assert CartItem.objects.filter(cart_id=cart_id, removed_at=None).count() == 1
 
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',

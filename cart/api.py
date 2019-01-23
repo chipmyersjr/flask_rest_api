@@ -1,12 +1,15 @@
 from flask.views import MethodView
 from flask import request, jsonify
 from datetime import datetime
+from jsonschema import Draft4Validator
+from jsonschema.exceptions import best_match
 
 from customer.models import Customer
 from store.models import Store
 from store.decorators import token_required
 from cart.models import Cart, CartItem, ProductNotFoundException
 from cart.templates import cart_obj
+from cart.schema import remove_multiple_items_schema
 from product.models import Product
 
 
@@ -254,15 +257,42 @@ class CartItemAPI(MethodView):
         if cart is None:
             return jsonify({"error": NO_OPEN_CART}), 404
 
-        product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
-        if product is None:
-            return jsonify({"error": PRODUCT_NOT_FOUND}), 404
+        if product_id:
+            product = Product.objects.filter(product_id=product_id, deleted_at=None).first()
+            if product is None:
+                return jsonify({"error": PRODUCT_NOT_FOUND}), 404
 
-        cart_item = CartItem.objects.filter(cart_id=cart, removed_at=None, product_id=product.product_id).first()
-        if cart_item is None:
-            return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
+            cart_item = CartItem.objects.filter(cart_id=cart, removed_at=None, product_id=product.product_id).first()
+            if cart_item is None:
+                return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
 
-        cart_item.removed_at = datetime.now()
-        cart_item.save()
+            cart_item.removed_at = datetime.now()
+            cart_item.save()
+        else:
+            request_json = request.json
+            error = best_match(Draft4Validator(remove_multiple_items_schema).iter_errors(request_json))
+            if error:
+                return jsonify({"error": error.message}), 400
 
-        return jsonify({}), 204
+            cart_items_to_delete = []
+            for item in request_json:
+                product = Product.objects.filter(product_id=item["product_id"], deleted_at=None).first()
+                if product is None:
+                    return jsonify({"error": PRODUCT_NOT_FOUND}), 404
+
+                cart_item = CartItem.objects.filter(cart_id=cart, removed_at=None,
+                                                    product_id=product.product_id).first()
+                if cart_item is None:
+                    return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
+
+                cart_items_to_delete.append(cart_item)
+
+            for cart_item in cart_items_to_delete:
+                cart_item.removed_at = datetime.now()
+                cart_item.save()
+
+        response = {
+                "result": "ok",
+                "cart": cart_obj(cart)
+        }
+        return jsonify(response), 200
