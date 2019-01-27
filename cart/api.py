@@ -215,7 +215,10 @@ class CartItemAPI(MethodView):
             if request_json is None:
                 quantity = 1
             else:
-                quantity = request_json.get("quantity", 1)
+                try:
+                    quantity = request_json.get("quantity", 1)
+                except AttributeError:
+                    return jsonify({"error": "POST_BODY_INVALID"}), 400
             try:
                 cart.add_item_to_cart(product_id, quantity)
             except ProductNotFoundException:
