@@ -9,7 +9,7 @@ from store.models import Store
 from store.decorators import token_required
 from cart.models import Cart, CartItem, ProductNotFoundException
 from cart.templates import cart_obj
-from cart.schema import remove_multiple_items_schema
+from cart.schema import remove_multiple_items_schema, put_cart_schema
 from product.models import Product
 
 
@@ -239,6 +239,36 @@ class CartItemAPI(MethodView):
             "cart": cart_obj(cart)
         }
         return jsonify(response), 201
+
+    @token_required
+    def put(self, customer_id, product_id):
+        request_json = request.json
+        error = best_match(Draft4Validator(put_cart_schema).iter_errors(request_json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
+        if cart is None:
+            return jsonify({"error": NO_OPEN_CART}), 404
+
+        cart_item = CartItem.objects.filter(cart_id=cart.cart_id, product_id=product_id).first()
+
+        if cart_item is None:
+            return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
+        cart_item.quantity = request_json["quantity"]
+        cart_item.save()
+
+        response = {
+            "result": "ok",
+            "cart": cart_obj(cart)
+        }
+        return jsonify(response), 200
 
     @token_required
     def delete(self, customer_id, product_id=None):

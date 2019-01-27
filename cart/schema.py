@@ -8,3 +8,12 @@ remove_multiple_items_schema = {
                 },
             "required": ["product_id"]
 }
+
+
+put_cart_schema = {
+    "type": "object",
+    "properties": {
+        "quantity": {"type": "integer"}
+    },
+    "required": ["quantity"]
+}

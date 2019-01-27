@@ -9,5 +9,5 @@ cart_item_view = CartItemAPI.as_view('cart_item_api')
 
 cart_app.add_url_rule('/customer/<customer_id>/cart', view_func=cart_view, methods=['POST', 'GET', 'DELETE', ])
 cart_app.add_url_rule('/customer/<customer_id>/cart/item/<product_id>', view_func=cart_item_view
-                      , methods=["POST", "DELETE", ])
+                      , methods=["POST", "DELETE", "PUT", ])
 cart_app.add_url_rule('/customer/<customer_id>/cart/item', view_func=cart_item_view, methods=["POST", "DELETE"])

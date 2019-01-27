@@ -148,6 +148,16 @@ class CartTest(unittest.TestCase):
         assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).count() == 1
         assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).first().quantity == 3
 
+        # test update product quantity
+        data = {"quantity": 2}
+        rv = self.app.put('/customer/' + customer_id + '/cart/item/' + product_id,
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        assert rv.status_code == 200
+        assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).first().quantity == 2
+
         # test add multiple products
         batch_data = [{"product_id": "314936113833628994682040857331370897630", "quantity": 1},
                       {"product_id": "314936113833628994682040857331370897631", "quantity": 1}]
@@ -291,12 +301,12 @@ class CartTest(unittest.TestCase):
         # test delete product
         product_id = "314936113833628994682040857331370897630"
         rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
-                             headers=self.headers,
+                             headers=self.other_store_headers,
                              content_type='application/json')
         assert rv.status_code == 404
 
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',
-                             headers=self.headers,
+                             headers=self.other_store_headers,
                              content_type='application/json')
         assert rv.status_code == 404
