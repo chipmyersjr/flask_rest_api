@@ -116,7 +116,7 @@ class CartTest(unittest.TestCase):
                            headers=self.headers,
                            data=json.dumps(data),
                            content_type='application/json')
-        assert rv.status_code == 400
+        assert rv.status_code == 404
 
         # add cart item...test default quantity is 1
         product_id = "314936113833628994682040857331370897629"
@@ -267,3 +267,36 @@ class CartTest(unittest.TestCase):
         rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
                              content_type='application/json')
         assert rv.status_code == 403
+
+    def test_cart_store_relationship(self):
+        """
+        test that store can only access its own carts
+        """
+        # test get cart
+        customer_id = "180422867908286360754098232165804040712"
+        rv = self.app.get('/customer/' + customer_id + '/cart',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        # test add item to cart
+        product_id = "314936113833628994682040857331370897627"
+        data = {"quantity": 1}
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.other_store_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 404
+
+        # test delete product
+        product_id = "314936113833628994682040857331370897630"
+        rv = self.app.delete('/customer/' + customer_id + '/cart/item/' + product_id,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 404
+
+        # test close cart
+        rv = self.app.delete('/customer/' + customer_id + '/cart',
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 404

@@ -64,11 +64,11 @@ class CartAPI(MethodView):
 
         customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
         if customer is None:
-            return jsonify({"error": CUSTOMER_NOT_FOUND})
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
         cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
         if cart is None:
-            return jsonify({"error": NO_OPEN_CART})
+            return jsonify({"error": NO_OPEN_CART}), 404
 
         response = {
             "result": "ok",
@@ -203,7 +203,7 @@ class CartItemAPI(MethodView):
 
         customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
         if customer is None:
-            return jsonify({"error": CUSTOMER_NOT_FOUND}), 400
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
         cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
         if cart is None:
@@ -219,7 +219,7 @@ class CartItemAPI(MethodView):
             try:
                 cart.add_item_to_cart(product_id, quantity)
             except ProductNotFoundException:
-                return jsonify({"error": "PRODUCT_NOT_FOUND"}), 400
+                return jsonify({"error": "PRODUCT_NOT_FOUND"}), 404
         else:
             cart_items_to_add = []
             for cart_item in request_json:
