@@ -191,12 +191,13 @@ class CustomerAPI(MethodView):
             return jsonify({"error": "CUSTOMER_ALREADY_EXISTS"}), 400
 
         count_is_primary = 0
-        for address in customer_json.get("addresses"):
-            if address.get("is_primary"):
-                if address.get("is_primary") == "true":
-                    count_is_primary += 1
-                    if count_is_primary > 1:
-                        return jsonify({"error": "MULTIPLE_PRIMARY_ADDRESSES_SUPPLIED"}), 400
+        if customer_json.get("addresses"):
+            for address in customer_json.get("addresses"):
+                if address.get("is_primary"):
+                    if address.get("is_primary") == "true":
+                        count_is_primary += 1
+                        if count_is_primary > 1:
+                            return jsonify({"error": "MULTIPLE_PRIMARY_ADDRESSES_SUPPLIED"}), 400
 
         customer = Customer(
             currency=customer_json.get("currency"),

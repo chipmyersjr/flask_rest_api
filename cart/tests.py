@@ -6,6 +6,7 @@ import json
 from settings import MONGODB_HOST
 from application import fixtures
 from cart.models import Cart, CartItem
+from customer.models import Customer
 
 
 class CartTest(unittest.TestCase):
@@ -81,8 +82,12 @@ class CartTest(unittest.TestCase):
         rv = self.app.post('/customer/' + customer_id + '/cart',
                            headers=self.headers,
                            content_type='application/json')
+        posted_customer = Customer.objects.filter(customer_id=customer_id).first()
+        print(posted_customer.updated_at)
         assert rv.status_code == 201
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
+        # test last_cart_created_updated
+        assert posted_customer.last_cart_created_at is not None
 
         # test that adding another cart closes the previous cart
         rv = self.app.post('/customer/' + customer_id + '/cart',
@@ -106,8 +111,10 @@ class CartTest(unittest.TestCase):
                            data=json.dumps(data),
                            content_type='application/json')
         cart_id = json.loads(rv.data.decode('utf-8')).get("cart")["cart_id"]
+        posted_customer = Customer.objects.filter(customer_id=customer_id).first()
         assert rv.status_code == 201
         assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).count() == 1
+        assert posted_customer.last_cart_activity_at is not None
 
         # test invalid customer for add cart item
         product_id = "314936113833628994682040857331370897628"

@@ -29,6 +29,7 @@ def cart_item_obj(cart_item):
         "product_title": cart_item.product_id.title,
         "product_vendor": cart_item.product_id.vendor,
         "product_type": cart_item.product_id.product_type,
+        "quantity": cart_item.quantity,
         "added_at": cart_item.added_at,
         "links": [
             {"rel": "product", "href": "/product/" + cart_item.product_id.product_id}
