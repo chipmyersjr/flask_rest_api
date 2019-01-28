@@ -135,10 +135,10 @@ class CustomerTest(unittest.TestCase):
                            data=json.dumps(data),
                            headers=self.headers,
                            content_type='application/json')
-        customer_id = json.loads(rv.data.decode('utf-8')).get("customer")['customer_id']
+        response_customer_id = json.loads(rv.data.decode('utf-8')).get("customer")['customer_id']
         assert rv.status_code == 201
-        assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
-        assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 0
+        assert Customer.objects.filter(customer_id=response_customer_id, deleted_at=None).count() == 1
+        assert Address.objects.filter(customer_id=response_customer_id, deleted_at=None).count() == 0
 
         # test that missing field returns 400
         data = {
