@@ -237,6 +237,9 @@ class CartItemAPI(MethodView):
             for item in cart_items_to_add:
                 cart.add_item_to_cart(item["product_id"], item["quantity"])
 
+        cart.last_item_added_at = datetime.now()
+        cart.save()
+
         response = {
             "result": "ok",
             "cart": cart_obj(cart)

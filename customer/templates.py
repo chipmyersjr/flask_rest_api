@@ -14,7 +14,8 @@ def customer_obj(customer):
       "updated_at": customer.updated_at,
       "deleted_at": customer.deleted_at,
       "links": [
-            {"rel": "self", "href": "/customer/" + customer.customer_id}
+            {"rel": "self", "href": "/customer/" + customer.customer_id},
+            {"rel": "cart", "href": "/customer/" + customer.customer_id + "/cart"}
         ]
     }
 
