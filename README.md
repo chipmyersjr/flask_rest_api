@@ -95,7 +95,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * GET /admin/customers/count/         (Retrieves a count of customers)
 
 
-# Store
+# Cart
 original issue: https://github.com/chipmyersjr/flask_rest_api/issues/15
 
 **fields:**
