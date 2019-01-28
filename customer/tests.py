@@ -124,6 +124,22 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get('error') == "MULTIPLE_PRIMARY_ADDRESSES_SUPPLIED"
 
+        # test that we can create customer without address
+        data = {
+            "currency": "USD",
+            "email": "johnsmithington@gmail.com",
+            "first_name": "John",
+            "last_name": "Smithington"
+        }
+        rv = self.app.post('/customer/',
+                           data=json.dumps(data),
+                           headers=self.headers,
+                           content_type='application/json')
+        customer_id = json.loads(rv.data.decode('utf-8')).get("customer")['customer_id']
+        assert rv.status_code == 201
+        assert Customer.objects.filter(customer_id=customer_id, deleted_at=None).count() == 1
+        assert Address.objects.filter(customer_id=customer_id, deleted_at=None).count() == 0
+
         # test that missing field returns 400
         data = {
             "currency": "USD",
