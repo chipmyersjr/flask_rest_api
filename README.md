@@ -111,13 +111,13 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/15
 * deleted_at
 
 *cart_item*
-cart_item_id
-cart_id
-product_id
-quantity
-added_at
-removed_at
-invoice_created_at
+* cart_item_id
+* cart_id
+* product_id
+* quantity
+* added_at
+* removed_at
+* invoice_created_at
 
 **Methods:**
 * GET /customer/{customer-id}/cart    (Return customer cart)
