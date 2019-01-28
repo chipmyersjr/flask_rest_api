@@ -10,6 +10,8 @@ def customer_obj(customer):
       "last_name": customer.last_name,
       "total_spent": str(customer.total_spent),
       "last_order_date": customer.last_order_date,
+      "last_cart_activity_at": customer.last_cart_activity_at,
+      "last_cart_created_at": customer.last_cart_created_at,
       "created_at": customer.created_at,
       "updated_at": customer.updated_at,
       "deleted_at": customer.deleted_at,

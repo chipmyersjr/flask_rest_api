@@ -40,6 +40,10 @@ class Cart(db.Document):
             customer_id=customer.customer_id
         ).save()
 
+        customer.last_cart_created_at = datetime.now()
+        customer.updated_at = datetime.now()
+        customer.save()
+
         return cart
 
     def add_item_to_cart(self, product_id, quantity):
@@ -50,6 +54,9 @@ class Cart(db.Document):
         existing_cart_item = CartItem.objects.filter(cart_id=self.cart_id, product_id=product.product_id
                                                      , removed_at=None).first()
 
+        self.customer_id.last_cart_activity_at = datetime.now()
+        self.customer_id.updated_at = datetime.now()
+        self.customer_id.save()
         if existing_cart_item:
             existing_cart_item.quantity += quantity
             existing_cart_item.save()
