@@ -87,9 +87,44 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * deleted_at
 
 **Methods:**
-* GET /admin/customers.json      (Retrieves a list of customers)
+* GET /admin/customers      (Retrieves a list of customers)
 * GET /admin/customers/{customer-id}      (Retrieves a single customer)
 * POST /admin/customers      (Creates a customer)
 * PUT /admin/customers/{customer-id}    (Updates a customer)
 * DELETE /admin/customers/{customer-id}    (Deletes a customer)
 * GET /admin/customers/count/         (Retrieves a count of customers)
+
+
+# Store
+original issue: https://github.com/chipmyersjr/flask_rest_api/issues/15
+
+**fields:**
+
+*cart:*
+* cart_id
+* customer_id
+* state {open, closed, billed}
+* created_at
+* last_item_added_at
+* invoice_created_at
+* closed_at
+* deleted_at
+
+*cart_item*
+cart_item_id
+cart_id
+product_id
+quantity
+added_at
+removed_at
+invoice_created_at
+
+**Methods:**
+* GET /customer/{customer-id}/cart    (Return customer cart)
+* POST /customer/{customer-id}/cart    (Create a new cart - Close Exisiting Cart)
+* POST /customer/{customer-id}/cart/item/{product-id}     (Add an item to the cart)
+* POST /customer/{customer-id}/cart/item    (Add a batch of items to the cart)
+* PUT /customer/{customer-id}/cart/item/{product-id}    (Update quantity of cart item)
+* DELETE /customer/{customer-id}/cart   (Closes customer cart)
+* DELETE /customer/{customer-id}/cart/item/{product-id}   (Removes item from cart)
+* DELETE /customer/{customer-id}/cart/item         (Removes a batch of items from cart)
