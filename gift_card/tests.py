@@ -80,8 +80,17 @@ class GiftCardTest(unittest.TestCase):
                            headers=self.headers,
                            data=json.dumps(data),
                            content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        gift_card_id = data["gift_card"]["gift_card_id"]
         assert rv.status_code == 201
         assert GiftCard.objects \
                        .filter(recipient_customer=recipient_customer_id, gifter_customer=gifter_customer_id) \
                        .first() \
                        .original_balance_in_cents == 4500
+
+        rv = self.app.get('/giftcard/' + gift_card_id,
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert data["gift_card"]["original_balance_in_cents"] == 4500

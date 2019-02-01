@@ -22,6 +22,28 @@ class GiftCardAPI(MethodView):
             abort(400)
 
     @token_required
+    def get(self, gift_card_id=None):
+        """
+        returns a gift_card object of list of gift_card objects
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        if gift_card_id:
+            gift_card = GiftCard.objects.filter(gift_card_id=gift_card_id).first()
+
+            if gift_card is None:
+                return jsonify({}), 404
+
+            if gift_card.recipient_customer.store_id != store:
+                return jsonify({}), 404
+
+            response = {
+                "result": "ok",
+                "gift_card": gift_card_obj(gift_card)
+            }
+            return jsonify(response), 200
+
+    @token_required
     def post(self):
         """
         creates a new gift card.
