@@ -116,6 +116,7 @@ class CustomerGiftCardAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self, customer_id):
         """
         returns a list of customer gift cards

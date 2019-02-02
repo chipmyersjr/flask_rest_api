@@ -138,3 +138,50 @@ class GiftCardTest(unittest.TestCase):
         data = json.loads(rv.get_data(as_text=True))
         assert rv.status_code == 200
         assert len(data["gift_cards"]) == 1
+
+    def test_method_authentication(self):
+        """
+        tests that methods are unreachable without proper authentication
+        """
+        self.incorrect_headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": "INCORRECT_TOKEN"
+        }
+        gift_card_id = "293707785755116023642783319645463522597"
+        gifter_customer_id = "97420317489459215220140127731804389597"
+        recipient_customer_id = "270069597057605288682661398313534675760"
+
+        rv = self.app.get('/giftcard/' + gift_card_id,
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/giftcard/' + gift_card_id,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        data = {
+            "gifter_customer_id": gifter_customer_id,
+            "recipient_customer_id": recipient_customer_id,
+            "original_amount": 4500
+        }
+        rv = self.app.post('/giftcard/',
+                           headers=self.incorrect_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/giftcard/',
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        customer_id = "70141961588007884983637788286212381370"
+        rv = self.app.get('/customer/' + customer_id + '/giftcards',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + '/giftcards',
+                          content_type='application/json')
+        assert rv.status_code == 403
