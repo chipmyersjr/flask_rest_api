@@ -27,6 +27,7 @@ class GiftCardTest(unittest.TestCase):
         fixtures(self.db_name, "product", "product/fixtures/products.json")
         fixtures(self.db_name, "cart", "cart/fixtures/cart")
         fixtures(self.db_name, "cart_item", "cart/fixtures/cart_items")
+        fixtures(self.db_name, "gift_card", "gift_card/fixtures/gift_cards")
 
         data = {
             "app_id": "my_furniture_app",
@@ -94,3 +95,23 @@ class GiftCardTest(unittest.TestCase):
         data = json.loads(rv.get_data(as_text=True))
         assert rv.status_code == 200
         assert data["gift_card"]["original_balance_in_cents"] == 4500
+
+    def test_get_gift_card_list(self):
+        """
+        tests for gift card list endpoint
+        """
+        # test get gift_card_list
+        rv = self.app.get('/giftcard/?giftercustomerid=7703254127253629093471751051825874859'
+                          '&recipientcustomerid=70141961588007884983637788286212381370&active=true',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["gift_cards"]) == 1
+
+        # test missing parameters
+        rv = self.app.get('/giftcard/',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 400

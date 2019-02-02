@@ -15,3 +15,10 @@ def gift_card_obj(gift_card):
             "recipient_customer": "/customer/" + gift_card.recipient_customer.customer_id
         }
     }
+
+
+def gift_card_objs(gift_cards):
+    obj_list = []
+    for gift_card in gift_cards.items:
+        obj_list.append(gift_card_obj(gift_card))
+    return obj_list
