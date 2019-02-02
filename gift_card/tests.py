@@ -115,3 +115,26 @@ class GiftCardTest(unittest.TestCase):
                           content_type='application/json')
         data = json.loads(rv.get_data(as_text=True))
         assert rv.status_code == 400
+
+    def test_get_customer_gift_card_list(self):
+        """
+        tests the /customer/{customer-id}/giftcards endpoint
+        """
+
+        customer_id = "70141961588007884983637788286212381370"
+
+        # test get customer gift card list
+        rv = self.app.get('/customer/' + customer_id + '/giftcards',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["gift_cards"]) == 2
+
+        # test active query parameter
+        rv = self.app.get('/customer/' + customer_id + '/giftcards?active=true',
+                          headers=self.headers,
+                          content_type='application/json')
+        data = json.loads(rv.get_data(as_text=True))
+        assert rv.status_code == 200
+        assert len(data["gift_cards"]) == 1

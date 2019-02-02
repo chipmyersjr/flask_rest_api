@@ -89,7 +89,6 @@ class GiftCardAPI(MethodView):
         if gifter_customer is None:
             return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
-
         recipient_customer = Customer.objects.filter(customer_id=request.json.get("recipient_customer_id")
                                                      , store_id=store, deleted_at=None).first()
         if recipient_customer is None:
@@ -108,3 +107,31 @@ class GiftCardAPI(MethodView):
             "gift_card": gift_card_obj(gift_card)
         }
         return jsonify(response), 201
+
+
+class CustomerGiftCardAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self, customer_id):
+        """
+        returns a list of customer gift cards
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        customer = Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        gift_cards = GiftCard.objects.filter(recipient_customer=customer)
+
+        if "active" in request.args:
+            if request.args['active'].lower() == 'true':
+                gift_cards = gift_cards.filter(current_balance_in_cents__gt=0)
+
+        return paginated_results(objects=gift_cards, collection_name='gift_card', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=gift_card_objs), 200
