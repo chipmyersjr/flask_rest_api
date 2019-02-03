@@ -7,6 +7,7 @@ from customer.tests import CustomerTest
 from product.tests import ProductTest
 from store.tests import StoreTest
 from cart.tests import CartTest
+from gift_card.tests import GiftCardTest
 
 
 if __name__ == "__main__":
