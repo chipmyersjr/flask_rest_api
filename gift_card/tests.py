@@ -185,3 +185,26 @@ class GiftCardTest(unittest.TestCase):
         rv = self.app.get('/customer/' + customer_id + '/giftcards',
                           content_type='application/json')
         assert rv.status_code == 403
+
+    def test_store_relationship(self):
+        """
+        test that other stores can
+        """
+        gift_card_id = "293707785755116023642783319645463522597"
+
+        rv = self.app.get('/giftcard/' + gift_card_id,
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.get('/giftcard/?giftercustomerid=7703254127253629093471751051825874859'
+                          '&recipientcustomerid=70141961588007884983637788286212381370&active=true',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        customer_id = "70141961588007884983637788286212381370"
+        rv = self.app.get('/customer/' + customer_id + '/giftcards',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
