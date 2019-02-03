@@ -25,6 +25,7 @@ def create_app(**config_overrides):
     from customer.views import customer_app
     from cart.views import cart_app
     from gift_card.views import gift_card_app
+    from credit.views import credit_app
 
     # register blueprints
     app.register_blueprint(product_app)
@@ -32,6 +33,7 @@ def create_app(**config_overrides):
     app.register_blueprint(customer_app)
     app.register_blueprint(cart_app)
     app.register_blueprint(gift_card_app)
+    app.register_blueprint(credit_app)
 
     return app
 
