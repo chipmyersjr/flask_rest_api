@@ -10,6 +10,7 @@ from credit.templates import credit_obj
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 AMOUNT_SHOULD_BE_INT = "AMOUNT_SHOULD_BE_INT"
+CREDIT_NOT_FOUND = "CREDIT_NOT_FOUND"
 
 
 class CustomerCreditAPI(MethodView):
@@ -51,3 +52,25 @@ class CustomerCreditAPI(MethodView):
             "credit": credit_obj(credit)
         }
         return jsonify(response), 201
+
+    @token_required
+    def delete(self, customer_id, credit_id):
+        """
+        voids a credit
+
+        :param credit_id: credit to be voided
+        :param customer_id: customer whose credit is to be voided
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        credit = Credit.objects.filter(customer=customer, credit_id=credit_id).first()
+
+        if credit is None:
+            return jsonify({"error": CREDIT_NOT_FOUND}), 404
+
+        credit.void_credit()
+
+        return jsonify({}), 204

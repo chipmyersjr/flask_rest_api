@@ -13,6 +13,12 @@ class Credit(db.Document):
     updated_at = db.DateTimeField()
     voided_at = db.DateTimeField()
 
+    def void_credit(self):
+        self.voided_at = datetime.now()
+        self.updated_at = datetime.now()
+        self.current_balance_in_cents = 0
+        self.save()
+
 
 class CreditRedemption(db.Document):
     credit_redemption_id = db.StringField(db_field="credit_redemption_id", primary_key=True)

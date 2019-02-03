@@ -75,6 +75,7 @@ class CreditTest(unittest.TestCase):
                            headers=self.headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
+        credit_id = json.loads(rv.get_data(as_text=True)).get('credit')['credit_id']
         assert rv.status_code == 201
         assert Credit.objects.filter(customer=customer_id).first().original_balance_in_cents == 1000
 
@@ -85,3 +86,13 @@ class CreditTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 400
         assert json.loads(rv.get_data(as_text=True)).get("error") == "AMOUNT_SHOULD_BE_INT"
+
+        # test void credit
+        rv = self.app.delete('/customer/' + customer_id + "/credit/" + credit_id,
+                             headers=self.headers,
+                             content_type='application/json')
+        credit = Credit.objects.filter(credit_id=credit_id).first()
+        assert rv.status_code == 204
+        assert credit.updated_at is not None
+        assert credit.voided_at is not None
+        assert credit.current_balance_in_cents == 0
