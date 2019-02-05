@@ -1,0 +1,4 @@
+{ "_id" : "282181587758147399985845767541983888901", "customer_id" : "70141961588007884983637788286212381370", "original_balance_in_cents" : 1000, "current_balance_in_cents" : 1000, "created_at" : "2019-02-03T21:58:24.011Z" }
+{ "_id" : "152070402920944119886312152890465164639", "customer_id" : "70141961588007884983637788286212381370", "original_balance_in_cents" : 1000, "current_balance_in_cents" : 1000, "created_at" : "2019-02-05T05:37:11.482Z" }
+{ "_id" : "241957693747280422488740753464114537859", "customer_id" : "70141961588007884983637788286212381370", "original_balance_in_cents" : 1000, "current_balance_in_cents" : 1000, "created_at" : "2019-02-05T05:37:11.482Z" }
+{ "_id" : "201285773978942914054186556756783888771", "customer_id" : "70141961588007884983637788286212381370", "original_balance_in_cents" : 1000, "current_balance_in_cents" : 0, "created_at" : "2019-02-05T05:37:11.482Z" }

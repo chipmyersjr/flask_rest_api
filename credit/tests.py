@@ -29,6 +29,7 @@ class CreditTest(unittest.TestCase):
         fixtures(self.db_name, "cart", "cart/fixtures/cart")
         fixtures(self.db_name, "cart_item", "cart/fixtures/cart_items")
         fixtures(self.db_name, "gift_card", "gift_card/fixtures/gift_cards")
+        fixtures(self.db_name, "credit", "credit/fixtures/credits")
 
         data = {
             "app_id": "my_furniture_app",
@@ -96,3 +97,19 @@ class CreditTest(unittest.TestCase):
         assert credit.updated_at is not None
         assert credit.voided_at is not None
         assert credit.current_balance_in_cents == 0
+
+    def test_get_customer_credit_list(self):
+        """
+        test get customer credit list endpoint
+        """
+        customer_id = "70141961588007884983637788286212381370"
+
+        rv = self.app.get('/customer/' + customer_id + "/credit", headers=self.headers, content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get('credits')) == 4
+
+        # test active param
+        rv = self.app.get('/customer/' + customer_id + "/credit?active=true", headers=self.headers
+                          , content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get('credits')) == 3

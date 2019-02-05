@@ -14,3 +14,10 @@ def credit_obj(credit):
             "customer": "/customer/" + credit.customer.customer_id
         }
     }
+
+
+def credit_objs(credits):
+    obj_list = []
+    for credit in credits.items:
+        obj_list.append(credit_obj(credit))
+    return obj_list

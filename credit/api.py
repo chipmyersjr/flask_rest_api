@@ -6,7 +6,8 @@ from store.decorators import token_required
 from store.models import Store
 from customer.models import Customer
 from credit.models import Credit
-from credit.templates import credit_obj
+from credit.templates import credit_obj, credit_objs
+from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 AMOUNT_SHOULD_BE_INT = "AMOUNT_SHOULD_BE_INT"
@@ -19,6 +20,29 @@ class CustomerCreditAPI(MethodView):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
+
+    @token_required
+    def get(self, customer_id):
+        """
+        returns a list of customer credits
+
+        params:
+        active (true only includes credits with balance more that zero)
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        credits = Credit.objects.filter(customer=customer)
+
+        if "active" in request.args:
+            if request.args['active'].lower() == 'true':
+                credits = credits.filter(current_balance_in_cents__gt=0)
+
+        return paginated_results(objects=credits, collection_name='credit', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=credit_objs), 200
+
 
     @token_required
     def post(self, customer_id, amount):
