@@ -53,6 +53,19 @@ class StoreTest(unittest.TestCase):
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_ID_ALREADY_EXISTS"
 
+        # test malformed credit_order_preference
+        bad_credit_data = {
+            "name": "Furniture Store2",
+            "tagline": "A really good furniture store",
+            "app_id": "my_furniture_app2",
+            "app_secret": "my_furniture_secret",
+            "credit_order_preference": "Something"
+        }
+        rv = self.app.post('/store/',
+                           data=json.dumps(bad_credit_data),
+                           content_type='application/json')
+        assert rv.status_code == 400
+
         # test get access token
         data = {
             "app_id": "my_furniture_app",
@@ -78,7 +91,7 @@ class StoreTest(unittest.TestCase):
 
         # test app not found for token request
         data = {
-            "app_id": "my_furniture_app2",
+            "app_id": "my_furniture_app3",
             "app_secret": "my_furniture_secret"
         }
         rv = self.app.post('/store/token/',
@@ -97,7 +110,6 @@ class StoreTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 400
         assert json.loads(rv.data.decode('utf-8')).get("error") == "APP_SECRET IS INCORRECT"
-
 
         # test that decorator requires app_id and token
         rv = self.app.get('/store/',
@@ -126,6 +138,16 @@ class StoreTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get("store")["tagline"] == "A really great furniture store"
+
+        # test malformed credit_origin_preference
+        data = {
+            "credit_order_preference": "Incorrect",
+        }
+        rv = self.app.put('/store/',
+                          headers=headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 400
 
         # test put method with incorrect fields
         data = {
@@ -173,3 +195,5 @@ class StoreTest(unittest.TestCase):
                              content_type='application/json')
         assert rv.status_code == 204
         assert Store.objects.filter(app_id="my_furniture_app", deleted_at=None).count() == 0
+
+

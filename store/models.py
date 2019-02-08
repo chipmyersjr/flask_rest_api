@@ -9,6 +9,7 @@ class Store(db.Document):
     tagline = db.StringField(db_field="tagline")
     app_id = db.StringField(db_field="app_id")
     app_secret = db.StringField(db_field="app_secret")
+    credit_order_preference = db.StringField(db_field="credit_order_preference", default="gift-card")
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
