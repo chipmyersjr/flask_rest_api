@@ -12,7 +12,8 @@ def gift_card_obj(gift_card):
         "recipient_customer": customer_obj(gift_card.recipient_customer),
         "links": {
             "gifter_customer": "/customer/" + gift_card.gifter_customer.customer_id,
-            "recipient_customer": "/customer/" + gift_card.recipient_customer.customer_id
+            "recipient_customer": "/customer/" + gift_card.recipient_customer.customer_id,
+            "self": "/giftcard/" + gift_card.gift_card_id
         }
     }
 

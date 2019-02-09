@@ -24,6 +24,12 @@ class Customer(db.Document):
         'indexes': ['customer_id']
     }
 
+    @classmethod
+    def get_customer(cls, customer_id, request):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        return Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+
 
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))
