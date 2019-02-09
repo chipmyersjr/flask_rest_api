@@ -158,3 +158,32 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/25
 * GET /giftcard/<gift_card_id>   (Returns specific giftcard)
 * GET /customer/<customer_id>/giftcards  (Returns gift cards for customer)   params = active
 * POST /giftcard/    (Creates a gift card)
+
+
+# Credit
+
+original issue = https://github.com/chipmyersjr/flask_rest_api/issues/28
+
+**fields:**
+
+*credit:*
+* credit_id
+* customer_id
+* original_balance
+* current_balance
+* created_at
+* updated_at
+* voided_at
+
+*credit_redemption:*
+* credit_redemption_id
+* credit_id
+* invoice_id
+* amount
+* remaining_balance
+* created_at
+
+**Methods:**
+* POST /customer/{customer-id}/credit/{amount}   (Issue customer a credit)
+* DELETE /customer/{customer-id}/credit/{credit_id} (Void customer credit)
+* GET /customer/{customer-id}/credit?active=true   (Get customer credits)
