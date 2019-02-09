@@ -69,7 +69,8 @@ class ProductTest(unittest.TestCase):
                  "title": "PS4",
                  "product_type": "Electronics",
                  "vendor": "Sony",
-                 "inventory": 10
+                 "inventory": 10,
+                 "sale_price_in_cents": 2000
                }
 
         rv = self.app.post('/product/',
@@ -80,6 +81,7 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
         assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().sale_price_in_cents == 2000
 
         # test that links were created for product
         data = json.loads(rv.get_data(as_text=True))
@@ -108,7 +110,8 @@ class ProductTest(unittest.TestCase):
         data = {
             "title": "PS5",
             "product_type": "Electronics",
-            "vendor": "Sony"
+            "vendor": "Sony",
+            "sale_price_in_cents": 3000
         }
         rv = self.app.put('/product/' + product_id,
                           data=json.dumps(data),
@@ -116,6 +119,7 @@ class ProductTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
+        assert json.loads(rv.data.decode('utf-8')).get('product')['sale_price_in_cents'] == 3000
 
         # test increase product inventory
         data = {
