@@ -2,6 +2,7 @@ from application import db
 from datetime import datetime
 
 from customer.models import Customer
+from invoice.models import Invoice
 
 
 class Credit(db.Document):
@@ -23,6 +24,7 @@ class Credit(db.Document):
 class CreditRedemption(db.Document):
     credit_redemption_id = db.StringField(db_field="credit_redemption_id", primary_key=True)
     credit = db.ReferenceField(Credit, db_field="credit_id")
+    invoice = db.ReferenceField(Invoice, db_field="invoice_id")
     amount = db.IntField()
     remaining_balance = db.IntField()
     created_at = db.DateTimeField(default=datetime.now())

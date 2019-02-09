@@ -2,6 +2,7 @@ from application import db
 from datetime import datetime
 
 from customer.models import Customer
+from invoice.models import Invoice
 
 
 class GiftCard(db.Document):
@@ -16,7 +17,8 @@ class GiftCard(db.Document):
 
 class GiftCardSpend(db.Document):
     gift_card_spend_id = db.StringField(db_field="gift_card_spend_id", primary_key=True)
-    gift_card = db.ReferenceField(GiftCard)
+    gift_card = db.ReferenceField(GiftCard, db_field="gift_card_id")
+    invoice = db.ReferenceField(Invoice, db_field="invoice_id")
     amount = db.DecimalField()
     remaining_balance = db.DecimalField()
     created_at = db.DateTimeField(default=datetime.now())

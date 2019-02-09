@@ -17,7 +17,7 @@ class Invoice(db.Document):
     closed_at = db.DateTimeField()
 
     meta = {
-        'indexes': [('customer_id', ), ('cart_id', )]
+        'indexes': [('customer', ), ('cart', )]
     }
 
 
