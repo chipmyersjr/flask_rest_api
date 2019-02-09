@@ -20,6 +20,7 @@ producttype (Filter by product_type)
 * vendor
 * store_id
 * inventory
+* sale_price_in_cents
 * created_at
 * updated_at
 * deleted_at
