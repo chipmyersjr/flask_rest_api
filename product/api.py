@@ -186,6 +186,7 @@ class ProductAPI(MethodView):
             product_type=product_json.get("product_type"),
             vendor=product_json.get("vendor"),
             inventory=product_json.get("inventory"),
+            sale_price_in_cents=product_json.get("sale_price_in_cents"),
             store=store
         ).save()
 
@@ -224,6 +225,7 @@ class ProductAPI(MethodView):
         product.title = product_json.get("title")
         product.product_type = product_json.get("product_type")
         product.vendor = product_json.get("vendor")
+        product.sale_price_in_cents = product_json.get("sale_price_in_cents")
         product.updated_at = datetime.now()
         product.save()
 
