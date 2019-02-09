@@ -61,6 +61,11 @@ class CreditTest(unittest.TestCase):
             "ACCESS-TOKEN": token
         }
 
+        self.incorrect_headers = {
+            "APP-ID": "my_furniture_app",
+            "ACCESS-TOKEN": "INCORRECT_TOKEN"
+        }
+
     def tearDown(self):
         db = _get_db()
         db.client.drop_database(db)
@@ -113,3 +118,39 @@ class CreditTest(unittest.TestCase):
                           , content_type='application/json')
         assert rv.status_code == 200
         assert len(json.loads(rv.get_data(as_text=True)).get('credits')) == 3
+
+    def test_authentication(self):
+        """
+        test that methods can't be be accessed without auth headers
+        """
+        customer_id = "7703254127253629093471751051825874859"
+
+        rv = self.app.post('/customer/' + customer_id + "/credit/1000",
+                           headers=self.incorrect_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/customer/' + customer_id + "/credit/1000",
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        customer_id = "70141961588007884983637788286212381370"
+        credit_id = "282181587758147399985845767541983888901"
+
+        rv = self.app.delete('/customer/' + customer_id + "/credit/" + credit_id,
+                             headers=self.incorrect_headers,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/' + customer_id + "/credit/" + credit_id,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + "/credit", headers=self.incorrect_headers
+                          , content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + "/credit", content_type='application/json')
+        assert rv.status_code == 403
