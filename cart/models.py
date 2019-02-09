@@ -28,6 +28,12 @@ class Cart(db.Document):
 
     @classmethod
     def open_cart(cls, customer):
+        """
+        opens a cart for given customer
+
+        :param customer: customer document object
+        :return: newly created cart object
+        """
         existing_cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
 
         if existing_cart:
@@ -40,9 +46,20 @@ class Cart(db.Document):
             customer_id=customer.customer_id
         ).save()
 
+        customer.last_cart_created_at = datetime.now()
+        customer.updated_at = datetime.now()
+        customer.save()
+
         return cart
 
     def add_item_to_cart(self, product_id, quantity):
+        """
+        Add an item to customers current cart
+
+        :param product_id: product id string
+        :param quantity: amount of items added
+        :return: newly created or existing cart item
+        """
         product = Product.objects.filter(product_id=product_id, store=self.customer_id.store_id, deleted_at=None).first()
         if product is None:
             raise ProductNotFoundException
@@ -50,6 +67,9 @@ class Cart(db.Document):
         existing_cart_item = CartItem.objects.filter(cart_id=self.cart_id, product_id=product.product_id
                                                      , removed_at=None).first()
 
+        self.customer_id.last_cart_activity_at = datetime.now()
+        self.customer_id.updated_at = datetime.now()
+        self.customer_id.save()
         if existing_cart_item:
             existing_cart_item.quantity += quantity
             existing_cart_item.save()

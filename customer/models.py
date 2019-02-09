@@ -13,7 +13,9 @@ class Customer(db.Document):
     first_name = db.StringField(db_field="first_name")
     last_name = db.StringField(db_field="last_name")
     total_spent = db.DecimalField(db_field="total_spent", default=0)
-    last_order_date = db.StringField(db_field="last_order_date")
+    last_order_date = db.DateTimeField(db_field="last_order_date")
+    last_cart_activity_at = db.DateTimeField(db_field="last_cart_activity_at")
+    last_cart_created_at = db.DateTimeField(db_field="last_cart_created_at")
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -21,6 +23,12 @@ class Customer(db.Document):
     meta = {
         'indexes': ['customer_id']
     }
+
+    @classmethod
+    def get_customer(cls, customer_id, request):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        return Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
 
 
 class Address(db.Document):

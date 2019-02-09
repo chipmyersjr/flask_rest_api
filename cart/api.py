@@ -237,6 +237,9 @@ class CartItemAPI(MethodView):
             for item in cart_items_to_add:
                 cart.add_item_to_cart(item["product_id"], item["quantity"])
 
+        cart.last_item_added_at = datetime.now()
+        cart.save()
+
         response = {
             "result": "ok",
             "cart": cart_obj(cart)
@@ -245,6 +248,54 @@ class CartItemAPI(MethodView):
 
     @token_required
     def put(self, customer_id, product_id):
+        """
+        updates cart item quantity
+
+        Endpoint: localhost/customer/{customer-id}/cart/item/{product-id}
+
+        Example Post Body:
+        {"quantity": 1}
+
+        Example Response:
+        {
+            "cart": {
+                "cart_id": "296772394663686740365876173683355765627",
+                "closed_at": null,
+                "created_at": "Mon, 28 Jan 2019 03:08:44 GMT",
+                "invoice_created_at": null,
+                "items": [
+                    {
+                        "added_at": "Mon, 28 Jan 2019 03:14:38 GMT",
+                        "cart_item_id": "327014681847201129541902225536065069896",
+                        "links": [
+                            {
+                                "href": "/product/58829620864631543564022316902169146987",
+                                "rel": "product"
+                            }
+                        ],
+                        "product_id": "58829620864631543564022316902169146987",
+                        "product_title": "PS4",
+                        "product_type": "Electronics",
+                        "product_vendor": "Sony",
+                        "quantity": 1
+                    }
+                ],
+                "last_item_added_at": "Mon, 28 Jan 2019 03:17:48 GMT",
+                "links": [
+                    {
+                        "href": "/customer/203143206815474133956265931856458093780/cart",
+                        "rel": "self"
+                    },
+                    {
+                        "href": "/customer/203143206815474133956265931856458093780",
+                        "rel": "customer"
+                    }
+                ],
+                "state": "open"
+            },
+            "result": "ok"
+        }
+        """
         request_json = request.json
         error = best_match(Draft4Validator(put_cart_schema).iter_errors(request_json))
         if error:

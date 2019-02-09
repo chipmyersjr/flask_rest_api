@@ -9,6 +9,8 @@ from store.models import Store, AccessToken
 from store.templates import store_obj
 from store.decorators import token_required
 
+CREDIT_ORDER_PREFERENCE_ERROR = "CREDIT_ORDER_ALLOWED_VALUES_ARE_CREDIT_GIFT-CARD"
+
 
 class StoreAPI(MethodView):
 
@@ -94,12 +96,20 @@ class StoreAPI(MethodView):
         if store:
             return jsonify({"error": "APP_ID_ALREADY_EXISTS"}), 400
 
+        if store_json.get("credit_order_preference"):
+            if store_json.get("credit_order_preference").lower() not in ["credit", "gift-card"]:
+                return jsonify({"error": CREDIT_ORDER_PREFERENCE_ERROR}), 400
+
         store = Store(
             name=store_json.get("name"),
             tagline=store_json.get("tagline"),
             app_id=store_json.get("app_id"),
             app_secret=store_json.get("app_secret")
         ).save()
+
+        if store_json.get("credit_order_preference"):
+            store.credit_order_preference = store_json.get("credit_order_preference")
+            store.save()
 
         response = {
             "result": "ok",
@@ -115,14 +125,19 @@ class StoreAPI(MethodView):
         request_json = request.json
         name = request_json.get("name")
         tagline = request_json.get("tagline")
+        credit_order_preference = request_json.get("credit_order_preference")
 
-        if name is None and tagline is None:
+        if name is None and tagline is None and credit_order_preference is None:
             return jsonify({"error": "No fields to update were supplied"}), 400
 
         if name:
             store.name = name
         if tagline:
             store.tagline = tagline
+        if credit_order_preference:
+            if credit_order_preference.lower() not in ['credit', 'gift-card']:
+                return jsonify({"error": CREDIT_ORDER_PREFERENCE_ERROR}), 400
+            store.credit_order_preference = credit_order_preference
         store.updated_at = datetime.now()
         store.save()
 

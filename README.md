@@ -20,6 +20,7 @@ producttype (Filter by product_type)
 * vendor
 * store_id
 * inventory
+* sale_price_in_cents
 * created_at
 * updated_at
 * deleted_at
@@ -43,6 +44,7 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/2
 * tagline
 * app_id
 * app_secret
+* credit_order_preference
 * created_at
 * updated_at
 * deleted_at
@@ -128,3 +130,61 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/15
 * DELETE /customer/{customer-id}/cart   (Closes customer cart)
 * DELETE /customer/{customer-id}/cart/item/{product-id}   (Removes item from cart)
 * DELETE /customer/{customer-id}/cart/item         (Removes a batch of items from cart)
+
+
+# Gift Card
+
+original issue = https://github.com/chipmyersjr/flask_rest_api/issues/25
+
+**fields:**
+
+*gift_card*
+* gift_card_id
+* gifter_customer
+* recipient_customer
+* original_balance_in_cents 
+* current_balance_in_cents
+* created_at
+* updated_at
+
+*gift_card_spend*
+* gift_card_spend_id
+* gift_card
+* amount
+* remaining_balance 
+* created_at
+
+**Methods:**
+* GET /giftcard/     (Return a list of gift cards)  params = giftercustomerid, recipientcustomerid, active
+* GET /giftcard/<gift_card_id>   (Returns specific giftcard)
+* GET /customer/<customer_id>/giftcards  (Returns gift cards for customer)   params = active
+* POST /giftcard/    (Creates a gift card)
+
+
+# Credit
+
+original issue = https://github.com/chipmyersjr/flask_rest_api/issues/28
+
+**fields:**
+
+*credit:*
+* credit_id
+* customer_id
+* original_balance
+* current_balance
+* created_at
+* updated_at
+* voided_at
+
+*credit_redemption:*
+* credit_redemption_id
+* credit_id
+* invoice_id
+* amount
+* remaining_balance
+* created_at
+
+**Methods:**
+* POST /customer/{customer-id}/credit/{amount}   (Issue customer a credit)
+* DELETE /customer/{customer-id}/credit/{credit_id} (Void customer credit)
+* GET /customer/{customer-id}/credit?active=true   (Get customer credits)

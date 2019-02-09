@@ -15,6 +15,7 @@ class Product(db.Document):
     vendor = db.StringField(db_field="vendor")
     store = db.ReferenceField(Store, db_field="store_id")
     inventory = db.IntField(db_field="inventory", default=0)
+    sale_price_in_cents = db.IntField()
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()

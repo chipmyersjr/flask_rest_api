@@ -5,6 +5,7 @@ def product_obj(product):
       "product_type": product.product_type,
       "vendor": product.vendor,
       "inventory": product.inventory,
+      "sale_price_in_cents": product.sale_price_in_cents,
       "created_at": product.created_at,
       "updated_at": product.updated_at,
       "deleted_at": product.deleted_at,
