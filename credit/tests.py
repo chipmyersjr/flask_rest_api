@@ -154,3 +154,19 @@ class CreditTest(unittest.TestCase):
 
         rv = self.app.get('/customer/' + customer_id + "/credit", content_type='application/json')
         assert rv.status_code == 403
+
+    def test_store_relationship(self):
+        """
+        tests that customers can't be accessed by another store
+        """
+        customer_id = "70141961588007884983637788286212381370"
+        credit_id = "282181587758147399985845767541983888901"
+
+        rv = self.app.delete('/customer/' + customer_id + "/credit/" + credit_id,
+                             headers=self.other_store_headers,
+                             content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.get('/customer/' + customer_id + "/credit", headers=self.other_store_headers
+                          , content_type='application/json')
+        assert rv.status_code == 404
