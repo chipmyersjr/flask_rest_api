@@ -83,6 +83,9 @@ class Cart(db.Document):
             ).save()
             return cart_item
 
+    def get_cart_items(self):
+        return CartItem.objects.filter(cart_id=self, removed_at=None)
+
 
 class CartItem(db.Document):
     cart_item_id = db.StringField(db_field="cart_item_id", primary_key=True)

@@ -1,5 +1,6 @@
 from application import db
 from datetime import datetime
+import uuid
 
 from customer.models import Customer
 from cart.models import Cart
@@ -12,13 +13,32 @@ class Invoice(db.Document):
     customer = db.ReferenceField(Customer, db_field="customer_id")
     cart = db.ReferenceField(Cart, db_field="cart_id")
     state = db.StringField(default="open")
-    gift_card_used_amount = db.DecimalField(default=0)
+    gift_card_used_amount_in_cents = db.IntField(default=0)
+    credit_used_amount_in_cents = db.IntField(default=0)
     created_at = db.DateTimeField(default=datetime.now())
     closed_at = db.DateTimeField()
 
     meta = {
         'indexes': [('customer', ), ('cart', )]
     }
+
+    def create_invoice_line_items(self):
+        invoice_line_items = []
+        for cart_item in self.cart.get_cart_items():
+            invoice_line_item = InvoiceLineItem(
+                                    invoice_line_item_id=str(uuid.uuid4().int),
+                                    invoice=self,
+                                    cart_item=cart_item,
+                                    product=cart_item.product_id,
+                                    quantity=cart_item.quantity,
+                                    unit_amount_in_cents=cart_item.product_id.sale_price_in_cents,
+                                    total_amount_in_cents=cart_item.product_id.sale_price_in_cents*cart_item.quantity,
+                                    type="item"
+                                )
+            invoice_line_items.append(invoice_line_item)
+            invoice_line_item.save()
+
+        return invoice_line_items
 
 
 class InvoiceLineItem(db.Document):
@@ -27,7 +47,11 @@ class InvoiceLineItem(db.Document):
     cart_item = db.ReferenceField(CartItem, db_field="cart_item_id")
     product = db.ReferenceField(Product, db_field="product_id")
     quantity = db.IntField()
-    unit_amount = db.DecimalField()
-    total_amount = db.DecimalField()
-    tax_amount = db.DecimalField()
+    unit_amount_in_cents = db.IntField()
+    total_amount_in_cents = db.IntField()
+    tax_amount_in_cents = db.IntField(default=0)
     type = db.StringField()
+
+    meta = {
+        'indexes': [('invoice',)]
+    }

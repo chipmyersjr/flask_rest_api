@@ -4,3 +4,4 @@ python3 tests.py StoreTest
 python3 tests.py CartTest
 python3 tests.py GiftCardTest
 python3 tests.py CreditTest
+python3 tests.py InvoiceTest
