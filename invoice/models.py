@@ -36,9 +36,22 @@ class Invoice(db.Document):
                                     type="item"
                                 )
             invoice_line_items.append(invoice_line_item)
+            invoice_line_item.invoice_created_at = datetime.now()
             invoice_line_item.save()
 
         return invoice_line_items
+
+    def get_total_amount(self):
+        invoice_line_items = InvoiceLineItem.objects.filter(invoice=self).all()
+        return sum([invoice_line_item.total_amount_in_cents for invoice_line_item in invoice_line_items])
+
+    def get_tax_amount(self):
+        invoice_line_items = InvoiceLineItem.objects.filter(invoice=self).all()
+        return sum([invoice_line_item.tax_amount_in_cents for invoice_line_item in invoice_line_items])
+
+    def get_subtotal_amount(self):
+        return self.get_total_amount() - self.gift_card_used_amount_in_cents - self.credit_used_amount_in_cents \
+              + self.get_tax_amount()
 
 
 class InvoiceLineItem(db.Document):

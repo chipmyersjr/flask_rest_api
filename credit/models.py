@@ -20,6 +20,24 @@ class Credit(db.Document):
         self.current_balance_in_cents = 0
         self.save()
 
+    def redeem(self, invoice):
+        amount_to_apply = min([invoice.get_subtotal_amount(), self.current_balance_in_cents])
+
+        invoice.credit_used_amount_in_cents += amount_to_apply
+        invoice.updated_at = datetime.now()
+        invoice.save()
+
+        self.current_balance_in_cents -= amount_to_apply
+        self.updated_at = datetime.now()
+        self.save()
+
+    @classmethod
+    def get_active_credits(cls, customer):
+        credits = Credit.objects.filter(customer=customer, current_balance_in_cents__gt=0).all()
+
+        for credit in credits:
+            yield credit
+
 
 class CreditRedemption(db.Document):
     credit_redemption_id = db.StringField(db_field="credit_redemption_id", primary_key=True)

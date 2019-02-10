@@ -14,6 +14,9 @@ def invoice_obj(invoice):
         "state": invoice.state,
         "gift_card_used_amount_in_cents": invoice.gift_card_used_amount_in_cents,
         "credit_used_amount_in_cents": invoice.credit_used_amount_in_cents,
+        "total_amount_in_cents": invoice.get_total_amount(),
+        "tax_amount_in_cents": invoice.get_tax_amount(),
+        "subtotal_amount_in_cents": invoice.get_subtotal_amount(),
         "created_at": invoice.created_at,
         "closed_at": invoice.closed_at,
         "invoice_line_items": invoice_line_item_objs(invoice_line_items=invoice_line_items)
