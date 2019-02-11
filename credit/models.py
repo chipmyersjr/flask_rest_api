@@ -1,5 +1,6 @@
 from application import db
 from datetime import datetime
+import uuid
 
 from customer.models import Customer
 from invoice.models import Invoice
@@ -26,6 +27,14 @@ class Credit(db.Document):
         invoice.credit_used_amount_in_cents += amount_to_apply
         invoice.updated_at = datetime.now()
         invoice.save()
+
+        CreditRedemption(
+            credit_redemption_id=str(uuid.uuid4().int),
+            credit=self,
+            invoice=invoice,
+            amount=amount_to_apply,
+            remaining_balance=self.current_balance_in_cents - amount_to_apply
+        ).save()
 
         self.current_balance_in_cents -= amount_to_apply
         self.updated_at = datetime.now()

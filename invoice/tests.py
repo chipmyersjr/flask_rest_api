@@ -8,7 +8,7 @@ from application import fixtures
 from invoice.models import Invoice
 from invoice.models import InvoiceLineItem
 from gift_card.models import GiftCard, GiftCardSpend
-from credit.models import Credit
+from credit.models import Credit, CreditRedemption
 from cart.models import Cart
 
 
@@ -109,6 +109,8 @@ class InvoiceTest(unittest.TestCase):
         assert Cart.objects.filter(cart_id=cart_id).first().invoice_created_at is not None
         assert GiftCardSpend.objects.filter(gift_card=gift_card_id).first().amount == 500
         assert GiftCardSpend.objects.filter(gift_card=gift_card_id).first().remaining_balance == 0
+        assert CreditRedemption.objects.filter(credit=credit_id).first().amount == 1000
+        assert CreditRedemption.objects.filter(credit=credit_id).first().remaining_balance == 0
 
         # test that the cart can't be billed again
         rv = self.app.post('/customer/' + customer_id + "/cart/billcart",
