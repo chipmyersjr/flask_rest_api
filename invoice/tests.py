@@ -7,7 +7,7 @@ from settings import MONGODB_HOST
 from application import fixtures
 from invoice.models import Invoice
 from invoice.models import InvoiceLineItem
-from gift_card.models import GiftCard
+from gift_card.models import GiftCard, GiftCardSpend
 from credit.models import Credit
 from cart.models import Cart
 
@@ -86,6 +86,7 @@ class InvoiceTest(unittest.TestCase):
         gift card is applied
         credit is applied
         test cart is closed
+        gift card spend records are created
         """
         customer_id = "180422867908286360754098232165804040712"
         gift_card_id = "130774321679366772547251016213112148452"
@@ -106,6 +107,8 @@ class InvoiceTest(unittest.TestCase):
         assert Credit.objects.filter(credit_id=credit_id).first().current_balance_in_cents == 0
         assert Cart.objects.filter(cart_id=cart_id).first().state == 'billed'
         assert Cart.objects.filter(cart_id=cart_id).first().invoice_created_at is not None
+        assert GiftCardSpend.objects.filter(gift_card=gift_card_id).first().amount == 500
+        assert GiftCardSpend.objects.filter(gift_card=gift_card_id).first().remaining_balance == 0
 
         # test that the cart can't be billed again
         rv = self.app.post('/customer/' + customer_id + "/cart/billcart",
@@ -121,7 +124,6 @@ class InvoiceTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 200
         assert json.loads(rv.get_data(as_text=True)).get('invoice')['subtotal_amount_in_cents'] == 3500
-
 
         # test a customer with multiple credits and giftcards
         customer_id = "264356367106300022542696282926073711663"

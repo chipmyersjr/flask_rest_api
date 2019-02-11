@@ -1,5 +1,6 @@
 from application import db
 from datetime import datetime
+import uuid
 
 from customer.models import Customer
 from invoice.models import Invoice
@@ -19,6 +20,14 @@ class GiftCard(db.Document):
 
         invoice.gift_card_used_amount_in_cents += amount_to_apply
         invoice.save()
+
+        GiftCardSpend(
+            gift_card_spend_id=str(uuid.uuid4().int),
+            gift_card=self,
+            invoice=invoice,
+            amount=amount_to_apply,
+            remaining_balance=self.current_balance_in_cents - amount_to_apply
+        ).save()
 
         self.current_balance_in_cents -= amount_to_apply
         self.updated_at = datetime.now()

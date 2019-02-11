@@ -28,6 +28,12 @@ class BillCartApi(MethodView):
     def post(self, customer_id):
         """
         bills the customers current open cart
+
+        --Bills the current open cart for customer
+        --Create Invoice Record and Invoice Line Item Records
+        --Automatically applies giftcard and credits
+        --closes cart as 'billed'
+        --store.credit_order_preference: determines if credits are giftcards are applied first
         """
 
         customer = Customer.get_customer(customer_id=customer_id, request=request)
