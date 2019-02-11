@@ -5,16 +5,18 @@ from datetime import datetime
 
 from customer.models import Customer
 from cart.models import Cart
-from invoice.models import Invoice
-from invoice.templates import invoice_obj
+from invoice.models import Invoice, IncorrectDateFormat
+from invoice.templates import invoice_obj, invoice_objs
 from gift_card.models import GiftCard
 from credit.models import Credit
 from store.models import Store
 from store.decorators import token_required
+from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 NO_OPEN_CART = "NO_CART_IS_OPEN"
 INVOICE_NOT_FOUND = "INVOICE_NOT_FOUND"
+INCORRECT_TIME_FORMAT = "INCORRECT_TIME_FORMAT"
 
 
 class BillCartApi(MethodView):
@@ -106,6 +108,11 @@ class InvoiceAPI(MethodView):
     def get(self, invoice_id=None):
         """
         returns an invoice number or list of invoice numbers
+
+        params:
+        closed: true if want to include closed invoices
+        startdate: date range filter
+        enddate: date range filter
         """
         if invoice_id:
             invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
@@ -116,3 +123,38 @@ class InvoiceAPI(MethodView):
                 "invoice": invoice_obj(invoice)
             }
             return jsonify(response), 200
+        else:
+            try:
+                invoices = Invoice.get_all_invoices(request=request)
+            except IncorrectDateFormat:
+                return jsonify({"error": INCORRECT_TIME_FORMAT})
+
+            return paginated_results(objects=invoices, collection_name='invoice', request=request
+                                     , per_page=self.PER_PAGE, serialization_func=invoice_objs), 200
+
+
+class CustomerInvoiceAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self, customer_id):
+        """
+        return a list of invoice for customer
+
+        params:
+        closed: true if want to include closed invoices
+        startdate: date range filter
+        enddate: date range filter
+        """
+        try:
+            invoices = Invoice.get_all_invoices(request=request)
+        except IncorrectDateFormat:
+            return jsonify({"error": INCORRECT_TIME_FORMAT})
+
+        invoices = invoices.filter(customer=customer_id)
+
+        return paginated_results(objects=invoices, collection_name='invoice', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=invoice_objs), 200

@@ -33,6 +33,7 @@ class InvoiceTest(unittest.TestCase):
         fixtures(self.db_name, "cart_item", "cart/fixtures/cart_items")
         fixtures(self.db_name, "gift_card", "gift_card/fixtures/gift_cards")
         fixtures(self.db_name, "credit", "credit/fixtures/credits")
+        fixtures(self.db_name, "invoice", "invoice/fixtures/invoices")
 
         data = {
             "app_id": "my_furniture_app",
@@ -162,3 +163,28 @@ class InvoiceTest(unittest.TestCase):
         assert json.loads(rv.get_data(as_text=True)).get('invoice')['total_amount_in_cents'] == 1000
         assert json.loads(rv.get_data(as_text=True)).get('invoice')['subtotal_amount_in_cents'] == 0
         assert Credit.objects.filter(credit_id=credit_id).first().current_balance_in_cents == 1000
+
+    def test_get_invoice_list(self):
+        """
+        test the GET /invoice/ method
+        """
+        rv = self.app.get('/invoice/',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 4
+
+        # test closed query parameter
+        rv = self.app.get('/invoice/?closed=true',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 5
+
+        # test customer invoice list
+        customer_id = "180422867908286360754098232165804040712"
+        rv = self.app.get('/customer/' + customer_id + '/invoices',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 3

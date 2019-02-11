@@ -44,3 +44,10 @@ def invoice_line_item_objs(invoice_line_items):
     for invoice_line_item in invoice_line_items:
         obj_list.append(invoice_line_item_obj(invoice_line_item))
     return obj_list
+
+
+def invoice_objs(invoices):
+    obj_list = []
+    for invoice in invoices.items:
+        obj_list.append(invoice_obj(invoice))
+    return obj_list
