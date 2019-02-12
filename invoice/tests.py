@@ -122,9 +122,9 @@ class InvoiceTest(unittest.TestCase):
 
         # test get invoice method
         rv = self.app.get('/invoice/' + invoice_id,
-                           headers=self.headers,
-                           data=json.dumps("{}"),
-                           content_type='application/json')
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
         assert rv.status_code == 200
         assert json.loads(rv.get_data(as_text=True)).get('invoice')['subtotal_amount_in_cents'] == 3500
 
@@ -188,3 +188,65 @@ class InvoiceTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 200
         assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 3
+
+    def test_authentication(self):
+        """
+        tests that methods can't be accessed without authentication
+        """
+        customer_id = "207041015150729681304475393352873932232"
+        rv = self.app.post('/customer/' + customer_id + "/cart/billcart",
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.post('/customer/' + customer_id + "/cart/billcart",
+                           data=json.dumps("{}"),
+                           headers=self.incorrect_headers,
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        invoice_id = "5723328550124612978426097921146674387"
+        rv = self.app.get('/invoice/' + invoice_id,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/invoice/' + invoice_id,
+                          data=json.dumps("{}"),
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        customer_id = "180422867908286360754098232165804040712"
+        rv = self.app.get('/customer/' + customer_id + '/invoices',
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + '/invoices',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+    def test_store_relationship(self):
+        """
+        tests that other store can't access resources
+        """
+        customer_id = "207041015150729681304475393352873932232"
+        rv = self.app.post('/customer/' + customer_id + "/cart/billcart",
+                           headers=self.other_store_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 404
+
+        invoice_id = "5723328550124612978426097921146674387"
+        rv = self.app.get('/invoice/' + invoice_id,
+                          headers=self.other_store_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        customer_id = "180422867908286360754098232165804040712"
+        rv = self.app.get('/customer/' + customer_id + '/invoices',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404

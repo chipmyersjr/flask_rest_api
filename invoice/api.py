@@ -116,6 +116,11 @@ class InvoiceAPI(MethodView):
         """
         if invoice_id:
             invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
+            store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+            if invoice.customer.store_id != store:
+                return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
             if invoice is None:
                 return jsonify({"error": INVOICE_NOT_FOUND}), 404
             response = {
@@ -140,6 +145,7 @@ class CustomerInvoiceAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self, customer_id):
         """
         return a list of invoice for customer
@@ -153,6 +159,11 @@ class CustomerInvoiceAPI(MethodView):
             invoices = Invoice.get_all_invoices(request=request)
         except IncorrectDateFormat:
             return jsonify({"error": INCORRECT_TIME_FORMAT})
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
         invoices = invoices.filter(customer=customer_id)
 

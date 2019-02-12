@@ -310,6 +310,9 @@ class CustomerAPI(MethodView):
 
         if items_updated == 0:
             return jsonify({"error": "No fields supplied for update"}), 400
+        else:
+            customer.updated_at = datetime.now()
+            customer.save()
 
         response = {
             "result": "ok",
