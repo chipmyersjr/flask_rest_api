@@ -188,3 +188,36 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/28
 * POST /customer/{customer-id}/credit/{amount}   (Issue customer a credit)
 * DELETE /customer/{customer-id}/credit/{credit_id} (Void customer credit)
 * GET /customer/{customer-id}/credit?active=true   (Get customer credits)
+
+
+# Invoice
+
+original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
+
+**fields:**
+
+*invoice:*
+* invoice_id
+* customer_id
+* cart_id
+* state [open, collected, failed]
+* created_at
+* closed_at
+
+*Invoice_Line_Item:*
+* invoice_line_item_id
+* invoice_id
+* cart_item_id
+* product_id
+* quantity
+* unit_amount_in_cents
+* total_amount_in_cents
+* tax_amount_in_cents
+* type [shipping, item]
+
+**Methods:**
+* POST /customer/{customer-id}/cart/{cart-id}/bill-cart   (Bills for all items in customer cart.)
+* GET /invoice/{invoice-id}          (Return a single invoices)
+* GET /invoice/?closed=false&startdate=19000101&enddate=30000101        (Return all open invoices.)
+* GET /customer/{customer_id}/invoices?closed=false           (Get all invoices for a customer)
+* PUT /invoice/{invoice-id}/close     (Mark an invoice as closed)
