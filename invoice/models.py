@@ -12,6 +12,7 @@ from store.models import Store
 class IncorrectDateFormat(Exception):
     pass
 
+
 class Invoice(db.Document):
     invoice_id = db.StringField(db_field="invoice_id", primary_key=True)
     customer = db.ReferenceField(Customer, db_field="customer_id")
