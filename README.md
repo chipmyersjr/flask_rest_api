@@ -204,7 +204,7 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * created_at
 * closed_at
 
-*Invoice_Line_Item:*
+*invoice_line_item:*
 * invoice_line_item_id
 * invoice_id
 * cart_item_id
