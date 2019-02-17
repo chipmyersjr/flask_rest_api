@@ -15,7 +15,10 @@ def order_obj(order):
         "order_line_items": order_line_item_objs(order_line_items=order_line_items),
         "links": {
             "self": "/order/" + order.order_id,
-            "invoice": "/invoice" + order.invoice.invoice_id
+            "invoice": "/invoice" + order.invoice.invoice_id,
+            "shipped": "/order/" + order.order_id + "/shipped",
+            "delivered": "/order/" + order.order_id + "/delivered",
+            "canceled": "/order/" + order.order_id + "/canceled"
         }
     }
 

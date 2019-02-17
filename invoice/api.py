@@ -121,11 +121,12 @@ class InvoiceAPI(MethodView):
             invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
             store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
+            if invoice is None:
+                return jsonify({"error": INVOICE_NOT_FOUND}), 404
+
             if invoice.customer.store_id != store:
                 return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
-            if invoice is None:
-                return jsonify({"error": INVOICE_NOT_FOUND}), 404
             response = {
                 "result": "ok",
                 "invoice": invoice_obj(invoice)
