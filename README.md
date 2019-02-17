@@ -221,4 +221,4 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * GET /invoice/?closed=false&startdate=19000101&enddate=30000101        (Return all open invoices.)
 * GET /customer/{customer_id}/invoices?closed=false           (Get all invoices for a customer)
 * POST /invoice/{invoice-id}/collected     (Mark an invoice as collected)
-* POST /invoice/{invoice-id}/failed     (Mark an invoice as failed)
+* PUT /invoice/{invoice-id}/failed     (Mark an invoice as failed)
