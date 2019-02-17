@@ -207,6 +207,20 @@ class InvoiceTest(unittest.TestCase):
         assert order.status == "pending"
         assert OrderLineItem.objects.filter(order=order).first().quantity == 1
 
+    def test_failed_invoice(self):
+        """
+        test that invoice can be failed properly
+        """
+        invoice_id = "5723328550124612978426097921146674389"
+
+        rv = self.app.put('/invoice/' + invoice_id + '/failed',
+                           headers=self.headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 200
+        assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "failed"
+        assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "failed"
+
     def test_authentication(self):
         """
         tests that methods can't be accessed without authentication
@@ -253,6 +267,14 @@ class InvoiceTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 403
 
+        invoice_id = "5723328550124612978426097921146674387"
+
+        rv = self.app.put('/invoice/' + invoice_id + '/failed',
+                          headers=self.incorrect_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
     def test_store_relationship(self):
         """
         tests that other store can't access resources
@@ -282,4 +304,12 @@ class InvoiceTest(unittest.TestCase):
                            headers=self.other_store_headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
+        assert rv.status_code == 404
+
+        invoice_id = "5723328550124612978426097921146674387"
+
+        rv = self.app.put('/invoice/' + invoice_id + '/failed',
+                          headers=self.other_store_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
         assert rv.status_code == 404
