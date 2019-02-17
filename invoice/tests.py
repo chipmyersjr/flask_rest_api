@@ -10,6 +10,7 @@ from invoice.models import InvoiceLineItem
 from gift_card.models import GiftCard, GiftCardSpend
 from credit.models import Credit, CreditRedemption
 from cart.models import Cart
+from orders.models import Order, OrderLineItem
 
 
 class InvoiceTest(unittest.TestCase):
@@ -34,6 +35,7 @@ class InvoiceTest(unittest.TestCase):
         fixtures(self.db_name, "gift_card", "gift_card/fixtures/gift_cards")
         fixtures(self.db_name, "credit", "credit/fixtures/credits")
         fixtures(self.db_name, "invoice", "invoice/fixtures/invoices")
+        fixtures(self.db_name, "invoice_line_item", "invoice/fixtures/invoice_line_items")
 
         data = {
             "app_id": "my_furniture_app",
@@ -189,6 +191,22 @@ class InvoiceTest(unittest.TestCase):
         assert rv.status_code == 200
         assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 3
 
+    def test_collected_invoice(self):
+        """
+        test that invoices can be marked as collected and that orders are created
+        """
+        invoice_id = "5723328550124612978426097921146674391"
+
+        rv = self.app.post('/invoice/' + invoice_id + '/collected',
+                           headers=self.headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        order = Order.objects.filter(invoice=invoice_id).first()
+        assert rv.status_code == 201
+        assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "collected"
+        assert order.status == "pending"
+        assert OrderLineItem.objects.filter(order=order).first().quantity == 1
+
     def test_authentication(self):
         """
         tests that methods can't be accessed without authentication
@@ -227,6 +245,14 @@ class InvoiceTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
 
+        invoice_id = "5723328550124612978426097921146674391"
+
+        rv = self.app.post('/invoice/' + invoice_id + '/collected',
+                           headers=self.incorrect_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
     def test_store_relationship(self):
         """
         tests that other store can't access resources
@@ -249,4 +275,11 @@ class InvoiceTest(unittest.TestCase):
         rv = self.app.get('/customer/' + customer_id + '/invoices',
                           headers=self.other_store_headers,
                           content_type='application/json')
+        assert rv.status_code == 404
+
+        invoice_id = "5723328550124612978426097921146674389"
+        rv = self.app.post('/invoice/' + invoice_id + '/collected',
+                           headers=self.other_store_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
         assert rv.status_code == 404
