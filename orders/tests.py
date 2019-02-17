@@ -114,6 +114,21 @@ class OrderTest(unittest.TestCase):
         assert order.status == "delivered"
         assert order.delivered_at is not None
 
+    def test_cancel_order(self):
+        """
+        test /order/<order_id>/shipped
+        """
+        order_id = "182529164345039825253601341694848820614"
+
+        rv = self.app.put('/order/' + order_id + '/canceled',
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        order = Order.objects.filter(order_id=order_id).first()
+        assert rv.status_code == 200
+        assert order.status == "canceled"
+        assert order.canceled_at is not None
+
     def test_authentication(self):
         """
         tests that methods can't be accessed without authentication
@@ -138,6 +153,12 @@ class OrderTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
 
+        rv = self.app.put('/order/' + order_id + '/canceled',
+                          headers=self.incorrect_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
     def test_store_relationship(self):
         """
         tests that other store can't access resources
@@ -157,6 +178,12 @@ class OrderTest(unittest.TestCase):
         assert rv.status_code == 404
 
         rv = self.app.put('/order/' + order_id + '/delivered',
+                          headers=self.other_store_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.put('/order/' + order_id + '/canceled',
                           headers=self.other_store_headers,
                           data=json.dumps("{}"),
                           content_type='application/json')
