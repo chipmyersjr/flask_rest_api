@@ -222,3 +222,34 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * GET /customer/{customer_id}/invoices?closed=false           (Get all invoices for a customer)
 * POST /invoice/{invoice-id}/collected     (Mark an invoice as collected)
 * PUT /invoice/{invoice-id}/failed     (Mark an invoice as failed)
+
+
+# Order
+
+original issue = https://github.com/chipmyersjr/flask_rest_api/issues/21
+
+**fields:**
+
+*order:*
+* order_id
+* store_id
+* invoice_id
+* status[pending, shipped, delivered, canceled]
+* created_at
+* shipped_at
+* delivered_at
+* canceled_at
+
+*order_line_item:*
+* order_line_item_id
+* order_id
+* invoice_line_item_id
+* product_id
+* quantity
+
+* GET /order/{order-id}   (Return info on order)
+* GET /order/ (Return a list of orders) params = status, created_at_startdate, delivered_at_startdate, canceled_at_startdate, shipped_at_startdate, created_at_enddate, delivered_at_enddate, canceled_at_enddate, shipped_at_enddate
+* PUT /order/{order-id}/shipped  (Mark an order as shipped)
+* PUT /order/{order-id}/delivered  (Mark an order as delivered)
+* PUT /order/{order-id}/canceled   (Mark an order as canceled)
+* GET /customer/{customer-id}/orders  (Returns list of orders for a customer) params = status, created_at_startdate, delivered_at_startdate, canceled_at_startdate, shipped_at_startdate, created_at_enddate, delivered_at_enddate, canceled_at_enddate, shipped_at_enddate
