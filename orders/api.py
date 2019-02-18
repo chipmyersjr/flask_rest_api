@@ -2,13 +2,16 @@ from flask.views import MethodView
 from flask import request, jsonify, abort
 from datetime import datetime
 
-from orders.models import Order
-from orders.templates import order_obj
+from orders.models import Order, IncorrectDateFormat
+from orders.templates import order_obj, order_objs
 from store.models import Store
 from store.decorators import token_required
+from customer.models import Customer
+from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 ORDER_NOT_FOUND = "ORDER_NOT_FOUND"
+INCORRECT_TIME_FORMAT = "INCORRECT_TIME_FORMAT"
 
 
 class OrderAPI(MethodView):
@@ -41,6 +44,14 @@ class OrderAPI(MethodView):
                 "order": order_obj(order)
             }
             return jsonify(response), 200
+        else:
+            try:
+                orders = Order.get_orders(request=request)
+            except IncorrectDateFormat:
+                return jsonify({"error": INCORRECT_TIME_FORMAT})
+
+            return paginated_results(objects=orders, collection_name='order', request=request
+                                     , per_page=self.PER_PAGE, serialization_func=order_objs), 200
 
 
 class OrderShippedAPI(MethodView):
@@ -149,3 +160,26 @@ class OrderDeliveredAPI(MethodView):
             "order": order_obj(order)
         }
         return jsonify(response), 200
+
+
+class CustomerOrderAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def get(self, customer_id):
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        try:
+            orders = Order.get_orders(request=request, customer_id=customer_id)
+        except IncorrectDateFormat:
+            return jsonify({"error": INCORRECT_TIME_FORMAT})
+
+        return paginated_results(objects=orders, collection_name='order', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=order_objs), 200

@@ -36,3 +36,10 @@ def order_line_item_objs(order_line_items):
     for order_line_item in order_line_items:
         obj_list.append(order_line_item_obj(order_line_item))
     return obj_list
+
+
+def order_objs(orders):
+    obj_list = []
+    for order in orders.items:
+        obj_list.append(order_obj(order))
+    return obj_list

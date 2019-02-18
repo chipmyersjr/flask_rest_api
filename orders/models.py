@@ -4,6 +4,12 @@ import uuid
 
 from invoice.models import Invoice, InvoiceLineItem
 from product.models import Product
+from store.models import Store
+from customer.models import Customer
+
+
+class IncorrectDateFormat(Exception):
+    pass
 
 
 class Order(db.Document):
@@ -34,6 +40,79 @@ class Order(db.Document):
             OrderLineItem.create_order_line_item(order=order, invoice_line_item=invoice_line_item)
 
         return order
+
+    @classmethod
+    def get_orders(cls, request, customer_id=None):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        customers = Customer.objects.filter(store_id=store)
+        invoices = Invoice.objects.filter(customer__in=customers)
+        orders = Order.objects.filter(invoice__in=invoices)
+
+        if customer_id is not None:
+            customer_invoices = Invoice.objects.filter(customer=customer_id)
+            orders = Order.objects.filter(invoice__in=customer_invoices)
+
+        if "status" in request.args:
+            orders = orders.filter(status=request.args.get("status"))
+
+        if "created_at_startdate" in request.args:
+            try:
+                start = datetime.strptime(request.args.get("created_at_startdate"), "%Y%m%d")
+                orders = orders.filter(created_at__gte=start)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "delivered_at_startdate" in request.args:
+            try:
+                start = datetime.strptime(request.args.get("delivered_at_startdate"), "%Y%m%d")
+                orders = orders.filter(delivered_at__gte=start)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "canceled_at_startdate" in request.args:
+            try:
+                start = datetime.strptime(request.args.get("canceled_at_startdate"), "%Y%m%d")
+                orders = orders.filter(canceled_at__gte=start)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "shipped_at_startdate" in request.args:
+            try:
+                start = datetime.strptime(request.args.get("shipped_at_startdate"), "%Y%m%d")
+                orders = orders.filter(shipped_at__gte=start)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "created_at_enddate" in request.args:
+            try:
+                end = datetime.strptime(request.args.get("created_at_startdate"), "%Y%m%d")
+                orders = orders.filter(created_at__lte=end)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "delivered_at_enddate" in request.args:
+            try:
+                end = datetime.strptime(request.args.get("delivered_at_startdate"), "%Y%m%d")
+                orders = orders.filter(delivered_at__lte=end)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "canceled_at_enddate" in request.args:
+            try:
+                end = datetime.strptime(request.args.get("canceled_at_startdate"), "%Y%m%d")
+                orders = orders.filter(canceled_at__lte=end)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        if "shipped_at_enddate" in request.args:
+            try:
+                end = datetime.strptime(request.args.get("shipped_at_startdate"), "%Y%m%d")
+                orders = orders.filter(shipped_at_lte=end)
+            except ValueError:
+                raise IncorrectDateFormat
+
+        return orders
 
 
 class OrderLineItem(db.Document):
