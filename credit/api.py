@@ -43,7 +43,6 @@ class CustomerCreditAPI(MethodView):
         return paginated_results(objects=credits, collection_name='credit', request=request
                                  , per_page=self.PER_PAGE, serialization_func=credit_objs), 200
 
-
     @token_required
     def post(self, customer_id, amount):
         """

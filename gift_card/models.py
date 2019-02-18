@@ -41,6 +41,12 @@ class GiftCard(db.Document):
         for gift_card in gift_cards:
             yield gift_card
 
+    def void(self):
+        self.voided_at = datetime.now()
+        self.updated_at = datetime.now()
+        self.current_balance_in_cents = 0
+        self.save()
+
 
 class GiftCardSpend(db.Document):
     gift_card_spend_id = db.StringField(db_field="gift_card_spend_id", primary_key=True)
