@@ -247,6 +247,7 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/21
 * product_id
 * quantity
 
+**Methods:**
 * GET /order/{order-id}   (Return info on order)
 * GET /order/ (Return a list of orders) params = status, created_at_startdate, delivered_at_startdate, canceled_at_startdate, shipped_at_startdate, created_at_enddate, delivered_at_enddate, canceled_at_enddate, shipped_at_enddate
 * PUT /order/{order-id}/shipped  (Mark an order as shipped)
