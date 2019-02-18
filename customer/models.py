@@ -62,6 +62,20 @@ class Customer(db.Document):
 
         return new_address
 
+    def get_primary_address(self):
+        """
+
+        :return: current primary address if exists
+        """
+        return Address.objects.filter(customer_id=self.customer_id, deleted_at=None, is_primary=True).first()
+
+    def get_addresses(self):
+        """
+
+        :return: all not deleted customer addresses
+        """
+        return Address.objects.filter(customer_id=self.customer_id, deleted_at=None)
+
 
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))

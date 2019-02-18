@@ -9,10 +9,11 @@ from store.models import Store
 from store.decorators import token_required
 from customer.schema import schema, address_schema
 from customer.models import Customer, Address
-from customer.templates import customer_obj, customer_objs, address_obj
+from customer.templates import customer_obj, customer_objs, address_obj, addresses_obj_for_pagination
 from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
+ADDRESS_NOT_FOUND = "ADDRESS_NOT_FOUND"
 
 
 class CustomerAPI(MethodView):
@@ -369,6 +370,30 @@ class CustomerAddressAPI(MethodView):
             abort(400)
 
     @token_required
+    def get(self, customer_id):
+        """
+        return primary address or list of all addresses
+
+        :param customer_id: to return list of addresses for
+        :return: addresses
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        if request.args.get("is_primary"):
+            if request.args.get("is_primary").lower() == "true":
+                response = {
+                    "result": "ok",
+                    "address": address_obj(customer.get_primary_address())
+                }
+                return jsonify(response), 200
+
+        return paginated_results(objects=customer.get_addresses(), collection_name='address', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=addresses_obj_for_pagination), 200
+
+    @token_required
     def post(self, customer_id):
         """
         creates a new customer address. Overrides primary if is_primary included in request
@@ -388,6 +413,10 @@ class CustomerAddressAPI(MethodView):
 
         if request.json.get("is_primary") is not None:
             if request.json.get("is_primary").lower() == "true":
-                return jsonify(address_obj(customer.add_address(request=request, is_primary=True))), 201
+                response = {
+                    "result": "ok",
+                    "address": address_obj(customer.add_address(request=request, is_primary=True))
+                }
+                return jsonify(response), 201
 
         return jsonify(address_obj(customer.add_address(request=request, is_primary=False))), 201

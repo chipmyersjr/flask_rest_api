@@ -17,6 +17,7 @@ def paginated_results(objects, collection_name, request, per_page, serialization
     page = int(request.args.get('page', 1))
     paginated_objects = objects.paginate(page=page, per_page=per_page)
 
+    plural = collection_name + "es" if collection_name[-1] == "s" else collection_name + "s"
     response = {
         "result": "ok",
         "links": [
@@ -25,7 +26,7 @@ def paginated_results(objects, collection_name, request, per_page, serialization
                 "rel": "self"
             }
         ],
-        collection_name + "s": serialization_func(paginated_objects)
+        plural: serialization_func(paginated_objects)
     }
     if paginated_objects.has_prev:
         response["links"].append(

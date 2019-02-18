@@ -303,6 +303,11 @@ class CustomerTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 403
 
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
     def test_get_customer_list(self):
         """
         Tests for the get customer list endpoint
@@ -389,6 +394,11 @@ class CustomerTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 404
 
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
     def test_address(self):
         """
         test the customer address methods
@@ -428,6 +438,18 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 201
         assert Address.objects.filter(customer_id=customer_id, is_primary=True).first().city == "Nowhere"
         assert Address.objects.filter(customer_id=customer_id, is_primary=True).count() == 1
+
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get("addresses")) == 2
+
+        rv = self.app.get('/customer/' + customer_id + '/address/?is_primary=true',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("address")["city"] == "Nowhere"
 
 
 if __name__ == '__main__':
