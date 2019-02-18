@@ -235,4 +235,4 @@ class OrderTest(unittest.TestCase):
         rv = self.app.get('/customer/' + customer_id + '/orders',
                           headers=self.other_store_headers,
                           content_type='application/json')
-        assert len(json.loads(rv.get_data(as_text=True)).get("orders")) == 0
+        assert rv.status_code == 404

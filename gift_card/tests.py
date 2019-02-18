@@ -96,6 +96,12 @@ class GiftCardTest(unittest.TestCase):
         assert rv.status_code == 200
         assert data["gift_card"]["original_balance_in_cents"] == 4500
 
+        rv = self.app.delete('/giftcard/' + gift_card_id,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert GiftCard.objects.filter(gift_card_id=gift_card_id).first().voided_at is not None
+
     def test_get_gift_card_list(self):
         """
         tests for gift card list endpoint
@@ -186,6 +192,11 @@ class GiftCardTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
 
+        rv = self.app.delete('/giftcard/' + gift_card_id,
+                             headers=self.incorrect_headers,
+                             content_type='application/json')
+        assert rv.status_code == 403
+
     def test_store_relationship(self):
         """
         test that other stores can
@@ -207,4 +218,9 @@ class GiftCardTest(unittest.TestCase):
         rv = self.app.get('/customer/' + customer_id + '/giftcards',
                           headers=self.other_store_headers,
                           content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.delete('/giftcard/' + gift_card_id,
+                             headers=self.other_store_headers,
+                             content_type='application/json')
         assert rv.status_code == 404

@@ -14,6 +14,7 @@ class GiftCard(db.Document):
     current_balance_in_cents = db.IntField()
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField()
+    voided_at = db.DateTimeField()
 
     def redeem(self, invoice):
         amount_to_apply = min([invoice.get_subtotal_amount(), self.current_balance_in_cents])
@@ -39,6 +40,12 @@ class GiftCard(db.Document):
 
         for gift_card in gift_cards:
             yield gift_card
+
+    def void(self):
+        self.voided_at = datetime.now()
+        self.updated_at = datetime.now()
+        self.current_balance_in_cents = 0
+        self.save()
 
 
 class GiftCardSpend(db.Document):

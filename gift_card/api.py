@@ -15,6 +15,7 @@ from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 MISSING_PARAMETERS = "MISSING_PARAMETERS"
+GIFT_CARD_NOT_FOUND = "GIFT_CARD_NOT_FOUND"
 
 
 class GiftCardAPI(MethodView):
@@ -107,6 +108,24 @@ class GiftCardAPI(MethodView):
             "gift_card": gift_card_obj(gift_card)
         }
         return jsonify(response), 201
+
+    @token_required
+    def delete(self, gift_card_id):
+        """
+        voids a gift_card
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        gift_card = GiftCard.objects.filter(gift_card_id=gift_card_id).first()
+
+        if gift_card is None:
+            return jsonify({"error": GIFT_CARD_NOT_FOUND}), 404
+
+        if gift_card.recipient_customer.store_id != store:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        gift_card.void()
+
+        return jsonify({}), 204
 
 
 class CustomerGiftCardAPI(MethodView):
