@@ -30,6 +30,38 @@ class Customer(db.Document):
 
         return Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
 
+    def add_address(self, request, is_primary=False):
+        """
+        adds a new address based on request
+
+        :param request: will pull data from flask request object
+        :param is_primary: set new address to primary if true
+        :return: address object
+        """
+
+        new_address = Address(
+            address_id=str(uuid.uuid4().int),
+            customer_id=self,
+            street=request.json.get("street"),
+            city=request.json.get("city"),
+            zip=request.json.get("zip"),
+            state=request.json.get("state"),
+            country=request.json.get("country")
+        ).save()
+
+        if is_primary:
+            old_primary_address = Address.objects.filter(is_primary=True).first()
+
+            if old_primary_address:
+                old_primary_address.is_primary = False
+                old_primary_address.updated_at = datetime.now()
+                old_primary_address.save()
+
+            new_address.is_primary = True
+            new_address.save()
+
+        return new_address
+
 
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))
