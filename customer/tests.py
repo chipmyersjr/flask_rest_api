@@ -308,6 +308,13 @@ class CustomerTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
 
+        address_id = "1"
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.incorrect_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
     def test_get_customer_list(self):
         """
         Tests for the get customer list endpoint
@@ -399,6 +406,13 @@ class CustomerTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 404
 
+        address_id = "1"
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.other_store_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 404
+
     def test_address(self):
         """
         test the customer address methods
@@ -418,6 +432,7 @@ class CustomerTest(unittest.TestCase):
                            headers=self.headers,
                            data=json.dumps(data),
                            content_type='application/json')
+        address_id = Address.objects.filter(customer_id=customer_id).first().address_id
         assert rv.status_code == 201
         assert Address.objects.filter(customer_id=customer_id).first().city == "Somewhere"
 
@@ -450,6 +465,15 @@ class CustomerTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 200
         assert json.loads(rv.get_data(as_text=True)).get("address")["city"] == "Nowhere"
+
+        # test switch primary
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).first().city == "Somewhere"
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).count() == 1
 
 
 if __name__ == '__main__':

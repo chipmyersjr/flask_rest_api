@@ -50,7 +50,7 @@ class Customer(db.Document):
         ).save()
 
         if is_primary:
-            old_primary_address = Address.objects.filter(is_primary=True).first()
+            old_primary_address = Address.objects.filter(customer_id=self, is_primary=True).first()
 
             if old_primary_address:
                 old_primary_address.is_primary = False
@@ -89,6 +89,23 @@ class Address(db.Document):
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
+
+    def make_primary(self):
+        """
+        marks the address as primary. unmarks the old primary address
+
+        :return: address obj
+        """
+        old_primary_address = Address.objects.filter(customer_id=self.customer_id, is_primary=True).first()
+
+        if old_primary_address:
+            old_primary_address.is_primary = False
+            old_primary_address.updated_at = datetime.now()
+            old_primary_address.save()
+
+        self.is_primary = True
+        self.updated_at = datetime.now()
+        self.save()
 
     meta = {
         'indexes': [('customer_id', 'address_id')]

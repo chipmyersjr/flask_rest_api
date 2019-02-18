@@ -420,3 +420,31 @@ class CustomerAddressAPI(MethodView):
                 return jsonify(response), 201
 
         return jsonify(address_obj(customer.add_address(request=request, is_primary=False))), 201
+
+    @token_required
+    def put(self, customer_id, address_id):
+        """
+        switch primary address
+
+        :param customer_id: customer to update
+        :param address_id: address to become primary
+        :return: address object
+        """
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        address = customer.get_addresses().filter(address_id=address_id).first()
+
+        if address is None:
+            return jsonify({"error": ADDRESS_NOT_FOUND}), 404
+
+        address.make_primary()
+
+        response = {
+            "result": "ok",
+            "address": address_obj(address)
+        }
+        return jsonify(response), 200
