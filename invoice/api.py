@@ -11,12 +11,15 @@ from gift_card.models import GiftCard
 from credit.models import Credit
 from store.models import Store
 from store.decorators import token_required
+from orders.models import Order
+from orders.templates import order_obj
 from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 NO_OPEN_CART = "NO_CART_IS_OPEN"
 INVOICE_NOT_FOUND = "INVOICE_NOT_FOUND"
 INCORRECT_TIME_FORMAT = "INCORRECT_TIME_FORMAT"
+INVOICE_IS_NOT_OPEN = "INVOICE_IS_NOT_OPEN"
 
 
 class BillCartApi(MethodView):
@@ -118,11 +121,12 @@ class InvoiceAPI(MethodView):
             invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
             store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
+            if invoice is None:
+                return jsonify({"error": INVOICE_NOT_FOUND}), 404
+
             if invoice.customer.store_id != store:
                 return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
-            if invoice is None:
-                return jsonify({"error": INVOICE_NOT_FOUND}), 404
             response = {
                 "result": "ok",
                 "invoice": invoice_obj(invoice)
@@ -136,6 +140,73 @@ class InvoiceAPI(MethodView):
 
             return paginated_results(objects=invoices, collection_name='invoice', request=request
                                      , per_page=self.PER_PAGE, serialization_func=invoice_objs), 200
+
+
+class InvoiceCollectedAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def post(self, invoice_id):
+        invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        if invoice.customer.store_id != store:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        if invoice is None:
+            return jsonify({"error": INVOICE_NOT_FOUND}), 404
+
+        if invoice.state != 'open':
+            return jsonify({"error": INVOICE_IS_NOT_OPEN}), 400
+
+        invoice.state = "collected"
+        invoice.closed_at = datetime.now()
+        invoice.save()
+
+        order = Order.create_order(invoice=invoice)
+
+        response = {
+            "result": "ok",
+            "order": order_obj(order)
+        }
+
+        return jsonify(response), 201
+
+
+class InvoiceFailedAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def put(self, invoice_id):
+        invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        if invoice.customer.store_id != store:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        if invoice is None:
+            return jsonify({"error": INVOICE_NOT_FOUND}), 404
+
+        if invoice.state != 'open':
+            return jsonify({"error": INVOICE_IS_NOT_OPEN}), 400
+
+        invoice.state = "failed"
+        invoice.closed_at = datetime.now()
+        invoice.save()
+
+        response = {
+            "result": "ok",
+            "invoice": invoice_obj(invoice)
+        }
+        return jsonify(response), 200
 
 
 class CustomerInvoiceAPI(MethodView):

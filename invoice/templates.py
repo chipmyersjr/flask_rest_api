@@ -19,7 +19,12 @@ def invoice_obj(invoice):
         "subtotal_amount_in_cents": invoice.get_subtotal_amount(),
         "created_at": invoice.created_at,
         "closed_at": invoice.closed_at,
-        "invoice_line_items": invoice_line_item_objs(invoice_line_items=invoice_line_items)
+        "invoice_line_items": invoice_line_item_objs(invoice_line_items=invoice_line_items),
+        "links": {
+            "self": "/invoice/" + invoice.invoice_id,
+            "collected": "/invoice/" + invoice.invoice_id + "/collected",
+            "failed": "/invoice/" + invoice.invoice_id + "/failed"
+        }
     }
 
 
