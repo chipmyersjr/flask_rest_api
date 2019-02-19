@@ -85,7 +85,7 @@ class Address(db.Document):
     zip = db.StringField(db_field="zip")
     state = db.StringField(db_field="state")
     country = db.StringField(db_field="country")
-    is_primary = db.BooleanField(db_field="is_primary")
+    is_primary = db.BooleanField(db_field="is_primary", default=False)
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -105,6 +105,17 @@ class Address(db.Document):
 
         self.is_primary = True
         self.updated_at = datetime.now()
+        self.save()
+
+    def delete(self):
+        """
+        marks an address as deleted
+
+        :return: null
+        """
+        self.deleted_at = datetime.now()
+        self.updated_at = datetime.now()
+        self.is_primary = False
         self.save()
 
     meta = {

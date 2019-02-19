@@ -448,3 +448,27 @@ class CustomerAddressAPI(MethodView):
             "address": address_obj(address)
         }
         return jsonify(response), 200
+
+    @token_required
+    def delete(self, customer_id, address_id):
+        """
+        deletes an address
+
+        :param customer_id: customer to be updated
+        :param address_id: address to be delete
+        :return: null
+        """
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        address = customer.get_addresses().filter(address_id=address_id).first()
+
+        if address is None:
+            return jsonify({"error": ADDRESS_NOT_FOUND}), 404
+
+        address.delete()
+
+        return jsonify({}), 204

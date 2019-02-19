@@ -15,3 +15,5 @@ customer_app.add_url_rule('/customer/<customer_id>/address/', view_func=customer
                           , methods=['POST', 'GET', ])
 customer_app.add_url_rule('/customer/<customer_id>/address/<address_id>/make_primary', view_func=customer_address_view
                           , methods=['PUT', ])
+customer_app.add_url_rule('/customer/<customer_id>/address/<address_id>', view_func=customer_address_view
+                          , methods=['DELETE', ])
