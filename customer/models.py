@@ -1,12 +1,14 @@
 from application import db
 from datetime import datetime, timedelta
 import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from store.models import Store
 
 
 class Customer(db.Document):
     customer_id = db.StringField(db_field="customer_id", primary_key=True)
+    password_hash = db.StringField()
     store_id = db.ReferenceField(Store, db_field="store_id")
     currency = db.StringField(db_field="currency")
     email = db.StringField(db_field="email")
@@ -16,6 +18,7 @@ class Customer(db.Document):
     last_order_date = db.DateTimeField(db_field="last_order_date")
     last_cart_activity_at = db.DateTimeField(db_field="last_cart_activity_at")
     last_cart_created_at = db.DateTimeField(db_field="last_cart_created_at")
+    log_out_expires_at = db.DateTimeField(default=datetime.now())
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -29,6 +32,12 @@ class Customer(db.Document):
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         return Customer.objects.filter(customer_id=customer_id, store_id=store, deleted_at=None).first()
+
+    @classmethod
+    def get_customer_by_email(cls, email, request):
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        return Customer.objects.filter(email=email, store_id=store, deleted_at=None).first()
 
     def add_address(self, request, is_primary=False):
         """
@@ -67,6 +76,23 @@ class Customer(db.Document):
         :return: all not deleted customer addresses
         """
         return Address.objects.filter(customer_id=self.customer_id, deleted_at=None)
+
+    def set_password(self, password):
+        """
+        creates password for user
+
+        :param password: new password
+        :return: null
+        """
+        self.password_hash = generate_password_hash(password)
+        self.save()
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def login(self):
+        self.log_out_expires_at = datetime.now() + timedelta(hours=24)
+        self.save()
 
 
 class Address(db.Document):

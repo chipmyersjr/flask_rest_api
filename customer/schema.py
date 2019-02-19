@@ -5,6 +5,7 @@ schema = {
             "email":     {"type": "string"},
             "first_name": {"type": "string"},
             "last_name":  {"type": "string"},
+            "password":  {"type": "string"},
             "addresses": {
                 "type": "array",
                 "items": {
@@ -21,7 +22,7 @@ schema = {
                 "required": ["street", "city", "state", "country"]
             },
         },
-        "required": ["currency", "email", "first_name", "last_name"]
+        "required": ["currency", "email", "first_name", "last_name", "password"]
 }
 
 

@@ -14,6 +14,8 @@ from utils import paginated_results
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 ADDRESS_NOT_FOUND = "ADDRESS_NOT_FOUND"
+INCORRECT_PASSWORD = "INCORRECT_PASSWORD"
+MISSING_CRENDENTIALS = "MISSING_CRENDENTIALS"
 
 
 class CustomerAPI(MethodView):
@@ -210,6 +212,8 @@ class CustomerAPI(MethodView):
             customer_id=str(uuid.uuid4().int),
             store_id=store
         ).save()
+
+        customer.set_password(customer_json.get("password"))
 
         if customer_json.get("addresses"):
             addresses = []
@@ -472,3 +476,26 @@ class CustomerAddressAPI(MethodView):
         address.delete()
 
         return jsonify({}), 204
+
+
+class CustomerLogin(MethodView):
+
+    @token_required
+    def put(self):
+        if request.json.get("password") is None or request.json.get("email") is None:
+            return jsonify({"error": MISSING_CRENDENTIALS}), 403
+
+        customer = Customer.get_customer_by_email(email=request.json.get("email"), request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        if customer.check_password(request.json.get("password")):
+            customer.login()
+            response = {
+                "result": "ok",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 200
+
+        return jsonify({"error": INCORRECT_PASSWORD}), 403
