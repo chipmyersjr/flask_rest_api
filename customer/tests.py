@@ -287,6 +287,40 @@ class CustomerTest(unittest.TestCase):
                           content_type='application/json')
         assert rv.status_code == 403
 
+        customer_id = "180422867908286360754098232165804040712"
+
+        data = {
+            "street": "123 Street Way",
+            "city": "Somewhere",
+            "zip": "12345",
+            "state": "CA",
+            "country": "usa"
+        }
+
+        rv = self.app.post('/customer/' + customer_id + '/address/',
+                           headers=self.incorrect_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.incorrect_headers,
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        address_id = "1"
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.incorrect_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        rv = self.app.delete('/customer/' + customer_id + '/address/' + address_id,
+                             headers=self.incorrect_headers,
+                             data=json.dumps("{}"),
+                             content_type='application/json')
+        assert rv.status_code == 403
+
     def test_get_customer_list(self):
         """
         Tests for the get customer list endpoint
@@ -356,6 +390,109 @@ class CustomerTest(unittest.TestCase):
 
         assert rv.status_code == 200
         assert data["count"] == "0"
+
+        customer_id = "180422867908286360754098232165804040712"
+
+        data = {
+            "street": "123 Street Way",
+            "city": "Somewhere",
+            "zip": "12345",
+            "state": "CA",
+            "country": "usa"
+        }
+
+        rv = self.app.post('/customer/' + customer_id + '/address/',
+                           headers=self.other_store_headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.other_store_headers,
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        address_id = "1"
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.other_store_headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 404
+
+        rv = self.app.delete('/customer/' + customer_id + '/address/' + address_id,
+                             headers=self.other_store_headers,
+                             data=json.dumps("{}"),
+                             content_type='application/json')
+        assert rv.status_code == 404
+
+    def test_address(self):
+        """
+        test the customer address methods
+        """
+        customer_id = "180422867908286360754098232165804040712"
+
+        data = {
+            "street": "123 Street Way",
+            "city": "Somewhere",
+            "zip": "12345",
+            "state": "CA",
+            "country": "usa",
+            "is_primary": "true"
+        }
+
+        rv = self.app.post('/customer/' + customer_id + '/address/',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        address_id = Address.objects.filter(customer_id=customer_id).first().address_id
+        assert rv.status_code == 201
+        assert Address.objects.filter(customer_id=customer_id).first().city == "Somewhere"
+
+        # test reset primary
+        data = {
+            "street": "123 Street Way",
+            "city": "Nowhere",
+            "zip": "12345",
+            "state": "CA",
+            "country": "usa",
+            "is_primary": "true"
+        }
+
+        rv = self.app.post('/customer/' + customer_id + '/address/',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).first().city == "Nowhere"
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).count() == 1
+
+        rv = self.app.get('/customer/' + customer_id + '/address/',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert len(json.loads(rv.get_data(as_text=True)).get("addresses")) == 2
+
+        rv = self.app.get('/customer/' + customer_id + '/address/?is_primary=true',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("address")["city"] == "Nowhere"
+
+        # test switch primary
+        rv = self.app.put('/customer/' + customer_id + '/address/' + address_id + '/make_primary',
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).first().city == "Somewhere"
+        assert Address.objects.filter(customer_id=customer_id, is_primary=True).count() == 1
+
+        rv = self.app.delete('/customer/' + customer_id + '/address/' + address_id,
+                             headers=self.headers,
+                             data=json.dumps("{}"),
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Address.objects.filter(address_id=address_id).first().deleted_at is not None
 
 
 if __name__ == '__main__':

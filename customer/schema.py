@@ -25,4 +25,18 @@ schema = {
 }
 
 
+address_schema = {
+    "type": "object",
+    "properties": {
+            "street":      {"type": "string"},
+            "city":        {"type": "string"},
+            "zip":         {"type": "string"},
+            "state":       {"type": "string"},
+            "country":     {"type": "string"},
+            "is_primary":  {"type": "string"},
+        },
+    "required": ["street", "city", "zip", "state", "country"]
+}
+
+
 

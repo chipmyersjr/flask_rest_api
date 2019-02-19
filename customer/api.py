@@ -7,10 +7,13 @@ from datetime import datetime
 
 from store.models import Store
 from store.decorators import token_required
-from customer.schema import schema
+from customer.schema import schema, address_schema
 from customer.models import Customer, Address
-from customer.templates import customer_obj, customer_objs
+from customer.templates import customer_obj, customer_objs, address_obj, addresses_obj_for_pagination
 from utils import paginated_results
+
+CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
+ADDRESS_NOT_FOUND = "ADDRESS_NOT_FOUND"
 
 
 class CustomerAPI(MethodView):
@@ -357,3 +360,115 @@ class CustomerCountAPI(MethodView):
             "count": str(Customer.objects.filter(store_id=store, deleted_at=None).count())
         }
         return jsonify(response), 200
+
+
+class CustomerAddressAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def get(self, customer_id):
+        """
+        return primary address or list of all addresses
+
+        :param customer_id: to return list of addresses for
+        :return: addresses
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        if request.args.get("is_primary"):
+            if request.args.get("is_primary").lower() == "true":
+                response = {
+                    "result": "ok",
+                    "address": address_obj(customer.get_primary_address())
+                }
+                return jsonify(response), 200
+
+        return paginated_results(objects=customer.get_addresses(), collection_name='address', request=request
+                                 , per_page=self.PER_PAGE, serialization_func=addresses_obj_for_pagination), 200
+
+    @token_required
+    def post(self, customer_id):
+        """
+        creates a new customer address. Overrides primary if is_primary included in request
+
+        :param customer_id: customer whose address to be added to
+        :return: address object
+        """
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        error = best_match(Draft4Validator(address_schema).iter_errors(request.json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        if request.json.get("is_primary") is not None:
+            if request.json.get("is_primary").lower() == "true":
+                response = {
+                    "result": "ok",
+                    "address": address_obj(customer.add_address(request=request, is_primary=True))
+                }
+                return jsonify(response), 201
+
+        return jsonify(address_obj(customer.add_address(request=request, is_primary=False))), 201
+
+    @token_required
+    def put(self, customer_id, address_id):
+        """
+        switch primary address
+
+        :param customer_id: customer to update
+        :param address_id: address to become primary
+        :return: address object
+        """
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        address = customer.get_addresses().filter(address_id=address_id).first()
+
+        if address is None:
+            return jsonify({"error": ADDRESS_NOT_FOUND}), 404
+
+        address.make_primary()
+
+        response = {
+            "result": "ok",
+            "address": address_obj(address)
+        }
+        return jsonify(response), 200
+
+    @token_required
+    def delete(self, customer_id, address_id):
+        """
+        deletes an address
+
+        :param customer_id: customer to be updated
+        :param address_id: address to be delete
+        :return: null
+        """
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        address = customer.get_addresses().filter(address_id=address_id).first()
+
+        if address is None:
+            return jsonify({"error": ADDRESS_NOT_FOUND}), 404
+
+        address.delete()
+
+        return jsonify({}), 204
