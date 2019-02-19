@@ -95,6 +95,10 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * PUT /admin/customers/{customer-id}    (Updates a customer)
 * DELETE /admin/customers/{customer-id}    (Deletes a customer)
 * GET /admin/customers/count/         (Retrieves a count of customers)
+* GET /customer/{customer-id}/address?is_primary=true  (Returns primary address or all customer addresses)
+* POST /customer/{customer-id}/address  (Create a new address for customer. Can override is_primary.)
+* PUT /customer/{customer-id}/address/{address-id}/make_primary   (Mark address as primary)
+( DELETE /customer/{customer-id}/address/{address-id}   (Delete customer address)
 
 
 # Cart
