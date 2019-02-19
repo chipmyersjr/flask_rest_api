@@ -50,15 +50,7 @@ class Customer(db.Document):
         ).save()
 
         if is_primary:
-            old_primary_address = Address.objects.filter(customer_id=self, is_primary=True).first()
-
-            if old_primary_address:
-                old_primary_address.is_primary = False
-                old_primary_address.updated_at = datetime.now()
-                old_primary_address.save()
-
-            new_address.is_primary = True
-            new_address.save()
+            new_address.make_primary()
 
         return new_address
 
