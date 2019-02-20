@@ -70,6 +70,7 @@ class CustomerTest(unittest.TestCase):
             "email": "johnsmith@gmail.com",
             "first_name": "John",
             "last_name": "Smith4",
+            "password": "1234",
             "addresses":
                 [
                     {
@@ -129,7 +130,8 @@ class CustomerTest(unittest.TestCase):
             "currency": "USD",
             "email": "johnsmithington@gmail.com",
             "first_name": "John",
-            "last_name": "Smithington"
+            "last_name": "Smithington",
+            "password": "1234"
         }
         rv = self.app.post('/customer/',
                            data=json.dumps(data),
@@ -212,6 +214,7 @@ class CustomerTest(unittest.TestCase):
             "email": "johnsmith@gmail.com",
             "first_name": "John",
             "last_name": "Smith5",
+            "password": "1234",
             "addresses":
                 [
                     {
@@ -493,6 +496,45 @@ class CustomerTest(unittest.TestCase):
                              content_type='application/json')
         assert rv.status_code == 204
         assert Address.objects.filter(address_id=address_id).first().deleted_at is not None
+
+    def test_customer_login(self):
+        """
+        test /customer/<customer_id>/login and /customer/<customer_id>/logout
+        """
+        customer_id = "180422867908286360754098232165804040712"
+
+        # test incorrect password
+        data = {
+            "password": "123",
+            "email": "jtuco@gmail.com"
+        }
+        rv = self.app.put('/customer/login',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 403
+
+        data = {
+            "password": "1234",
+            "email": "jtuco@gmail.com"
+        }
+        rv = self.app.put('/customer/login',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert Customer.objects.filter(customer_id=customer_id).first().log_out_expires_at is not None
+
+        data = {
+            "email": "jtuco@gmail.com"
+        }
+
+        rv = self.app.put('/customer/logout',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("customer")["logged_in"] is False
 
 
 if __name__ == '__main__':
