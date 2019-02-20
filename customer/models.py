@@ -94,6 +94,10 @@ class Customer(db.Document):
         self.log_out_expires_at = datetime.now() + timedelta(hours=24)
         self.save()
 
+    def logout(self):
+        self.log_out_expires_at = datetime.now()
+        self.save()
+
 
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))

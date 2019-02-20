@@ -525,6 +525,17 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 200
         assert Customer.objects.filter(customer_id=customer_id).first().log_out_expires_at is not None
 
+        data = {
+            "email": "jtuco@gmail.com"
+        }
+
+        rv = self.app.put('/customer/logout',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("customer")["logged_in"] is False
+
 
 if __name__ == '__main__':
     unittest.main()

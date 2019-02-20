@@ -18,6 +18,7 @@ def customer_obj(customer):
       "updated_at": customer.updated_at,
       "deleted_at": customer.deleted_at,
       "logged_in": True if datetime.now() < customer.log_out_expires_at else False,
+      "log_out_expires_at": customer.log_out_expires_at,
       "links": [
             {"rel": "self", "href": "/customer/" + customer.customer_id},
             {"rel": "cart", "href": "/customer/" + customer.customer_id + "/cart"}

@@ -482,6 +482,11 @@ class CustomerLogin(MethodView):
 
     @token_required
     def put(self):
+        """
+        logs customer in by providing email and password
+
+        :return: customer object
+        """
         if request.json.get("password") is None or request.json.get("email") is None:
             return jsonify({"error": MISSING_CRENDENTIALS}), 403
 
@@ -499,3 +504,29 @@ class CustomerLogin(MethodView):
             return jsonify(response), 200
 
         return jsonify({"error": INCORRECT_PASSWORD}), 403
+
+
+class CustomerLogOut(MethodView):
+
+    @token_required
+    def put(self):
+        """
+        logs customer out by providing email
+
+        :return: customer
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": MISSING_CRENDENTIALS}), 403
+
+        customer = Customer.get_customer_by_email(email=request.json.get("email"), request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        customer.logout()
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 200
