@@ -89,16 +89,18 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * deleted_at
 
 **Methods:**
-* GET /admin/customers      (Retrieves a list of customers)
-* GET /admin/customers/{customer-id}      (Retrieves a single customer)
-* POST /admin/customers      (Creates a customer)
-* PUT /admin/customers/{customer-id}    (Updates a customer)
-* DELETE /admin/customers/{customer-id}    (Deletes a customer)
-* GET /admin/customers/count/         (Retrieves a count of customers)
+* GET /customers/      (Retrieves a list of customers)
+* GET /customers/{customer-id}      (Retrieves a single customer)
+* POST /customers/      (Creates a customer)
+* PUT /customers/{customer-id}    (Updates a customer)
+* DELETE /customers/{customer-id}    (Deletes a customer)
+* GET /customers/count/         (Retrieves a count of customers)
 * GET /customer/{customer-id}/address?is_primary=true  (Returns primary address or all customer addresses)
 * POST /customer/{customer-id}/address  (Create a new address for customer. Can override is_primary.)
 * PUT /customer/{customer-id}/address/{address-id}/make_primary   (Mark address as primary)
-( DELETE /customer/{customer-id}/address/{address-id}   (Delete customer address)
+* DELETE /customer/{customer-id}/address/{address-id}   (Delete customer address)
+* PUT /customer/login   (Logs customer in)
+* PUT /customer/logout   (Logs customer out)
 
 
 # Cart
