@@ -222,7 +222,7 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * type [shipping, item]
 
 **Methods:**
-* POST /customer/{customer-id}/cart/{cart-id}/bill-cart   (Bills for all items in customer cart.)
+* POST /customer/{customer-id}/cart/bill-cart   (Bills for all items in customer cart.)
 * GET /invoice/{invoice-id}          (Return a single invoices)
 * GET /invoice/?closed=false&startdate=19000101&enddate=30000101        (Return all open invoices.)
 * GET /customer/{customer_id}/invoices?closed=false           (Get all invoices for a customer)
