@@ -313,7 +313,7 @@ class CustomerAPI(MethodView):
             items_updated += 1
 
         if customer_json.get("last_name"):
-            customer.first_name = customer_json.get("last_name")
+            customer.last_name = customer_json.get("last_name")
             items_updated += 1
 
         if items_updated == 0:
