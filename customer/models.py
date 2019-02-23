@@ -136,7 +136,7 @@ class Customer(db.Document):
         for email in self.emails:
             if is_primary:
                 email.is_primary = False
-            if email.email == new_email:
+            if email.email == new_email and email.deleted_at is None:
                 raise DuplicateDataError
 
         new_email_document = Email(email_id=str(uuid.uuid4().int), email=new_email, is_primary=is_primary)
@@ -173,6 +173,20 @@ class Customer(db.Document):
                 return email
 
         return None
+
+    def make_email_primary(self, new_primay_email):
+        if new_primay_email not in [email.email for email in self.emails]:
+            return None
+
+        for email in self.emails:
+            if email.email == new_primay_email:
+                email.is_primary = True
+                new_primay_email_object = email
+            else:
+                email.is_primary = False
+
+        self.save()
+        return new_primay_email_object
 
 
 class Address(db.Document):

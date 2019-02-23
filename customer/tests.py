@@ -607,6 +607,18 @@ class CustomerTest(unittest.TestCase):
                              content_type='application/json')
         assert rv.status_code == 404
 
+        # set make primary
+        data = {
+            "email": "email2@email.com"
+        }
+        rv = self.app.put('/customer/' + customer_id + '/email/make_primary',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is True
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[2].is_primary is False
+
 
 if __name__ == '__main__':
     unittest.main()

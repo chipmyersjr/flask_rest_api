@@ -605,3 +605,34 @@ class CustomerEmailAPI(MethodView):
             "customer": customer_obj(customer)
         }
         return jsonify(response), 204
+
+    @token_required
+    def put(self, customer_id):
+        """
+        marks email address as primary
+
+        :param customer_id: customer to be updated
+        :return: customer object
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": EMAIL_IS_REQUIRED_FIELD}), 403
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        new_primary_email = customer.make_email_primary(new_primay_email=request.json.get("email"))
+
+        if new_primary_email is None:
+            response = {
+                "result": "not found",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 404
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 200
