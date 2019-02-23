@@ -23,4 +23,4 @@ customer_app.add_url_rule('/customer/<customer_id>/address/<address_id>', view_f
                           , methods=['DELETE', ])
 customer_app.add_url_rule('/customer/login', view_func=customer_login_view, methods=['PUT', ])
 customer_app.add_url_rule('/customer/logout', view_func=customer_logout_view, methods=['PUT', ])
-customer_app.add_url_rule('/customer/<customer_id>/email/', view_func=customer_email_view, methods=['POST', ])
+customer_app.add_url_rule('/customer/<customer_id>/email/', view_func=customer_email_view, methods=['POST', 'DELETE', ])

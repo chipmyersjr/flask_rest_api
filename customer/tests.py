@@ -585,6 +585,28 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is False
         assert Customer.objects.filter(customer_id=customer_id).first().emails[2].is_primary is True
 
+        # test delete email
+        data = {
+            "email": "email@email.com"
+        }
+        rv = self.app.delete('/customer/' + customer_id + '/email/',
+                             headers=self.headers,
+                             data=json.dumps(data),
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[0].updated_at is not None
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[0].deleted_at is not None
+
+        # test delete email that doesn't exists returns 404
+        data = {
+            "email": "email@email.com"
+        }
+        rv = self.app.delete('/customer/' + customer_id + '/email/',
+                             headers=self.headers,
+                             data=json.dumps(data),
+                             content_type='application/json')
+        assert rv.status_code == 404
+
 
 if __name__ == '__main__':
     unittest.main()

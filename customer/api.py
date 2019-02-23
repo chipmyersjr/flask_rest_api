@@ -573,3 +573,35 @@ class CustomerEmailAPI(MethodView):
         }
         return jsonify(response), 201
 
+    @token_required
+    def delete(self, customer_id):
+        """
+        deletes an email
+
+        query_parameters: is_primary
+
+        :param customer_id: customer to be updated
+        :return: customer object
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": EMAIL_IS_REQUIRED_FIELD}), 403
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        deleted_email = customer.delete_email(email_to_delete=request.json.get("email"))
+
+        if deleted_email is None:
+            response = {
+                "result": "not found",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 404
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 204

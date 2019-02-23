@@ -144,6 +144,36 @@ class Customer(db.Document):
         self.emails.append(new_email_document)
         self.save()
 
+    def get_emails(self):
+        """
+        return list of active emails
+
+        :return: list of email objects
+        """
+        active_emails = []
+        for email in self.emails:
+            if email.deleted_at is None:
+                active_emails.append(email)
+
+        return active_emails
+
+    def delete_email(self, email_to_delete):
+        """
+        deletes a customer email
+
+        :param email_to_delete: email to be deleted
+        :return: email object
+        """
+        for email in self.emails:
+            if email.email == email_to_delete and email.deleted_at is None:
+                email.deleted_at = datetime.now()
+                email.updated_at = datetime.now()
+                self.updated_at = datetime.now()
+                self.save()
+                return email
+
+        return None
+
 
 class Address(db.Document):
     address_id = db.StringField(db_field="address_id", primary_key=True, default=str(uuid.uuid4().int))
