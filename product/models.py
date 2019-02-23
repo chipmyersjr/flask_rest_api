@@ -8,6 +8,13 @@ class ProductInventoryLessThanZeroException(Exception):
     pass
 
 
+class ProductTag(db.EmbeddedDocument):
+    product_tag_id = db.StringField(primary_key=True)
+    tag = db.StringField()
+    created_at = db.DateTimeField(default=datetime.now())
+    deleted_at = db.DateTimeField()
+
+
 class Product(db.Document):
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
@@ -16,6 +23,7 @@ class Product(db.Document):
     store = db.ReferenceField(Store, db_field="store_id")
     inventory = db.IntField(db_field="inventory", default=0)
     sale_price_in_cents = db.IntField()
+    tags = db.ListField(db.EmbeddedDocumentField(ProductTag))
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
