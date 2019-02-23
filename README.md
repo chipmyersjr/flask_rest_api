@@ -88,6 +88,14 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * updated_at
 * deleted_at
 
+*email:*
+* email_id
+* email
+* is_primary
+* created_at
+* updated_at
+* deleted_at
+
 **Methods:**
 * GET /customers/      (Retrieves a list of customers)
 * GET /customers/{customer-id}      (Retrieves a single customer)
@@ -101,6 +109,10 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * DELETE /customer/{customer-id}/address/{address-id}   (Delete customer address)
 * PUT /customer/login   (Logs customer in)
 * PUT /customer/logout   (Logs customer out)
+* POST /customer/<customer_id>/email/<email_address>?is_primary=false    (Creates a new email for customer)
+* GET /customer/<customer_id>/email?is_primary=false       (Returns list of emails)
+* DELETE /customer/<customer_id>/email         (Soft deletes email)
+* PUT /customer/<customer_id>/email/<email_address>/make_primary    (Makes email address given primary email)
 
 
 # Cart
