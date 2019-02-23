@@ -141,6 +141,10 @@ class Customer(db.Document):
 
         new_email_document = Email(email_id=str(uuid.uuid4().int), email=new_email, is_primary=is_primary)
 
+        if is_primary:
+            self.email = new_email
+            self.updated_at = datetime.now()
+
         self.emails.append(new_email_document)
         self.save()
 
