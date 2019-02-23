@@ -6,6 +6,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from store.models import Store
 
 
+class Email(db.EmbeddedDocument):
+    email_id = db.StringField(primary_key=True)
+    email = db.StringField()
+    is_primary = db.BooleanField(db_field="is_primary", default=False)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
+    deleted_at = db.DateTimeField()
+
+
 class Customer(db.Document):
     customer_id = db.StringField(db_field="customer_id", primary_key=True)
     password_hash = db.StringField()
@@ -19,6 +28,7 @@ class Customer(db.Document):
     last_cart_activity_at = db.DateTimeField(db_field="last_cart_activity_at")
     last_cart_created_at = db.DateTimeField(db_field="last_cart_created_at")
     log_out_expires_at = db.DateTimeField(default=datetime.now())
+    emails = db.ListField(db.EmbeddedDocumentField(Email))
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -109,7 +119,7 @@ class Address(db.Document):
     country = db.StringField(db_field="country")
     is_primary = db.BooleanField(db_field="is_primary", default=False)
     created_at = db.DateTimeField(default=datetime.now())
-    updated_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
     deleted_at = db.DateTimeField()
 
     def make_primary(self):
