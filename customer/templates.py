@@ -21,7 +21,12 @@ def customer_obj(customer):
       "log_out_expires_at": customer.log_out_expires_at,
       "links": [
             {"rel": "self", "href": "/customer/" + customer.customer_id},
-            {"rel": "cart", "href": "/customer/" + customer.customer_id + "/cart"}
+            {"rel": "cart", "href": "/customer/" + customer.customer_id + "/cart"},
+            {"rel": "orders", "href": "/customer/" + customer.customer_id + "/orders"},
+            {"rel": "invoices", "href": "/customer/" + customer.customer_id + "/invoices"},
+            {"rel": "bill_cart", "href": "/customer/" + customer.customer_id + "/cart/billcart"},
+            {"rel": "gift_cards", "href": "/customer/" + customer.customer_id + "/giftcards"},
+            {"rel": "credits", "href": "/customer/" + customer.customer_id + "/credit"}
         ]
     }
 
