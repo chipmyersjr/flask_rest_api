@@ -4,6 +4,7 @@ import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from store.models import Store
+from utils import DuplicateDataError
 
 
 class Email(db.EmbeddedDocument):
@@ -98,14 +99,49 @@ class Customer(db.Document):
         self.save()
 
     def check_password(self, password):
+        """
+        checks if customer password is correct
+
+        :param password: password to check
+        :return: boolean
+        """
         return check_password_hash(self.password_hash, password)
 
     def login(self):
+        """
+        logs customer in
+
+        :return: null
+        """
         self.log_out_expires_at = datetime.now() + timedelta(hours=24)
         self.save()
 
     def logout(self):
+        """
+        logs customer out
+
+        :return: null
+        """
         self.log_out_expires_at = datetime.now()
+        self.save()
+
+    def add_email(self, new_email, is_primary=False):
+        """
+        adds a new email
+
+        :param new_email: new email address
+        :param is_primary: true if new email address should
+        :return: null
+        """
+        for email in self.emails:
+            if is_primary:
+                email.is_primary = False
+            if email.email == new_email:
+                raise DuplicateDataError
+
+        new_email_document = Email(email_id=str(uuid.uuid4().int), email=new_email, is_primary=is_primary)
+
+        self.emails.append(new_email_document)
         self.save()
 
 

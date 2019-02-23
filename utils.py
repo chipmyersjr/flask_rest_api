@@ -43,3 +43,7 @@ def paginated_results(objects, collection_name, request, per_page, serialization
             }
         )
     return jsonify(response)
+
+
+class DuplicateDataError(Exception):
+    pass
