@@ -305,7 +305,7 @@ class CustomerAPI(MethodView):
             items_updated += 1
 
         if customer_json.get("email"):
-            customer.email = customer_json.get("email")
+            customer.add_email(customer_json.get("email"), is_primary=True)
             items_updated += 1
 
         if customer_json.get("first_name"):
