@@ -19,6 +19,7 @@ def customer_obj(customer):
       "deleted_at": customer.deleted_at,
       "logged_in": True if datetime.now() < customer.log_out_expires_at else False,
       "log_out_expires_at": customer.log_out_expires_at,
+      "emails": email_objs(customer.get_emails()),
       "links": [
             {"rel": "self", "href": "/customer/" + customer.customer_id},
             {"rel": "cart", "href": "/customer/" + customer.customer_id + "/cart"},
@@ -70,3 +71,21 @@ def customer_objs(customers):
     for customer in customers.items:
         customer_obj_list.append(customer_obj(customer))
     return customer_obj_list
+
+
+def email_obj(email):
+    return {
+        "email_id": email.email_id,
+        "email": email.email,
+        "is_primary": email.is_primary,
+        "created_at": email.created_at,
+        "updated_at": email.updated_at,
+        "deleted_at": email.deleted_at
+    }
+
+
+def email_objs(emails):
+    obj_list = []
+    for email in emails:
+        obj_list.append(email_obj(email))
+    return obj_list

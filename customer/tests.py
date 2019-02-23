@@ -536,6 +536,89 @@ class CustomerTest(unittest.TestCase):
         assert rv.status_code == 200
         assert json.loads(rv.get_data(as_text=True)).get("customer")["logged_in"] is False
 
+    def test_emails(self):
+        """
+        tests the customer email related methods
+        """
+        customer_id = "180422867908286360754098232165804040712"
+        data = {
+            "email": "email@email.com"
+        }
+
+        rv = self.app.post('/customer/' + customer_id + '/email/',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[0].email == data["email"]
+
+        # test duplicate email returns 303
+        data = {
+            "email": "email@email.com"
+        }
+        rv = self.app.post('/customer/' + customer_id + '/email/',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 303
+
+        # test set primary
+        data = {
+            "email": "email2@email.com"
+        }
+        rv = self.app.post('/customer/' + customer_id + '/email/?is_primary=true',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is True
+
+        # test re-set primary
+        data = {
+            "email": "email3@email.com"
+        }
+        rv = self.app.post('/customer/' + customer_id + '/email/?is_primary=true',
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is False
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[2].is_primary is True
+
+        # test delete email
+        data = {
+            "email": "email@email.com"
+        }
+        rv = self.app.delete('/customer/' + customer_id + '/email/',
+                             headers=self.headers,
+                             data=json.dumps(data),
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[0].updated_at is not None
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[0].deleted_at is not None
+
+        # test delete email that doesn't exists returns 404
+        data = {
+            "email": "email@email.com"
+        }
+        rv = self.app.delete('/customer/' + customer_id + '/email/',
+                             headers=self.headers,
+                             data=json.dumps(data),
+                             content_type='application/json')
+        assert rv.status_code == 404
+
+        # set make primary
+        data = {
+            "email": "email2@email.com"
+        }
+        rv = self.app.put('/customer/' + customer_id + '/email/make_primary',
+                          headers=self.headers,
+                          data=json.dumps(data),
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is True
+        assert Customer.objects.filter(customer_id=customer_id).first().emails[2].is_primary is False
+
 
 if __name__ == '__main__':
     unittest.main()

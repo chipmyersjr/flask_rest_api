@@ -4,6 +4,16 @@ import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from store.models import Store
+from utils import DuplicateDataError
+
+
+class Email(db.EmbeddedDocument):
+    email_id = db.StringField(primary_key=True)
+    email = db.StringField()
+    is_primary = db.BooleanField(db_field="is_primary", default=False)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
+    deleted_at = db.DateTimeField()
 
 
 class Customer(db.Document):
@@ -19,6 +29,7 @@ class Customer(db.Document):
     last_cart_activity_at = db.DateTimeField(db_field="last_cart_activity_at")
     last_cart_created_at = db.DateTimeField(db_field="last_cart_created_at")
     log_out_expires_at = db.DateTimeField(default=datetime.now())
+    emails = db.ListField(db.EmbeddedDocumentField(Email))
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -88,15 +99,98 @@ class Customer(db.Document):
         self.save()
 
     def check_password(self, password):
+        """
+        checks if customer password is correct
+
+        :param password: password to check
+        :return: boolean
+        """
         return check_password_hash(self.password_hash, password)
 
     def login(self):
+        """
+        logs customer in
+
+        :return: null
+        """
         self.log_out_expires_at = datetime.now() + timedelta(hours=24)
         self.save()
 
     def logout(self):
+        """
+        logs customer out
+
+        :return: null
+        """
         self.log_out_expires_at = datetime.now()
         self.save()
+
+    def add_email(self, new_email, is_primary=False):
+        """
+        adds a new email
+
+        :param new_email: new email address
+        :param is_primary: true if new email address should
+        :return: null
+        """
+        for email in self.emails:
+            if is_primary:
+                email.is_primary = False
+            if email.email == new_email and email.deleted_at is None:
+                raise DuplicateDataError
+
+        new_email_document = Email(email_id=str(uuid.uuid4().int), email=new_email, is_primary=is_primary)
+
+        if is_primary:
+            self.email = new_email
+            self.updated_at = datetime.now()
+
+        self.emails.append(new_email_document)
+        self.save()
+
+    def get_emails(self):
+        """
+        return list of active emails
+
+        :return: list of email objects
+        """
+        active_emails = []
+        for email in self.emails:
+            if email.deleted_at is None:
+                active_emails.append(email)
+
+        return active_emails
+
+    def delete_email(self, email_to_delete):
+        """
+        deletes a customer email
+
+        :param email_to_delete: email to be deleted
+        :return: email object
+        """
+        for email in self.emails:
+            if email.email == email_to_delete and email.deleted_at is None:
+                email.deleted_at = datetime.now()
+                email.updated_at = datetime.now()
+                self.updated_at = datetime.now()
+                self.save()
+                return email
+
+        return None
+
+    def make_email_primary(self, new_primay_email):
+        if new_primay_email not in [email.email for email in self.emails]:
+            return None
+
+        for email in self.emails:
+            if email.email == new_primay_email:
+                email.is_primary = True
+                new_primay_email_object = email
+            else:
+                email.is_primary = False
+
+        self.save()
+        return new_primay_email_object
 
 
 class Address(db.Document):
@@ -109,7 +203,7 @@ class Address(db.Document):
     country = db.StringField(db_field="country")
     is_primary = db.BooleanField(db_field="is_primary", default=False)
     created_at = db.DateTimeField(default=datetime.now())
-    updated_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
     deleted_at = db.DateTimeField()
 
     def make_primary(self):

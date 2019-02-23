@@ -10,12 +10,13 @@ from store.decorators import token_required
 from customer.schema import schema, address_schema
 from customer.models import Customer, Address
 from customer.templates import customer_obj, customer_objs, address_obj, addresses_obj_for_pagination
-from utils import paginated_results
+from utils import paginated_results, DuplicateDataError
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 ADDRESS_NOT_FOUND = "ADDRESS_NOT_FOUND"
 INCORRECT_PASSWORD = "INCORRECT_PASSWORD"
 MISSING_CRENDENTIALS = "MISSING_CRENDENTIALS"
+EMAIL_IS_REQUIRED_FIELD = "EMAIL_IS_REQUIRED_FIELD"
 
 
 class CustomerAPI(MethodView):
@@ -304,7 +305,7 @@ class CustomerAPI(MethodView):
             items_updated += 1
 
         if customer_json.get("email"):
-            customer.email = customer_json.get("email")
+            customer.add_email(customer_json.get("email"), is_primary=True)
             items_updated += 1
 
         if customer_json.get("first_name"):
@@ -312,7 +313,7 @@ class CustomerAPI(MethodView):
             items_updated += 1
 
         if customer_json.get("last_name"):
-            customer.first_name = customer_json.get("last_name")
+            customer.last_name = customer_json.get("last_name")
             items_updated += 1
 
         if items_updated == 0:
@@ -524,6 +525,111 @@ class CustomerLogOut(MethodView):
             return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
         customer.logout()
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 200
+
+
+class CustomerEmailAPI(MethodView):
+
+    @token_required
+    def post(self, customer_id):
+        """
+        creates a new email
+
+        query_parameters: is_primary
+
+        :param customer_id: customer to be updated
+        :return: customer object
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": EMAIL_IS_REQUIRED_FIELD}), 403
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        is_primary = False
+        if request.args.get("is_primary") is not None:
+            if request.args.get("is_primary").lower() == "true":
+                is_primary = True
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        try:
+            customer.add_email(new_email=request.json.get("email"), is_primary=is_primary)
+        except DuplicateDataError:
+            response = {
+                "result": "already exists",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 303
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 201
+
+    @token_required
+    def delete(self, customer_id):
+        """
+        deletes an email
+
+        query_parameters: is_primary
+
+        :param customer_id: customer to be updated
+        :return: customer object
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": EMAIL_IS_REQUIRED_FIELD}), 403
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        deleted_email = customer.delete_email(email_to_delete=request.json.get("email"))
+
+        if deleted_email is None:
+            response = {
+                "result": "not found",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 404
+
+        response = {
+            "result": "ok",
+            "customer": customer_obj(customer)
+        }
+        return jsonify(response), 204
+
+    @token_required
+    def put(self, customer_id):
+        """
+        marks email address as primary
+
+        :param customer_id: customer to be updated
+        :return: customer object
+        """
+        if request.json.get("email") is None:
+            return jsonify({"error": EMAIL_IS_REQUIRED_FIELD}), 403
+
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        new_primary_email = customer.make_email_primary(new_primay_email=request.json.get("email"))
+
+        if new_primary_email is None:
+            response = {
+                "result": "not found",
+                "customer": customer_obj(customer)
+            }
+            return jsonify(response), 404
 
         response = {
             "result": "ok",
