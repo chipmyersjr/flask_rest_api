@@ -310,3 +310,17 @@ class ProductTest(unittest.TestCase):
                           data=json.dumps(data),
                           content_type='application/json')
         assert rv.status_code == 403
+
+    def test_product_tags(self):
+        """
+        tests for tag related methods
+        """
+        product_id = "131077205055504776670923389866612113556"
+        tag = "red"
+
+        rv = self.app.post('/product/' + product_id + '/tag/' + tag,
+                           data=json.dumps("{}"),
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id).first().tags[0].tag == tag

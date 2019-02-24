@@ -11,6 +11,7 @@ from product.schema import schema
 from product.templates import product_obj, products_obj
 from store.models import Store
 from store.decorators import token_required
+from utils import DuplicateDataError
 
 
 class ProductAPI(MethodView):
@@ -349,3 +350,36 @@ class ProductInventoryAPI(MethodView):
             return jsonify(response), 201
 
         return jsonify({"error": "INCLUDE_SET_OR_AMOUNT_IN_REQUEST"}), 400
+
+
+class ProductTagAPI(MethodView):
+
+    @token_required
+    def post(self, product_id, tag):
+        """
+        adds a tag for a product
+
+        :param product_id: product to be updated
+        :param tag: new tag
+        :return: product object
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        try:
+            product.add_tag(new_tag=tag)
+        except DuplicateDataError:
+            response = {
+                "result": "already exists",
+                "product": product_obj(product)
+            }
+            return jsonify(response), 303
+
+        response = {
+            "result": "ok",
+            "product": product_obj(product)
+        }
+        return jsonify(response), 201

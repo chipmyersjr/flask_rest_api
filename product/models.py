@@ -1,7 +1,9 @@
 from application import db
 from datetime import datetime
+import uuid
 
 from store.models import Store
+from utils import DuplicateDataError
 
 
 class ProductInventoryLessThanZeroException(Exception):
@@ -45,4 +47,20 @@ class Product(db.Document):
         if amount < 0:
             raise ProductInventoryLessThanZeroException
         self.inventory = amount
+        self.save()
+
+    def add_tag(self, new_tag):
+        """
+        adds a new tag to product
+
+        :param new_tag: new tag
+        :return: null
+        """
+        if new_tag in [tag.tag for tag in self.tags]:
+            raise DuplicateDataError
+
+        new_tag_object = ProductTag(product_tag_id=str(uuid.uuid4().int), tag=new_tag)
+
+        self.tags.append(new_tag_object)
+        self.updated_at = datetime.now()
         self.save()
