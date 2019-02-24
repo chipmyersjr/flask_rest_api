@@ -64,3 +64,16 @@ class Product(db.Document):
         self.tags.append(new_tag_object)
         self.updated_at = datetime.now()
         self.save()
+
+    def get_tags(self):
+        """
+        return list of active tags
+
+        :return: list of tag objects
+        """
+        active_tags = []
+        for tag in self.tags:
+            if tag.deleted_at is None:
+                active_tags.append(tag)
+
+        return active_tags
