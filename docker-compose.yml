@@ -12,3 +12,9 @@ services:
   db:
     image: mongo:3.0.2
     container_name: store-db
+  elasticsearch:
+    image: elasticsearch:5-alpine
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    container_name: store-es
