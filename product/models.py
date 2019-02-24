@@ -19,6 +19,7 @@ class Product(db.Document):
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
     product_type = db.StringField(db_field="product_type")
+    description = db.StringField()
     vendor = db.StringField(db_field="vendor")
     store = db.ReferenceField(Store, db_field="store_id")
     inventory = db.IntField(db_field="inventory", default=0)

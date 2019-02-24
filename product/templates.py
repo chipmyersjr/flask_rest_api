@@ -3,6 +3,7 @@ def product_obj(product):
       "product_id": product.id,
       "title": product.title,
       "product_type": product.product_type,
+      "description": product.description,
       "vendor": product.vendor,
       "inventory": product.inventory,
       "sale_price_in_cents": product.sale_price_in_cents,
