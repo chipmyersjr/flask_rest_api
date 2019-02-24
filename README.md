@@ -33,6 +33,9 @@ producttype (Filter by product_type)
 * PUT /products/{product_id}   (Updates a product)
 * DELETE /admin/products/{product_id}   (Deletes a product)
 * PUT /product/{product_id}/inventory   (Add to, Subtract From, or Set inventory amount)
+* POST /product/<product_id>/tag/<tag>  (Creates a new tag)
+* DELETE /product/<product_id>/tag/?tag=<tag>     (Removes tag)
+* DELETE /product/<product_id>/tag/  (Removes all tags)
 
 
 # Store
