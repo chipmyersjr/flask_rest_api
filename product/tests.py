@@ -324,3 +324,27 @@ class ProductTest(unittest.TestCase):
                            content_type='application/json')
         assert rv.status_code == 201
         assert Product.objects.filter(product_id=product_id).first().tags[0].tag == tag
+
+        self.app.post('/product/' + product_id + '/tag/blue',
+                      data=json.dumps("{}"),
+                      headers=self.headers,
+                      content_type='application/json')
+
+        self.app.post('/product/' + product_id + '/tag/yellow',
+                      data=json.dumps("{}"),
+                      headers=self.headers,
+                      content_type='application/json')
+
+        rv = self.app.delete('/product/' + product_id + '/tag/?tag=' + tag,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id).first().tags[0].deleted_at is not None
+        assert Product.objects.filter(product_id=product_id).first().tags[1].deleted_at is None
+
+        rv = self.app.delete('/product/' + product_id + '/tag/',
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id).first().tags[1].deleted_at is not None
+        assert Product.objects.filter(product_id=product_id).first().tags[2].deleted_at is not None

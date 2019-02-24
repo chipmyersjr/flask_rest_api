@@ -17,3 +17,4 @@ product_app.add_url_rule('/product/count', view_func=product_count_view, methods
 
 product_app.add_url_rule('/product/<product_id>/inventory', view_func=product_inventory_view, methods=['PUT', ])
 product_app.add_url_rule('/product/<product_id>/tag/<tag>', view_func=product_tag_view, methods=['POST', ])
+product_app.add_url_rule('/product/<product_id>/tag/', view_func=product_tag_view, methods=['DELETE', ])

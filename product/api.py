@@ -383,3 +383,28 @@ class ProductTagAPI(MethodView):
             "product": product_obj(product)
         }
         return jsonify(response), 201
+
+    @token_required
+    def delete(self, product_id):
+        """
+        deletes all or one tag
+
+        :param product_id: product to be updated
+        :return: product obj
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        deleted_tags = product.delete_tags(tag_to_delete=request.args.get("tag"))
+
+        if len(deleted_tags) == 0:
+            return jsonify({}), 404
+
+        response = {
+            "result": "ok",
+            "product": product_obj(product)
+        }
+        return jsonify(response), 204

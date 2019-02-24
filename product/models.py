@@ -77,3 +77,19 @@ class Product(db.Document):
                 active_tags.append(tag)
 
         return active_tags
+
+    def delete_tags(self, tag_to_delete):
+        """
+        deletes one or all tags
+
+        :param tag_to_delete: tag to be deleted
+        :return: list of tag objects
+        """
+        deleted_tags = []
+        for tag in self.tags:
+            if tag.deleted_at is None and (tag.tag == tag_to_delete or tag_to_delete is None):
+                tag.deleted_at = datetime.now()
+                deleted_tags.append(tag)
+
+        self.save()
+        return deleted_tags
