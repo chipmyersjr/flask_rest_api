@@ -18,6 +18,8 @@ class ProductTag(db.EmbeddedDocument):
 
 
 class Product(db.Document):
+    __searchable__ = ['description']
+
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
     product_type = db.StringField(db_field="product_type")

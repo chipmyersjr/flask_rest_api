@@ -1,4 +1,4 @@
-from flask import request, abort, jsonify
+from flask import request, abort, jsonify, current_app
 from flask.views import MethodView
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
@@ -45,13 +45,15 @@ class StoreAPI(MethodView):
             }
         }
         """
-        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
-        if store:
-            response = {
-                "result": "ok",
-                "store": store_obj(store)
-            }
-            return jsonify(response), 200
+        # store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        # if store:
+        #     response = {
+        #         "result": "ok",
+        #         "store": store_obj(store)
+        #     }
+        #     return jsonify(response), 200
+        from search.search import query_index
+        return str(query_index("test", "apple", 5))
 
     @classmethod
     def post(cls):
