@@ -45,15 +45,13 @@ class StoreAPI(MethodView):
             }
         }
         """
-        # store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
-        # if store:
-        #     response = {
-        #         "result": "ok",
-        #         "store": store_obj(store)
-        #     }
-        #     return jsonify(response), 200
-        from search.search import query_index
-        return str(query_index("test", "apple", 5))
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        if store:
+            response = {
+                "result": "ok",
+                "store": store_obj(store)
+            }
+            return jsonify(response), 200
 
     @classmethod
     def post(cls):
