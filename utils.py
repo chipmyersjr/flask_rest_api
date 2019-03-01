@@ -45,5 +45,19 @@ def paginated_results(objects, collection_name, request, per_page, serialization
     return jsonify(response)
 
 
+def handler(event):
+    """Signal decorator to allow use of callback functions as class decorators."""
+
+    def decorator(fn):
+        def apply(cls):
+            event.connect(fn, sender=cls)
+            return cls
+
+        fn.apply = apply
+        return fn
+
+    return decorator
+
+
 class DuplicateDataError(Exception):
     pass

@@ -4,6 +4,8 @@ import uuid
 
 from store.models import Store
 from utils import DuplicateDataError
+from search.decorators import search_reindex
+from search.search_mixin import SearchableMixin
 
 
 class ProductInventoryLessThanZeroException(Exception):
@@ -17,8 +19,9 @@ class ProductTag(db.EmbeddedDocument):
     deleted_at = db.DateTimeField()
 
 
-class Product(db.Document):
-    __searchable__ = ['description']
+@search_reindex.apply
+class Product(db.Document, SearchableMixin):
+    __searchable__ = ['description', 'product_type', 'title', 'tags']
 
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
