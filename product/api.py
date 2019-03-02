@@ -11,7 +11,7 @@ from product.schema import schema
 from product.templates import product_obj, products_obj
 from store.models import Store
 from store.decorators import token_required
-from utils import DuplicateDataError
+from utils import DuplicateDataError, paginated_results
 
 
 class ProductAPI(MethodView):
@@ -408,3 +408,23 @@ class ProductTagAPI(MethodView):
             "product": product_obj(product)
         }
         return jsonify(response), 204
+
+
+class ProductSearchAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def get(self, query):
+        query = query.replace("_", " ")
+
+        search_results = Product.search(expression=query, max=100)
+
+        if search_results is None:
+            return jsonify({}), 404
+
+        return paginated_results(objects=Product.search(expression=query, max=100), collection_name='product'
+                                 , request=request, per_page=self.PER_PAGE, serialization_func=products_obj), 200
