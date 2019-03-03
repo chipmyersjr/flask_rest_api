@@ -4,6 +4,7 @@ from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 import uuid
 from datetime import datetime
+from collections import OrderedDict
 
 
 from product.models import Product, ProductInventoryLessThanZeroException
@@ -11,6 +12,7 @@ from product.schema import schema
 from product.templates import product_obj, products_obj
 from store.models import Store
 from store.decorators import token_required
+from utils import DuplicateDataError, paginated_results
 
 
 class ProductAPI(MethodView):
@@ -187,6 +189,7 @@ class ProductAPI(MethodView):
             vendor=product_json.get("vendor"),
             inventory=product_json.get("inventory"),
             sale_price_in_cents=product_json.get("sale_price_in_cents"),
+            description=product_json.get("description"),
             store=store
         ).save()
 
@@ -226,6 +229,10 @@ class ProductAPI(MethodView):
         product.product_type = product_json.get("product_type")
         product.vendor = product_json.get("vendor")
         product.sale_price_in_cents = product_json.get("sale_price_in_cents")
+
+        if product_json.get("description") is not None:
+            product.description = product_json.get("description")
+
         product.updated_at = datetime.now()
         product.save()
 
@@ -344,3 +351,93 @@ class ProductInventoryAPI(MethodView):
             return jsonify(response), 201
 
         return jsonify({"error": "INCLUDE_SET_OR_AMOUNT_IN_REQUEST"}), 400
+
+
+class ProductTagAPI(MethodView):
+
+    @token_required
+    def post(self, product_id, tag):
+        """
+        adds a tag for a product
+
+        :param product_id: product to be updated
+        :param tag: new tag
+        :return: product object
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        try:
+            product.add_tag(new_tag=tag)
+        except DuplicateDataError:
+            response = {
+                "result": "already exists",
+                "product": product_obj(product)
+            }
+            return jsonify(response), 303
+
+        response = {
+            "result": "ok",
+            "product": product_obj(product)
+        }
+        return jsonify(response), 201
+
+    @token_required
+    def delete(self, product_id):
+        """
+        deletes all or one tag
+
+        :param product_id: product to be updated
+        :return: product obj
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        product = Product.objects.filter(product_id=product_id, deleted_at=None, store=store).first()
+        if not product:
+            return jsonify({}), 404
+
+        deleted_tags = product.delete_tags(tag_to_delete=request.args.get("tag"))
+
+        if len(deleted_tags) == 0:
+            return jsonify({}), 404
+
+        response = {
+            "result": "ok",
+            "product": product_obj(product)
+        }
+        return jsonify(response), 204
+
+
+class ProductSearchAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def get(self, query):
+        query = query.replace("_", " ")
+
+        try:
+            search_results, score_list = Product.search(expression=query, max=100)
+        except TypeError:
+            return jsonify({}), 404
+
+        if search_results is None:
+            return jsonify({}), 404
+
+        results = paginated_results(objects=search_results, collection_name='product', request=request
+                                    , per_page=self.PER_PAGE, serialization_func=products_obj, dictionary=True)
+
+        for product in results["products"]:
+            for id in score_list:
+                if product["product_id"] == id[0]:
+                    product["search_score"] = id[1]
+
+        results["products"] = sorted(results["products"], key=lambda product: product["search_score"], reverse=True)
+
+        return jsonify(results), 200

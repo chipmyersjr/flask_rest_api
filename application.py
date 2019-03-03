@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from subprocess import call
+from elasticsearch import Elasticsearch
 
 from settings import MONGODB_HOST
 
@@ -18,6 +19,10 @@ def create_app(**config_overrides):
 
     # setup db
     db.init_app(app)
+
+    # set up elasticsearch
+    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
+        if app.config['ELASTICSEARCH_URL'] else None
 
     # import blueprints
     from product.views import product_app

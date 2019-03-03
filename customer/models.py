@@ -182,6 +182,7 @@ class Customer(db.Document):
         if new_primay_email not in [email.email for email in self.emails]:
             return None
 
+        new_primay_email_object = None
         for email in self.emails:
             if email.email == new_primay_email:
                 email.is_primary = True

@@ -1,7 +1,7 @@
 from flask import jsonify
 
 
-def paginated_results(objects, collection_name, request, per_page, serialization_func):
+def paginated_results(objects, collection_name, request, per_page, serialization_func, dictionary=False):
     """
     returns standard paginated results response for get methods
 
@@ -10,6 +10,7 @@ def paginated_results(objects, collection_name, request, per_page, serialization
     :param request: request object from flask to get page
     :param per_page: number of results per page
     :param serialization_func: function for serializing the mongo actions
+    :param dictionary: if true returns a dictionary instead of a response object
     :return: json repsonse
     """
     href = "/" + collection_name + "/?page=%s"
@@ -42,7 +43,25 @@ def paginated_results(objects, collection_name, request, per_page, serialization
                 "rel": "next"
             }
         )
+
+    if dictionary:
+        return response
+
     return jsonify(response)
+
+
+def handler(event):
+    """Signal decorator to allow use of callback functions as class decorators."""
+
+    def decorator(fn):
+        def apply(cls):
+            event.connect(fn, sender=cls)
+            return cls
+
+        fn.apply = apply
+        return fn
+
+    return decorator
 
 
 class DuplicateDataError(Exception):

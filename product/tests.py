@@ -70,7 +70,8 @@ class ProductTest(unittest.TestCase):
                  "product_type": "Electronics",
                  "vendor": "Sony",
                  "inventory": 10,
-                 "sale_price_in_cents": 2000
+                 "sale_price_in_cents": 2000,
+                 "description": "A video game console"
                }
 
         rv = self.app.post('/product/',
@@ -82,6 +83,7 @@ class ProductTest(unittest.TestCase):
         assert Product.objects.filter(product_id=product_id, deleted_at=None).count() == 1
         assert Product.objects.filter(product_id=product_id, deleted_at=None).first().inventory == 10
         assert Product.objects.filter(product_id=product_id, deleted_at=None).first().sale_price_in_cents == 2000
+        assert Product.objects.filter(product_id=product_id, deleted_at=None).first().description == "A video game console"
 
         # test that links were created for product
         data = json.loads(rv.get_data(as_text=True))
@@ -111,7 +113,8 @@ class ProductTest(unittest.TestCase):
             "title": "PS5",
             "product_type": "Electronics",
             "vendor": "Sony",
-            "sale_price_in_cents": 3000
+            "sale_price_in_cents": 3000,
+            "description": "A video game system"
         }
         rv = self.app.put('/product/' + product_id,
                           data=json.dumps(data),
@@ -120,6 +123,7 @@ class ProductTest(unittest.TestCase):
         assert rv.status_code == 201
         assert json.loads(rv.data.decode('utf-8')).get('product')['title'] == "PS5"
         assert json.loads(rv.data.decode('utf-8')).get('product')['sale_price_in_cents'] == 3000
+        assert json.loads(rv.data.decode('utf-8')).get('product')['description'] == "A video game system"
 
         # test increase product inventory
         data = {
@@ -306,3 +310,41 @@ class ProductTest(unittest.TestCase):
                           data=json.dumps(data),
                           content_type='application/json')
         assert rv.status_code == 403
+
+    def test_product_tags(self):
+        """
+        tests for tag related methods
+        """
+        product_id = "131077205055504776670923389866612113556"
+        tag = "red"
+
+        rv = self.app.post('/product/' + product_id + '/tag/' + tag,
+                           data=json.dumps("{}"),
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 201
+        assert Product.objects.filter(product_id=product_id).first().tags[0].tag == tag
+
+        self.app.post('/product/' + product_id + '/tag/blue',
+                      data=json.dumps("{}"),
+                      headers=self.headers,
+                      content_type='application/json')
+
+        self.app.post('/product/' + product_id + '/tag/yellow',
+                      data=json.dumps("{}"),
+                      headers=self.headers,
+                      content_type='application/json')
+
+        rv = self.app.delete('/product/' + product_id + '/tag/?tag=' + tag,
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id).first().tags[0].deleted_at is not None
+        assert Product.objects.filter(product_id=product_id).first().tags[1].deleted_at is None
+
+        rv = self.app.delete('/product/' + product_id + '/tag/',
+                             headers=self.headers,
+                             content_type='application/json')
+        assert rv.status_code == 204
+        assert Product.objects.filter(product_id=product_id).first().tags[1].deleted_at is not None
+        assert Product.objects.filter(product_id=product_id).first().tags[2].deleted_at is not None

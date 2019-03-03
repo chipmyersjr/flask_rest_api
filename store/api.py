@@ -1,4 +1,4 @@
-from flask import request, abort, jsonify
+from flask import request, abort, jsonify, current_app
 from flask.views import MethodView
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
