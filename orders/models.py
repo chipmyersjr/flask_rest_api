@@ -21,6 +21,10 @@ class Order(db.Document):
     delivered_at = db.DateTimeField()
     canceled_at = db.DateTimeField()
 
+    meta = {
+        'indexes': [('order_id', ), ('invoice', )]
+    }
+
     @classmethod
     def create_order(cls, invoice):
         """
@@ -140,3 +144,7 @@ class OrderLineItem(db.Document):
         ).save()
 
         return order_line_item
+
+    meta = {
+        'indexes': [('order', )]
+    }

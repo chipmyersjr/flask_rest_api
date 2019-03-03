@@ -102,6 +102,10 @@ class Invoice(db.Document):
 
         return invoices
 
+    meta = {
+        'indexes': [('customer', ), ('invoice_id', ), ('cart', )]
+    }
+
 
 class InvoiceLineItem(db.Document):
     invoice_line_item_id = db.StringField(db_field="invoice_line_item_id", primary_key=True)

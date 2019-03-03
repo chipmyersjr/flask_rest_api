@@ -47,6 +47,10 @@ class Credit(db.Document):
         for credit in credits:
             yield credit
 
+    meta = {
+        'indexes': [('customer', ), ('credit_id', )]
+    }
+
 
 class CreditRedemption(db.Document):
     credit_redemption_id = db.StringField(db_field="credit_redemption_id", primary_key=True)
