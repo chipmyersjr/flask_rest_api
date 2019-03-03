@@ -4,6 +4,7 @@ from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 import uuid
 from datetime import datetime
+from collections import OrderedDict
 
 
 from product.models import Product, ProductInventoryLessThanZeroException
@@ -421,10 +422,22 @@ class ProductSearchAPI(MethodView):
     def get(self, query):
         query = query.replace("_", " ")
 
-        search_results = Product.search(expression=query, max=100)
+        try:
+            search_results, score_list = Product.search(expression=query, max=100)
+        except TypeError:
+            return jsonify({}), 404
 
         if search_results is None:
             return jsonify({}), 404
 
-        return paginated_results(objects=Product.search(expression=query, max=100), collection_name='product'
-                                 , request=request, per_page=self.PER_PAGE, serialization_func=products_obj), 200
+        results = paginated_results(objects=search_results, collection_name='product', request=request
+                                    , per_page=self.PER_PAGE, serialization_func=products_obj, dictionary=True)
+
+        for product in results["products"]:
+            for id in score_list:
+                if product["product_id"] == id[0]:
+                    product["search_score"] = id[1]
+
+        results["products"] = sorted(results["products"], key=lambda product: product["search_score"], reverse=True)
+
+        return jsonify(results), 200

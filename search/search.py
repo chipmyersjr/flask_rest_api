@@ -6,7 +6,10 @@ def add_to_index(document):
         return
     payload = {}
     for field in document.__searchable__:
-        payload[field] = getattr(document, field)
+        if field in document.__searchable_documents__:
+            payload[field] = document.to_search_format(field)
+        else:
+            payload[field] = getattr(document, field)
     current_app.elasticsearch.index(index=document._get_collection_name(), doc_type=document._get_collection_name()
                                     , id=document.id, body=payload)
 
@@ -26,4 +29,5 @@ def query_index(index, query, max, cls):
         body={'query': {'multi_match': {'query': query, 'fields': cls.__searchable__}},
               'from': 0, 'size': max})
     ids = [hit['_id'] for hit in search['hits']['hits']]
-    return ids, search['hits']['total']
+    scores = [hit['_score'] for hit in search['hits']['hits']]
+    return ids, search['hits']['total'], scores

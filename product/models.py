@@ -21,7 +21,9 @@ class ProductTag(db.EmbeddedDocument):
 
 @search_reindex.apply
 class Product(db.Document, SearchableMixin):
-    __searchable__ = ['description', 'product_type', 'title', 'tags']
+    __searchable__ = ['description', 'product_type', 'title', 'vendor', 'tags']
+
+    __searchable_documents__ = ['tags']
 
     product_id = db.StringField(db_field="id", primary_key=True)
     title = db.StringField(db_field="title")
@@ -98,3 +100,7 @@ class Product(db.Document, SearchableMixin):
 
         self.save()
         return deleted_tags
+
+    def to_search_format(self, field_name):
+        if field_name == 'tags':
+            return " ".join([tag.tag for tag in self.tags])
