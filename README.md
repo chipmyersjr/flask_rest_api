@@ -26,11 +26,12 @@ producttype (Filter by product_type)
 * deleted_at
 
 **Methods:**
-* GET /products/  (Retrieves a list of products)
-* GET /products/count/   (Retrieves a count of products)
-* GET /products/{product_id}   (Retrieves a single product)
-* POST /products/   (Creates a new product)
-* PUT /products/{product_id}   (Updates a product)
+* GET /product/  (Retrieves a list of products)
+* GET /product/count/   (Retrieves a count of products)
+* GET /product/{product_id}   (Retrieves a single product)
+* GET /product/search/<query>   (Full-text search of products)
+* POST /product/   (Creates a new product)
+* PUT /product/{product_id}   (Updates a product)
 * DELETE /admin/products/{product_id}   (Deletes a product)
 * PUT /product/{product_id}/inventory   (Add to, Subtract From, or Set inventory amount)
 * POST /product/<product_id>/tag/<tag>  (Creates a new tag)
