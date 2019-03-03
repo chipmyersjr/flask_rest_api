@@ -47,6 +47,10 @@ class GiftCard(db.Document):
         self.current_balance_in_cents = 0
         self.save()
 
+    meta = {
+        'indexes': [('gifter_customer', ), ('recipient_customer', ), ('gift_card_id', )]
+    }
+
 
 class GiftCardSpend(db.Document):
     gift_card_spend_id = db.StringField(db_field="gift_card_spend_id", primary_key=True)

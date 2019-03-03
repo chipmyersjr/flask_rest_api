@@ -97,5 +97,5 @@ class CartItem(db.Document):
     invoice_created_at = db.DateTimeField()
 
     meta = {
-        'indexes': [("cart_id", )]
+        'indexes': [("cart_id", "removed_at")]
     }

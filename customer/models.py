@@ -35,7 +35,7 @@ class Customer(db.Document):
     deleted_at = db.DateTimeField()
 
     meta = {
-        'indexes': ['customer_id']
+        'indexes': [('customer_id', ), ('email', )]
     }
 
     @classmethod
@@ -236,5 +236,5 @@ class Address(db.Document):
         self.save()
 
     meta = {
-        'indexes': [('customer_id', 'address_id')]
+        'indexes': [('customer_id', ), ('address_id', )]
     }
