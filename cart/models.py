@@ -102,3 +102,9 @@ class CartItem(db.Document):
     meta = {
         'indexes': [("cart_id", "removed_at")]
     }
+
+    def remove_from_cart(self):
+        self.removed_at = datetime.now()
+        self.product_id.inventory += self.quantity
+        self.product_id.save()
+        self.save()

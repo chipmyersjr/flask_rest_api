@@ -220,6 +220,7 @@ class CartTest(unittest.TestCase):
                              content_type='application/json')
         assert rv.status_code == 200
         assert CartItem.objects.filter(cart_id=cart_id, removed_at=None).count() == 1
+        assert Product.objects.filter(product_id=product_id).first().inventory == 10
 
         # test close cart
         rv = self.app.delete('/customer/' + customer_id + '/cart',
