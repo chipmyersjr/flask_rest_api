@@ -7,6 +7,7 @@ from settings import MONGODB_HOST
 from application import fixtures
 from cart.models import Cart, CartItem
 from customer.models import Customer
+from product.models import Product
 
 
 class CartTest(unittest.TestCase):
@@ -115,6 +116,16 @@ class CartTest(unittest.TestCase):
         assert rv.status_code == 201
         assert CartItem.objects.filter(product_id=product_id, cart_id=cart_id, removed_at=None).count() == 1
         assert posted_customer.last_cart_activity_at is not None
+        assert Product.objects.filter(product_id=product_id).first().inventory == 0
+
+        # test can't add zero inventory item
+        product_id = "314936113833628994682040857331370897627"
+        data = {"quantity": 1}
+        rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        assert rv.status_code == 404
 
         # test invalid customer for add cart item
         product_id = "314936113833628994682040857331370897628"
@@ -145,6 +156,13 @@ class CartTest(unittest.TestCase):
 
         # add cart item....test that adding existing product add to quantity
         product_id = "314936113833628994682040857331370897627"
+        data = {
+            "amount": 5
+        }
+        rv = self.app.put('/product/' + product_id + '/inventory',
+                          data=json.dumps(data),
+                          headers=self.headers,
+                          content_type='application/json')
         data = {"quantity": 2}
         rv = self.app.post('/customer/' + customer_id + '/cart/item/' + product_id,
                            headers=self.headers,
