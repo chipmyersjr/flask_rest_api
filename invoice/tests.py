@@ -11,6 +11,7 @@ from gift_card.models import GiftCard, GiftCardSpend
 from credit.models import Credit, CreditRedemption
 from cart.models import Cart
 from orders.models import Order, OrderLineItem
+from customer.models import Customer
 
 
 class InvoiceTest(unittest.TestCase):
@@ -196,16 +197,19 @@ class InvoiceTest(unittest.TestCase):
         test that invoices can be marked as collected and that orders are created
         """
         invoice_id = "5723328550124612978426097921146674391"
+        customer_id = "207041015150729681304475393352873932232"
 
         rv = self.app.post('/invoice/' + invoice_id + '/collected',
                            headers=self.headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
         order = Order.objects.filter(invoice=invoice_id).first()
+        customer = Customer.objects.filter(customer_id=customer_id).first()
         assert rv.status_code == 201
         assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "collected"
         assert order.status == "pending"
         assert OrderLineItem.objects.filter(order=order).first().quantity == 1
+        assert customer.last_order_date is not None
 
     def test_failed_invoice(self):
         """
