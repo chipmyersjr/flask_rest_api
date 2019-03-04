@@ -69,6 +69,14 @@ class Invoice(db.Document):
         return self.get_total_amount() - self.gift_card_used_amount_in_cents - self.credit_used_amount_in_cents \
               + self.get_tax_amount()
 
+    def get_pre_tax_amount(self):
+        """
+        returns invoice pre tax amount
+
+        total_amount - gift_card_used_amount - credit_used_amount
+        """
+        return self.get_total_amount() - self.gift_card_used_amount_in_cents - self.credit_used_amount_in_cents
+
     @classmethod
     def get_all_invoices(cls, request):
         """
