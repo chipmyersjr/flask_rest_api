@@ -210,6 +210,7 @@ class InvoiceTest(unittest.TestCase):
         assert order.status == "pending"
         assert OrderLineItem.objects.filter(order=order).first().quantity == 1
         assert customer.last_order_date is not None
+        assert customer.total_spent == 1000
 
     def test_failed_invoice(self):
         """
@@ -218,9 +219,9 @@ class InvoiceTest(unittest.TestCase):
         invoice_id = "5723328550124612978426097921146674389"
 
         rv = self.app.put('/invoice/' + invoice_id + '/failed',
-                           headers=self.headers,
-                           data=json.dumps("{}"),
-                           content_type='application/json')
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
         assert rv.status_code == 200
         assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "failed"
         assert Invoice.objects.filter(invoice_id=invoice_id).first().state == "failed"

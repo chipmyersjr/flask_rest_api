@@ -166,6 +166,7 @@ class InvoiceCollectedAPI(MethodView):
         invoice.state = "collected"
         invoice.closed_at = datetime.now()
         invoice.customer.last_order_date = datetime.now()
+        invoice.customer.total_spent += invoice.get_pre_tax_amount()
         invoice.customer.save()
         invoice.save()
 
