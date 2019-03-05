@@ -61,8 +61,11 @@ class Cart(db.Document):
         :return: newly created or existing cart item
         """
         product = Product.objects.filter(product_id=product_id, store=self.customer_id.store_id, deleted_at=None).first()
-        if product is None:
+        if product is None or product.inventory < quantity:
             raise ProductNotFoundException
+
+        product.inventory -= quantity
+        product.save()
 
         existing_cart_item = CartItem.objects.filter(cart_id=self.cart_id, product_id=product.product_id
                                                      , removed_at=None).first()
@@ -99,3 +102,9 @@ class CartItem(db.Document):
     meta = {
         'indexes': [("cart_id", "removed_at")]
     }
+
+    def remove_from_cart(self):
+        self.removed_at = datetime.now()
+        self.product_id.inventory += self.quantity
+        self.product_id.save()
+        self.save()

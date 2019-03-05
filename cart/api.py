@@ -350,8 +350,7 @@ class CartItemAPI(MethodView):
             if cart_item is None:
                 return jsonify({"error": PRODUCT_NOT_IN_CART}), 404
 
-            cart_item.removed_at = datetime.now()
-            cart_item.save()
+            cart_item.remove_from_cart()
         else:
             request_json = request.json
             error = best_match(Draft4Validator(remove_multiple_items_schema).iter_errors(request_json))
@@ -372,8 +371,7 @@ class CartItemAPI(MethodView):
                 cart_items_to_delete.append(cart_item)
 
             for cart_item in cart_items_to_delete:
-                cart_item.removed_at = datetime.now()
-                cart_item.save()
+                cart_item.remove_from_cart()
 
         response = {
                 "result": "ok",
