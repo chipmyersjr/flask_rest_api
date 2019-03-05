@@ -1,5 +1,7 @@
-SECRET_KEY = 'you-will-never-guess'
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
-MONGODB_HOST = 'mongodb' # use 'mongodb' if using Docker
-MONGODB_DB = 'store'
-ELASTICSEARCH_URL = 'elasticsearch:9200'
+MONGODB_HOST = "mongodb"
+MONGODB_DB = os.getenv("MONGODB_DB")
+ELASTICSEARCH_URL = "elasticsearch:9200"

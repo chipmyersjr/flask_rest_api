@@ -2,6 +2,8 @@ from flask import Flask
 from flask_mongoengine import MongoEngine
 from subprocess import call
 from elasticsearch import Elasticsearch
+import os
+from dotenv import load_dotenv
 
 from settings import MONGODB_HOST
 
@@ -10,6 +12,10 @@ db = MongoEngine()
 
 def create_app(**config_overrides):
     app = Flask(__name__)
+
+    APP_ROOT = os.path.join(os.path.dirname(__file__), '..')  # refers to application_top
+    dotenv_path = os.path.join(APP_ROOT, '.env')
+    load_dotenv(dotenv_path)
 
     # Load config
     app.config.from_pyfile('settings.py')
