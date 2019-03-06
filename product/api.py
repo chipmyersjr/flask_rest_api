@@ -430,6 +430,10 @@ class ProductSearchAPI(MethodView):
         if search_results is None:
             return jsonify({}), 404
 
+        if "available" in request.args:
+            if request.args.get("available").lower() == "true":
+                search_results = search_results.filter(inventory__gt=0)
+
         results = paginated_results(objects=search_results, collection_name='product', request=request
                                     , per_page=self.PER_PAGE, serialization_func=products_obj, dictionary=True)
 
