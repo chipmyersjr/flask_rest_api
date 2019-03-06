@@ -29,7 +29,7 @@ producttype (Filter by product_type)
 * GET /product/  (Retrieves a list of products)
 * GET /product/count/   (Retrieves a count of products)
 * GET /product/{product_id}   (Retrieves a single product)
-* GET /product/search/<query>   (Full-text search of products)
+* GET /product/search/<query>   (Full-text search of products)    params={available}
 * POST /product/   (Creates a new product)
 * PUT /product/{product_id}   (Updates a product)
 * DELETE /admin/products/{product_id}   (Deletes a product)
