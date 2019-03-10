@@ -619,6 +619,19 @@ class CustomerTest(unittest.TestCase):
         assert Customer.objects.filter(customer_id=customer_id).first().emails[1].is_primary is True
         assert Customer.objects.filter(customer_id=customer_id).first().emails[2].is_primary is False
 
+    def test_customer_snapshot(self):
+        """
+        test /customer/<customer_id>/snapshot
+        """
+        customer_id = "180422867908286360754098232165804040712"
+
+        rv = self.app.get('/customer/' + customer_id + '/snapshot',
+                          headers=self.headers,
+                          content_type='application/json')
+        customer = json.loads(rv.get_data(as_text=True)).get("customer")
+        assert rv.status_code == 200
+        assert customer["customer_id"] == "180422867908286360754098232165804040712"
+
 
 if __name__ == '__main__':
     unittest.main()

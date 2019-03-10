@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from customer.api import CustomerAPI, CustomerCountAPI, CustomerAddressAPI, CustomerLogin, CustomerLogOut\
-    , CustomerEmailAPI
+    , CustomerEmailAPI, CustomerSnapshotAPI
 
 customer_app = Blueprint('customer_app', __name__)
 
@@ -11,6 +11,7 @@ customer_address_view = CustomerAddressAPI.as_view('customer_address_api')
 customer_login_view = CustomerLogin.as_view('customer_login_api')
 customer_logout_view = CustomerLogOut.as_view('customer_logout_api')
 customer_email_view = CustomerEmailAPI.as_view('customer_email_api')
+customer_snapshot_view = CustomerSnapshotAPI.as_view('customer_snapshot_api')
 
 customer_app.add_url_rule('/customer/', view_func=customer_view, methods=['POST', 'GET', ])
 customer_app.add_url_rule('/customer/<customer_id>', view_func=customer_view, methods=['GET', 'PUT', 'DELETE', ])
@@ -26,3 +27,5 @@ customer_app.add_url_rule('/customer/logout', view_func=customer_logout_view, me
 customer_app.add_url_rule('/customer/<customer_id>/email/', view_func=customer_email_view, methods=['POST', 'DELETE', ])
 customer_app.add_url_rule('/customer/<customer_id>/email/make_primary', view_func=customer_email_view
                           , methods=['PUT', ])
+
+customer_app.add_url_rule('/customer/<customer_id>/snapshot', view_func=customer_snapshot_view, methods=['GET', ])

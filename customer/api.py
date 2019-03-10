@@ -10,6 +10,16 @@ from store.decorators import token_required
 from customer.schema import schema, address_schema
 from customer.models import Customer, Address
 from customer.templates import customer_obj, customer_objs, address_obj, addresses_obj_for_pagination
+from cart.models import Cart
+from cart.templates import cart_obj
+from invoice.models import Invoice
+from invoice.templates import invoice_objs
+from orders.models import Order
+from orders.templates import order_objs
+from gift_card.models import GiftCard
+from gift_card.templates import gift_card_objs
+from credit.models import Credit
+from credit.templates import credit_objs
 from utils import paginated_results, DuplicateDataError
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
@@ -634,5 +644,58 @@ class CustomerEmailAPI(MethodView):
         response = {
             "result": "ok",
             "customer": customer_obj(customer)
+        }
+        return jsonify(response), 200
+
+
+class CustomerSnapshotAPI(MethodView):
+
+    @token_required
+    def get(self, customer_id):
+        """
+        returns extended customer object
+
+        :return: customer snapshot object
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        obj = customer_obj(customer=customer)
+
+        cart = Cart.objects.filter(customer_id=customer.customer_id, closed_at=None).first()
+        if cart:
+            obj['cart'] = cart_obj(cart)
+
+        invoices = Invoice.objects.filter(customer=customer).order_by("-created_at").paginate(page=1, per_page=10)
+        if invoices:
+            obj["last_10_invoices"] = invoice_objs(invoices)
+
+        orders = Order.get_orders(request=request, customer_id=customer_id).order_by("-created_at")\
+            .paginate(page=1, per_page=10)
+        if orders:
+            obj["last_10_orders"] = order_objs(orders)
+
+        gift_cards = GiftCard.objects.filter(recipient_customer=customer, current_balance_in_cents__gt=0)\
+            .order_by("-created_at").paginate(page=1, per_page=10)
+
+        if gift_cards:
+            obj["active_giftcards"] = gift_card_objs(gift_cards)
+
+        credits = Credit.objects.filter(customer=customer, current_balance_in_cents__gt=0) \
+            .order_by("-created_at").paginate(page=1, per_page=10)
+
+        if credits:
+            obj["active_credits"] = credit_objs(credits)
+
+        products = Invoice.get_top_N_products(customer=customer, num_items=10, request=request)
+
+        if products:
+            obj["top_10_ordered_products"] = products
+
+        response = {
+            "result": "ok",
+            "customer": obj
         }
         return jsonify(response), 200
