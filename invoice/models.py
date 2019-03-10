@@ -1,12 +1,15 @@
 from application import db
 from datetime import datetime
 import uuid
+from collections import Counter
 
 from customer.models import Customer
 from cart.models import Cart
 from cart.models import CartItem
 from product.models import Product
+from product.templates import products_obj
 from store.models import Store
+from utils import paginated_results
 
 
 class IncorrectDateFormat(Exception):
@@ -113,6 +116,35 @@ class Invoice(db.Document):
     meta = {
         'indexes': [('customer', ), ('invoice_id', ), ('cart', )]
     }
+
+    @classmethod
+    def get_top_N_products(cls, customer, num_items, request):
+        """
+        returns the top 10 products purchased by customer
+
+        :param customer: customer of note
+        :return: Produce query object
+        """
+        invoices = Invoice.objects.filter(customer=customer, state="collected")
+        invoice_line_items = InvoiceLineItem.objects.filter(invoice__in=invoices).all()
+
+        products = {}
+        for invoice_line_item in invoice_line_items:
+            if invoice_line_item.product.product_id in products.keys():
+                products[invoice_line_item.product.product_id] += invoice_line_item.quantity
+            else:
+                products[invoice_line_item.product.product_id] = invoice_line_item.quantity
+
+        product_counts = dict(Counter(products).most_common(num_items))
+
+        results = Product.objects.filter(product_id__in=product_counts.keys())
+        results = paginated_results(objects=results, collection_name='product', request=request
+                                    , per_page=10, serialization_func=products_obj, dictionary=True)
+
+        for product in results["products"]:
+            product["num_ordered"] = product_counts[product["product_id"]]
+
+        return sorted(results["products"], key=lambda product: product["num_ordered"], reverse=True)
 
 
 class InvoiceLineItem(db.Document):
