@@ -70,7 +70,7 @@ class Invoice(db.Document):
         total_amount + tax_amount - gift_card_used_amount - credit_used_amount
         """
         return self.get_total_amount() - self.gift_card_used_amount_in_cents - self.credit_used_amount_in_cents \
-              + self.get_tax_amount()
+               + self.get_tax_amount()
 
     def get_pre_tax_amount(self):
         """
@@ -145,6 +145,14 @@ class Invoice(db.Document):
             product["num_ordered"] = product_counts[product["product_id"]]
 
         return sorted(results["products"], key=lambda product: product["num_ordered"], reverse=True)
+
+    def get_invoice_line_items(self):
+        """
+        returns all line items for invoice
+
+        :return: collection of invoice line item objects
+        """
+        return InvoiceLineItem.objects.filter(invoice=self).all()
 
 
 class InvoiceLineItem(db.Document):
