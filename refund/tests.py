@@ -81,3 +81,30 @@ class RefundTest(unittest.TestCase):
         refund = Refund.objects.filter(invoice=invoice_id).first()
         assert rv.status_code == 201
         assert len(refund.refund_line_items) == 1
+
+        # test line item refund
+        invoice_id = "5723328550124612978426097921146674393"
+        data = [{
+            "invoice_line_item_id": "40487189578257139583612614003166621213"
+        }]
+        rv = self.app.post('/invoice/' + invoice_id + "/refund",
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        refund = Refund.objects.filter(invoice=invoice_id).first()
+        assert rv.status_code == 201
+        assert len(refund.refund_line_items) == 1
+
+        # test partial line item refund
+        invoice_id = "5723328550124612978426097921146674394"
+        data = [{
+            "invoice_line_item_id": "40487189578257139583612614003166621214",
+            "amount": 300
+        }]
+        rv = self.app.post('/invoice/' + invoice_id + "/refund",
+                           headers=self.headers,
+                           data=json.dumps(data),
+                           content_type='application/json')
+        refund = Refund.objects.filter(invoice=invoice_id).first()
+        assert rv.status_code == 201
+        assert refund.refund_line_items[0].total_amount_in_cents == 300

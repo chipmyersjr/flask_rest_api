@@ -22,8 +22,6 @@ def refund_line_item_object(refund_line_item):
     return {
         "refund_line_item_id": refund_line_item.refund_line_item_id,
         "invoice_line_item": refund_line_item.invoice_line_item,
-        "quantity": refund_line_item.quantity,
-        "unit_amount_in_cents": refund_line_item.unit_amount_in_cents,
         "total_amount_in_cents": refund_line_item.total_amount_in_cents,
         "tax_amount_in_cents": refund_line_item.tax_amount_in_cents
     }

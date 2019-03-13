@@ -1,11 +1,14 @@
 from flask.views import MethodView
 from flask import request, jsonify, abort
+from jsonschema import Draft4Validator
+from jsonschema.exceptions import best_match
 
 from store.decorators import token_required
 from store.models import Store
 from invoice.models import Invoice
 from refund.models import Refund
 from refund.templates import refund_object
+from refund.schema import schema
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 INVOICE_NOT_FOUND = "INVOICE_NOT_FOUND"
@@ -37,7 +40,21 @@ class RefundAPI(MethodView):
         if invoice.customer.store_id != store:
             return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
-        refund = Refund.refund_invoice(invoice)
+        if "full" in request.args:
+            if request.args.get("full").lower() == "true":
+                refund = Refund.refund_invoice(invoice)
+
+                response = {
+                    "result": "ok",
+                    "invoice": refund_object(refund)
+                }
+                return jsonify(response), 201
+
+        error = best_match(Draft4Validator(schema).iter_errors(request.json))
+        if error:
+            return jsonify({"error": error.message}), 400
+
+        refund = Refund.refund_invoice(invoice=invoice, refund_object=request.json)
 
         response = {
             "result": "ok",
