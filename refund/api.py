@@ -50,6 +50,19 @@ class RefundAPI(MethodView):
                 }
                 return jsonify(response), 201
 
+        if "amount" in request.args:
+            try:
+                amount = int(request.args.get("amount"))
+                refund = Refund.refund_invoice(invoice, amount=amount)
+
+                response = {
+                    "result": "ok",
+                    "invoice": refund_object(refund)
+                }
+                return jsonify(response), 201
+            except ValueError:
+                return jsonify({"error": "amount should be int"}), 400
+
         error = best_match(Draft4Validator(schema).iter_errors(request.json))
         if error:
             return jsonify({"error": error.message}), 400

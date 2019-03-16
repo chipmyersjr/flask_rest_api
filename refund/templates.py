@@ -8,8 +8,6 @@ def refund_object(refund):
 
     return {
         "refund_id": refund.refund_id,
-        "cash_amount_in_cents": refund.cash_amount_in_cents,
-        "credit_amount_in_cents": refund.credit_amount_in_cents,
         "state": refund.state,
         "refund_line_items": refund_line_item_objects(refund.refund_line_items),
         "created_at": refund.created_at,

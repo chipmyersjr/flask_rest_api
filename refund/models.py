@@ -17,15 +17,13 @@ class Refund(db.Document):
     refund_id = db.StringField(primary_key=True)
     invoice = db.ReferenceField(Invoice, db_field="invoice_id")
     credit = db.ReferenceField(Credit, db_field="credit_id")
-    cash_amount_in_cents = db.IntField(default=0)
-    credit_amount_in_cents = db.IntField(default=0)
     state = db.StringField(default="open")
     refund_line_items = db.ListField(db.EmbeddedDocumentField(RefundLineItem))
     created_at = db.DateTimeField(default=datetime.now())
     closed_at = db.DateTimeField()
 
     @classmethod
-    def refund_invoice(cls, invoice, refund_object=None):
+    def refund_invoice(cls, invoice, refund_object=None, amount=None):
         """
         refunds invoice
 
@@ -36,9 +34,17 @@ class Refund(db.Document):
 
         refund = cls(
             refund_id=str(uuid.uuid4().int),
-            invoice=invoice,
-            cash_amount_in_cents=invoice.get_subtotal_amount()
+            invoice=invoice
         ).save()
+
+        if amount:
+            refund_line_item = RefundLineItem(
+                refund_line_item_id=str(uuid.uuid4().int),
+                total_amount_in_cents=amount
+            )
+            refund.refund_line_items.append(refund_line_item)
+            refund.save()
+            return refund
 
         if refund_object is None:
             invoice_line_items = invoice.get_invoice_line_items()
@@ -51,6 +57,7 @@ class Refund(db.Document):
                                                                 , invoice=invoice)
             for invoice_line_item in list(zip(invoice_line_items, amounts)):
                 refund.create_refund_line_item(invoice_line_item[0], invoice_line_item[1])
+            refund.save()
 
         return refund
 

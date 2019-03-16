@@ -108,3 +108,13 @@ class RefundTest(unittest.TestCase):
         refund = Refund.objects.filter(invoice=invoice_id).first()
         assert rv.status_code == 201
         assert refund.refund_line_items[0].total_amount_in_cents == 300
+
+        # test amount refund amount
+        invoice_id = "5723328550124612978426097921146674395"
+        rv = self.app.post('/invoice/' + invoice_id + "/refund?amount=500",
+                           headers=self.headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        refund = Refund.objects.filter(invoice=invoice_id).first()
+        assert rv.status_code == 201
+        assert refund.refund_line_items[0].total_amount_in_cents == 500
