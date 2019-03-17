@@ -18,3 +18,10 @@ services:
       - "9200:9200"
       - "9300:9300"
     container_name: store-es
+  kafka:
+    build: ./kafka
+    ports:
+      - '9092:9092'
+    environment:
+      - ADVERTISED_HOST=172.20.0.5
+      - ADVERTISED_PORT=9092
