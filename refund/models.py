@@ -23,12 +23,14 @@ class Refund(db.Document):
     closed_at = db.DateTimeField()
 
     @classmethod
-    def refund_invoice(cls, invoice, refund_object=None, amount=None):
+    def refund_invoice(cls, invoice, refund_object=None, amount=None, credit=False):
         """
         refunds invoice
 
         :param invoice: invoice to be refunded
         :param refund_object: list of objects with invoice_line_items and amounts to be refunded
+        :param amount: amount for refund open amount
+        :param credit: true if refund is to credit
         :return: refund
         """
 
@@ -44,6 +46,8 @@ class Refund(db.Document):
             )
             refund.refund_line_items.append(refund_line_item)
             refund.save()
+            if credit:
+                refund.create_credit()
             return refund
 
         if refund_object is None:
@@ -59,6 +63,8 @@ class Refund(db.Document):
                 refund.create_refund_line_item(invoice_line_item[0], invoice_line_item[1])
             refund.save()
 
+        if credit:
+            refund.create_credit()
         return refund
 
     def create_refund_line_item(self, invoice_line_item, amount=None):
@@ -82,4 +88,29 @@ class Refund(db.Document):
         )
 
         self.refund_line_items.append(refund_line_item)
+        self.save()
+
+    def get_refund_total(self):
+        """
+        get the total refund amount. sum of line item total amounts
+
+        :return: integer
+        """
+        return sum([refund_line_item.total_amount_in_cents + refund_line_item.tax_amount_in_cents for refund_line_item
+                    in self.refund_line_items])
+
+    def create_credit(self):
+        """
+        creates a customer credit for the total refund amount.
+
+        :return:
+        """
+        credit = Credit(
+            credit_id=str(uuid.uuid4().int),
+            customer=self.invoice.customer,
+            original_balance_in_cents=self.get_refund_total(),
+            current_balance_in_cents=self.get_refund_total()
+        ).save()
+
+        self.credit = credit
         self.save()

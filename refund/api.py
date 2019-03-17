@@ -34,6 +34,11 @@ class RefundAPI(MethodView):
         invoice = Invoice.objects.filter(invoice_id=invoice_id, state='collected').first()
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
+        is_to_credit = False
+        if "credit" in request.args:
+            if request.args.get("credit").lower() == "true":
+                is_to_credit = True
+
         if invoice is None:
             return jsonify({"error": INVOICE_NOT_FOUND}), 404
 
@@ -42,7 +47,7 @@ class RefundAPI(MethodView):
 
         if "full" in request.args:
             if request.args.get("full").lower() == "true":
-                refund = Refund.refund_invoice(invoice)
+                refund = Refund.refund_invoice(invoice, credit=is_to_credit)
 
                 response = {
                     "result": "ok",
@@ -53,7 +58,7 @@ class RefundAPI(MethodView):
         if "amount" in request.args:
             try:
                 amount = int(request.args.get("amount"))
-                refund = Refund.refund_invoice(invoice, amount=amount)
+                refund = Refund.refund_invoice(invoice, amount=amount, credit=is_to_credit)
 
                 response = {
                     "result": "ok",
@@ -67,7 +72,7 @@ class RefundAPI(MethodView):
         if error:
             return jsonify({"error": error.message}), 400
 
-        refund = Refund.refund_invoice(invoice=invoice, refund_object=request.json)
+        refund = Refund.refund_invoice(invoice=invoice, refund_object=request.json, credit=is_to_credit)
 
         response = {
             "result": "ok",
