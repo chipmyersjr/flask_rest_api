@@ -2,6 +2,6 @@ import os
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
-MONGODB_HOST = "mongodb"
+MONGODB_HOST = "172.20.0.7"
 MONGODB_DB = "store"
-ELASTICSEARCH_URL = "elasticsearch:9200"
+ELASTICSEARCH_URL = "172.20.0.8:9200"
