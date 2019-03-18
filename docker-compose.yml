@@ -9,19 +9,38 @@ services:
     links:
       - db:mongodb
     container_name: store-web
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.5
   db:
     image: mongo:3.0.2
     container_name: store-db
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.7
   elasticsearch:
     image: elasticsearch:5-alpine
     ports:
       - "9200:9200"
       - "9300:9300"
     container_name: store-es
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.8
   kafka:
-    build: ./kafka
+    build: ./kafka_server
     ports:
       - '9092:9092'
     environment:
-      - ADVERTISED_HOST=172.20.0.5
+      - ADVERTISED_HOST=172.20.0.6
       - ADVERTISED_PORT=9092
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.6
+
+
+networks:
+  frontend:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
