@@ -222,7 +222,7 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * invoice_id
 * customer_id
 * cart_id
-* state [open, collected, failed]
+* state [open, collected, failed, refunded, partially refunded]
 * created_at
 * closed_at
 
@@ -244,7 +244,8 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/17
 * GET /customer/{customer_id}/invoices?closed=false           (Get all invoices for a customer)
 * POST /invoice/{invoice-id}/collected     (Mark an invoice as collected)
 * PUT /invoice/{invoice-id}/failed     (Mark an invoice as failed)
-
+* POST /invoice/{invoice-id}/refund?full=true&credit=false&amount=0 (Refund an Invoice) body_params={line_item_it, amount}
+* PUT /invoice/{invoice-id}/refund/close  (Mark a refund as closed)
 
 # Order
 
