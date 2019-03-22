@@ -4,7 +4,7 @@
 #
 
 # Pull base image.
-FROM python:3.4.5-slim
+FROM python:3.6
 
 # Get some custom packages
 RUN apt-get update && apt-get install -y \
@@ -32,4 +32,5 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # start the app server
-CMD python manage.py runserver
+CMD python3 manage.py runserver
+
