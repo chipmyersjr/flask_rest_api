@@ -2,10 +2,24 @@ from product.templates import product_obj
 from customer.templates import customer_obj
 from cart.templates import cart_obj
 from invoice.models import InvoiceLineItem
+from refund.models import Refund
 
 
 def invoice_obj(invoice):
     invoice_line_items = InvoiceLineItem.objects.filter(invoice=invoice).all()
+
+    links = {
+            "self": "/invoice/" + invoice.invoice_id,
+            "collected": "/invoice/" + invoice.invoice_id + "/collected",
+            "failed": "/invoice/" + invoice.invoice_id + "/failed"
+    }
+
+    refund = Refund.objects.filter(invoice=invoice)
+
+    if refund:
+        links["close_refund"] = "/invoice/" + invoice.invoice_id + "/refund/close"
+    else:
+        links["refund"] = "/invoice/" + invoice.invoice_id + "/refund/"
 
     return {
         "invoice_id": invoice.invoice_id,
@@ -20,11 +34,7 @@ def invoice_obj(invoice):
         "created_at": invoice.created_at,
         "closed_at": invoice.closed_at,
         "invoice_line_items": invoice_line_item_objs(invoice_line_items=invoice_line_items),
-        "links": {
-            "self": "/invoice/" + invoice.invoice_id,
-            "collected": "/invoice/" + invoice.invoice_id + "/collected",
-            "failed": "/invoice/" + invoice.invoice_id + "/failed"
-        }
+        "links": links
     }
 
 

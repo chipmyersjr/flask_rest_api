@@ -11,6 +11,8 @@ from gift_card.tests import GiftCardTest
 from credit.tests import CreditTest
 from invoice.tests import InvoiceTest
 from orders.tests import OrderTest
+from refund.tests import RefundTest
+
 
 if __name__ == "__main__":
     unittest.main()
