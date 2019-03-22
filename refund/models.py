@@ -48,12 +48,16 @@ class Refund(db.Document):
             refund.save()
             if credit:
                 refund.create_credit()
+            invoice.state = 'partially refunded'
+            invoice.save()
             return refund
 
         if refund_object is None:
             invoice_line_items = invoice.get_invoice_line_items()
             for invoice_line_item in invoice_line_items:
                 refund.create_refund_line_item(invoice_line_item)
+            invoice.state = 'refunded'
+            invoice.save()
         else:
             invoice_line_item_ids = [refund["invoice_line_item_id"] for refund in refund_object]
             amounts = [refund.get("amount") for refund in refund_object]
@@ -62,6 +66,8 @@ class Refund(db.Document):
             for invoice_line_item in list(zip(invoice_line_items, amounts)):
                 refund.create_refund_line_item(invoice_line_item[0], invoice_line_item[1])
             refund.save()
+            invoice.state = 'partially refunded'
+            invoice.save()
 
         if credit:
             refund.create_credit()

@@ -6,6 +6,7 @@ import json
 from settings import MONGODB_HOST
 from application import fixtures
 from refund.models import Refund
+from invoice.models import Invoice
 
 
 class RefundTest(unittest.TestCase):
@@ -79,8 +80,10 @@ class RefundTest(unittest.TestCase):
                            data=json.dumps("{}"),
                            content_type='application/json')
         refund = Refund.objects.filter(invoice=invoice_id).first()
+        invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
         assert rv.status_code == 201
         assert len(refund.refund_line_items) == 1
+        assert invoice.state == "refunded"
 
         # test line item refund
         invoice_id = "5723328550124612978426097921146674393"
@@ -92,8 +95,10 @@ class RefundTest(unittest.TestCase):
                            data=json.dumps(data),
                            content_type='application/json')
         refund = Refund.objects.filter(invoice=invoice_id).first()
+        invoice = Invoice.objects.filter(invoice_id=invoice_id).first()
         assert rv.status_code == 201
         assert len(refund.refund_line_items) == 1
+        assert invoice.state == "partially refunded"
 
         # test partial line item refund
         invoice_id = "5723328550124612978426097921146674394"
