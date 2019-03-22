@@ -182,7 +182,7 @@ class InvoiceTest(unittest.TestCase):
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
-        assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 5
+        assert len(json.loads(rv.get_data(as_text=True)).get('invoices')) == 10
 
         # test customer invoice list
         customer_id = "180422867908286360754098232165804040712"
