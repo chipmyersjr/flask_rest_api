@@ -12,6 +12,7 @@ from refund.schema import schema
 
 CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND"
 INVOICE_NOT_FOUND = "INVOICE_NOT_FOUND"
+REFUND_NOT_FOUND = "REFUND_NOT_FOUND"
 
 
 class RefundAPI(MethodView):
@@ -79,3 +80,28 @@ class RefundAPI(MethodView):
             "invoice": refund_object(refund)
         }
         return jsonify(response), 201
+
+    def put(self, invoice_id):
+        """
+        marks refund as closed
+
+        :return: refund object
+        """
+        invoice = Invoice.objects.filter(invoice_id=invoice_id, state__in=['refunded', 'partially_refunded']).first()
+
+        if invoice is None:
+            return jsonify({"error": INVOICE_NOT_FOUND}), 404
+
+        refund = Refund.objects.filter(invoice=invoice).first()
+
+        if refund is None:
+            return jsonify({"error": REFUND_NOT_FOUND}), 404
+
+        refund.state = "closed"
+        refund.save()
+
+        response = {
+            "result": "ok",
+            "invoice": refund_object(refund)
+        }
+        return jsonify(response), 200

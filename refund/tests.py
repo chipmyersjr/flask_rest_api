@@ -137,3 +137,13 @@ class RefundTest(unittest.TestCase):
         credit = Refund.objects.filter(invoice=invoice_id).first().credit
         assert rv.status_code == 201
         assert credit.original_balance_in_cents == 1000
+
+        # test close invoice
+        invoice_id = "5723328550124612978426097921146674392"
+        rv = self.app.put('/invoice/' + invoice_id + "/refund/close",
+                          headers=self.headers,
+                          data=json.dumps("{}"),
+                          content_type='application/json')
+        refund = Refund.objects.filter(invoice=invoice_id).first()
+        assert rv.status_code == 200
+        assert refund.state == "closed"
