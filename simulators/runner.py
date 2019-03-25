@@ -3,7 +3,7 @@ from customer import Customer
 
 def main():
     counter = 0
-    while counter < 15:
+    while counter < 100:
         customer = Customer()
         customer.create()
         counter += 1
