@@ -2,6 +2,7 @@ import requests
 from faker import Faker
 from random import randint
 import httplib2
+import json
 
 
 API_URL = "http://127.0.0.1/"
@@ -49,3 +50,12 @@ class Customer:
 
         response = requests.post(url=API_URL + 'customer/', json=data, headers=self.headers).json()
         self.customer_id = response.get("customer")["customer_id"]
+
+    def open_cart(self):
+        return requests.post(url=API_URL + '/customer/' + str(self.customer_id) + '/cart', json=json.dumps("{}")
+                             , headers=self.headers)
+
+    def add_cart_item(self, product_id):
+        data = {"quantity": randint(1, 5)}
+        return requests.post(url=API_URL + 'customer/' + str(self.customer_id) + '/cart/item/' + product_id
+                             , json=data, headers=self.headers)
