@@ -2,10 +2,17 @@ from application import db
 from datetime import datetime, timedelta
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+from requests import post
+import os
+
 
 from store.models import Store
 from utils import DuplicateDataError
 from kafka_server.decorators import produces_kafka_message
+
+
+MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
+MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 
 
 class Email(db.EmbeddedDocument):
@@ -197,6 +204,18 @@ class Customer(db.Document):
 
         self.save()
         return new_primay_email_object
+
+    def send_email(self):
+        return post(
+                "https://api.mailgun.net/v3/{}/messages".format(MAILGUN_DOMAIN),
+                auth=("api", MAILGUN_API_KEY),
+                data={
+                    "from": "store.app.api@gmail.com",
+                    "to": self.email,
+                    "subject": "Hello",
+                    "text": "Hello",
+                },
+            ), MAILGUN_API_KEY
 
 
 class Address(db.Document):

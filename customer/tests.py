@@ -2,7 +2,6 @@ from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
 import json
-from datetime import datetime, timedelta
 
 from settings import MONGODB_HOST
 from customer.models import Customer, Address
