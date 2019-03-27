@@ -17,7 +17,7 @@ def main():
 def create_customers():
     counter = 0
     customers = []
-    while counter < 500:
+    while counter < 100:
         customer = Customer()
         customer.create()
         customers.append(customer)
