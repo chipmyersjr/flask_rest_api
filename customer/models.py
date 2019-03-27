@@ -3,12 +3,14 @@ from datetime import datetime, timedelta
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from requests import post
+from flask_mail import Message
 import os
 
 
 from store.models import Store
 from utils import DuplicateDataError
 from kafka_server.decorators import produces_kafka_message
+from application import mail
 
 
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
@@ -206,16 +208,11 @@ class Customer(db.Document):
         return new_primay_email_object
 
     def send_email(self):
-        return post(
-                "https://api.mailgun.net/v3/{}/messages".format(MAILGUN_DOMAIN),
-                auth=("api", MAILGUN_API_KEY),
-                data={
-                    "from": "store.app.api@gmail.com",
-                    "to": self.email,
-                    "subject": "Hello",
-                    "text": "Hello",
-                },
-            ), MAILGUN_API_KEY
+        msg = Message("Hello",
+                      sender="store.app.api@gmail.com",
+                      recipients=[self.email])
+        result = mail.send(msg)
+        return str(result)
 
 
 class Address(db.Document):
