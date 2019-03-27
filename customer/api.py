@@ -699,3 +699,22 @@ class CustomerSnapshotAPI(MethodView):
             "customer": obj
         }
         return jsonify(response), 200
+
+
+class CustomerSendConfirmation(MethodView):
+
+    @token_required
+    def put(self, customer_id):
+        """
+        sends the customer confirmation email
+
+        :return: confirmation
+        """
+        customer = Customer.get_customer(customer_id=customer_id, request=request)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        customer.send_confirmation()
+
+        return jsonify({"result": "ok"}), 200

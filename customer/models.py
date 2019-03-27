@@ -2,7 +2,7 @@ from application import db
 from datetime import datetime, timedelta
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-from requests import post
+from flask import request, url_for
 from flask_mail import Message
 import os
 
@@ -207,12 +207,32 @@ class Customer(db.Document):
         self.save()
         return new_primay_email_object
 
-    def send_email(self):
-        msg = Message("Hello",
+    def send_email(self, subject, body):
+        """
+        sends an email to the customers primary email
+
+        :return: none
+        """
+        msg = Message(subject,
                       sender="store.app.api@gmail.com",
                       recipients=[self.email])
-        result = mail.send(msg)
-        return str(result)
+        msg.html = body
+        mail.send(msg)
+
+    def send_confirmation(self):
+        """
+        sends confirmation email
+
+        :return: none
+        """
+        self.confirmation_token = str(uuid.uuid4().int)
+        self.confirmation_token_expires_at = datetime.now() + timedelta(hours=24)
+        self.save()
+
+        subject = "Store Confirmation"
+        link = "localhost/customer/confirm/" + self.confirmation_token
+        html = "<html>Please click the link to confirm your registration: <a href={}>link</a></html>".format(link)
+        self.send_email(subject=subject, body=html)
 
 
 class Address(db.Document):
