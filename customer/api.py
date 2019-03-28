@@ -1,5 +1,5 @@
 from flask.views import MethodView
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response, render_template
 from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 import uuid
@@ -717,4 +717,27 @@ class CustomerSendConfirmation(MethodView):
 
         customer.send_confirmation()
 
-        return jsonify({"result": "ok"}), 200
+        return jsonify({"result": customer.confirmation_token}), 200
+
+
+class CustomerConfirmAPI(MethodView):
+
+    def get(self, token):
+        """
+        allows user to confirm themselves
+
+        :return: confirmation page
+        """
+        customer = Customer.get_customer_by_token(token=token)
+
+        if customer is None:
+            return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
+
+        customer.confirmed_on = datetime.now()
+
+        headers = {"Content-Type": "text/html"}
+        return make_response(
+            render_template("confirmation.html"),
+            200,
+            headers,
+        )

@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from customer.api import CustomerAPI, CustomerCountAPI, CustomerAddressAPI, CustomerLogin, CustomerLogOut\
-    , CustomerEmailAPI, CustomerSnapshotAPI, CustomerSendConfirmation
+    , CustomerEmailAPI, CustomerSnapshotAPI, CustomerSendConfirmation, CustomerConfirmAPI
 
 customer_app = Blueprint('customer_app', __name__)
 
@@ -13,6 +13,7 @@ customer_logout_view = CustomerLogOut.as_view('customer_logout_api')
 customer_email_view = CustomerEmailAPI.as_view('customer_email_api')
 customer_snapshot_view = CustomerSnapshotAPI.as_view('customer_snapshot_api')
 customer_send_confirmation_view = CustomerSendConfirmation.as_view('customer_confirmation_api')
+customer_confirm_view = CustomerConfirmAPI.as_view('customer_confirm_api')
 
 customer_app.add_url_rule('/customer/', view_func=customer_view, methods=['POST', 'GET', ])
 customer_app.add_url_rule('/customer/<customer_id>', view_func=customer_view, methods=['GET', 'PUT', 'DELETE', ])
@@ -33,3 +34,6 @@ customer_app.add_url_rule('/customer/<customer_id>/snapshot', view_func=customer
 
 customer_app.add_url_rule('/customer/<customer_id>/send_confirmation', view_func=customer_send_confirmation_view
                           , methods=["PUT", ])
+
+customer_app.add_url_rule('/customer/confirm/<token>', view_func=customer_confirm_view
+                          , methods=["GET", ])

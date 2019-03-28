@@ -64,6 +64,10 @@ class Customer(db.Document):
 
         return Customer.objects.filter(email=email, store_id=store, deleted_at=None).first()
 
+    @classmethod
+    def get_customer_by_token(cls, token):
+        return Customer.objects.filter(confirmation_token=token, deleted_at=None).first()
+
     def add_address(self, request, is_primary=False):
         """
         adds a new address based on request
