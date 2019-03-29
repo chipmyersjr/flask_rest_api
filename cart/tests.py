@@ -2,6 +2,7 @@ from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
 import json
+from datetime import datetime
 
 from settings import MONGODB_HOST
 from application import fixtures
@@ -77,6 +78,20 @@ class CartTest(unittest.TestCase):
         assert rv.status_code == 404
         assert json.loads(rv.data.decode('utf-8')).get('error') == "CUSTOMER_NOT_FOUND"
 
+        customer_id = "270069597057605288682661398313534675760"
+
+
+        # test customer needs to be confirmed
+        rv = self.app.post('/customer/' + customer_id + '/cart',
+                           headers=self.headers,
+                           content_type='application/json')
+        assert rv.status_code == 403
+        assert json.loads(rv.get_data(as_text=True)).get('error') == "CUSTOMER_IS_NOT_CONFIRMED"
+
+        customer = Customer.objects.filter(customer_id=customer_id).first()
+        customer.confirmed_on = datetime.now()
+        customer.save()
+
         # test working post
         customer_id = "270069597057605288682661398313534675760"
 
@@ -84,7 +99,6 @@ class CartTest(unittest.TestCase):
                            headers=self.headers,
                            content_type='application/json')
         posted_customer = Customer.objects.filter(customer_id=customer_id).first()
-        print(posted_customer.updated_at)
         assert rv.status_code == 201
         assert Cart.objects.filter(customer_id=customer_id, closed_at=None).count() == 1
         # test last_cart_created_updated
@@ -254,6 +268,12 @@ class CartTest(unittest.TestCase):
         }
 
         customer_id = "180422867908286360754098232165804040712"
+
+        # confirm customer so cart usage is allowed
+        customer = Customer.objects.filter(customer_id=customer_id).first()
+        customer.confirmed_on = datetime.now()
+        customer.save()
+
         rv = self.app.post('/customer/' + customer_id + '/cart',
                            headers=incorrect_headers,
                            content_type='application/json')
@@ -310,6 +330,12 @@ class CartTest(unittest.TestCase):
         """
         # test get cart
         customer_id = "180422867908286360754098232165804040712"
+
+        # confirm customer so cart usage is allowed
+        customer = Customer.objects.filter(customer_id=customer_id).first()
+        customer.confirmed_on = datetime.now()
+        customer.save()
+
         rv = self.app.get('/customer/' + customer_id + '/cart',
                           headers=self.other_store_headers,
                           content_type='application/json')

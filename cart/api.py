@@ -5,6 +5,7 @@ from jsonschema import Draft4Validator
 from jsonschema.exceptions import best_match
 
 from customer.models import Customer
+from customer.decorators import customer_confirmation_required
 from store.models import Store
 from store.decorators import token_required
 from cart.models import Cart, CartItem, ProductNotFoundException
@@ -77,6 +78,7 @@ class CartAPI(MethodView):
         return jsonify(response), 200
 
     @token_required
+    @customer_confirmation_required
     def post(self, customer_id):
         """
         creates a cart for a customer
@@ -152,6 +154,7 @@ class CartAPI(MethodView):
 
 class CartItemAPI(MethodView):
     @token_required
+    @customer_confirmation_required
     def post(self, customer_id=None, product_id=None):
         """
         Adds an item to the customer cart
@@ -247,6 +250,7 @@ class CartItemAPI(MethodView):
         return jsonify(response), 201
 
     @token_required
+    @customer_confirmation_required
     def put(self, customer_id, product_id):
         """
         updates cart item quantity

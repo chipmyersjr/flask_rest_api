@@ -2,10 +2,19 @@ from application import db
 from datetime import datetime, timedelta
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import request, url_for
+from flask_mail import Message
+import os
+
 
 from store.models import Store
 from utils import DuplicateDataError
 from kafka_server.decorators import produces_kafka_message
+from application import mail
+
+
+MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
+MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 
 
 class Email(db.EmbeddedDocument):
@@ -54,6 +63,10 @@ class Customer(db.Document):
         store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
         return Customer.objects.filter(email=email, store_id=store, deleted_at=None).first()
+
+    @classmethod
+    def get_customer_by_token(cls, token):
+        return Customer.objects.filter(confirmation_token=token, deleted_at=None).first()
 
     def add_address(self, request, is_primary=False):
         """
@@ -197,6 +210,33 @@ class Customer(db.Document):
 
         self.save()
         return new_primay_email_object
+
+    def send_email(self, subject, body):
+        """
+        sends an email to the customers primary email
+
+        :return: none
+        """
+        msg = Message(subject,
+                      sender="store.app.api@gmail.com",
+                      recipients=[self.email])
+        msg.html = body
+        mail.send(msg)
+
+    def send_confirmation(self):
+        """
+        sends confirmation email
+
+        :return: none
+        """
+        self.confirmation_token = str(uuid.uuid4().int)
+        self.confirmation_token_expires_at = datetime.now() + timedelta(hours=24)
+        self.save()
+
+        subject = "Store Confirmation"
+        link = "localhost/customer/confirm/" + self.confirmation_token
+        html = "<html>Please click the link to confirm your registration: <a href={}>link</a></html>".format(link)
+        self.send_email(subject=subject, body=html)
 
 
 class Address(db.Document):

@@ -2,11 +2,11 @@ from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from settings import MONGODB_HOST
 from customer.models import Customer, Address
-from application import fixtures
+from application import fixtures, mail
 
 
 class CustomerTest(unittest.TestCase):
@@ -631,6 +631,29 @@ class CustomerTest(unittest.TestCase):
         customer = json.loads(rv.get_data(as_text=True)).get("customer")
         assert rv.status_code == 200
         assert customer["customer_id"] == "180422867908286360754098232165804040712"
+
+    def test_confirmation(self):
+        """
+        test  /customer/<customer_id>/send_confirmation and /customer/confirm/<token>
+        """
+        with mail.record_messages() as outbox:
+            customer_id = "180422867908286360754098232165804040712"
+            rv = self.app.put('/customer/' + customer_id + '/send_confirmation',
+                              headers=self.headers,
+                              content_type='application/json')
+            customer = Customer.objects.filter(customer_id=customer_id).first()
+            token = customer.confirmation_token
+            assert rv.status_code == 200
+            assert customer.confirmation_token_expires_at > datetime.now()
+            assert customer.confirmation_token is not None
+            assert len(outbox) == 1
+
+            rv = self.app.get('/customer/confirm/' + token,
+                              headers=self.headers,
+                              content_type='application/json')
+            customer = Customer.objects.filter(customer_id=customer_id).first()
+            assert rv.status_code == 200
+            assert customer.confirmed_on is not None
 
 
 if __name__ == '__main__':
