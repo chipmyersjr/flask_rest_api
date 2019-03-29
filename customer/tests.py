@@ -648,7 +648,7 @@ class CustomerTest(unittest.TestCase):
             assert customer.confirmation_token is not None
             assert len(outbox) == 1
 
-            rv = self.app.put('/customer/confirm/' + token,
+            rv = self.app.get('/customer/confirm/' + token,
                               headers=self.headers,
                               content_type='application/json')
             customer = Customer.objects.filter(customer_id=customer_id).first()

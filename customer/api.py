@@ -734,6 +734,7 @@ class CustomerConfirmAPI(MethodView):
             return jsonify({"error": CUSTOMER_NOT_FOUND}), 404
 
         customer.confirmed_on = datetime.now()
+        customer.save()
 
         headers = {"Content-Type": "text/html"}
         return make_response(
