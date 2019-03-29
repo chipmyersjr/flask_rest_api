@@ -154,6 +154,7 @@ class CartAPI(MethodView):
 
 class CartItemAPI(MethodView):
     @token_required
+    @customer_confirmation_required
     def post(self, customer_id=None, product_id=None):
         """
         Adds an item to the customer cart
@@ -249,6 +250,7 @@ class CartItemAPI(MethodView):
         return jsonify(response), 201
 
     @token_required
+    @customer_confirmation_required
     def put(self, customer_id, product_id):
         """
         updates cart item quantity
