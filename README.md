@@ -116,8 +116,9 @@ original issue: https://github.com/chipmyersjr/flask_rest_api/issues/12
 * POST /customer/<customer_id>/email/<email_address>?is_primary=false    (Creates a new email for customer)
 * DELETE /customer/<customer_id>/email         (Soft deletes email)
 * PUT /customer/<customer_id>/email/<email_address>/make_primary    (Makes email address given primary email)
-* /customer/<customer_id>/snapshot  (Extended customer object)
-
+* GET /customer/<customer_id>/snapshot  (Extended customer object)
+* PUT /customer/<customer_id>/send_confirmation/   (Send Confirmation email to user)
+* PUT /customer/confirm/<token>  (Confirm customer)
 
 # Cart
 original issue: https://github.com/chipmyersjr/flask_rest_api/issues/15
