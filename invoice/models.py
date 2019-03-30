@@ -169,3 +169,27 @@ class InvoiceLineItem(db.Document):
     meta = {
         'indexes': [('invoice',)]
     }
+
+
+class CouponCode(db.Document):
+    coupon_code_id = db.StringField(primary_key=True)
+    store = db.ReferenceField(Store, db_field="store_id")
+    code = db.StringField(unique_with="store")
+    style = db.StringField(default="dollars_off")
+    amount = db.IntField(default=0)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
+    expires_at = db.DateTimeField()
+    voided_at = db.DateTimeField()
+
+    meta = {
+        'indexes': [('code',)]
+    }
+
+
+class CouponCodeRedemption(db.Document):
+    coupon_code_redemption_id = db.StringField(primary_key=True)
+    coupon_code = db.ReferenceField(CouponCode, db_field="coupon_code_id")
+    invoice = db.ReferenceField(Invoice, db_field="invoice_id")
+    amount_in_cents = db.IntField()
+    created_at = db.DateTimeField(default=datetime.now())
