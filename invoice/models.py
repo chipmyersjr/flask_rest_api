@@ -182,6 +182,24 @@ class CouponCode(db.Document):
     expires_at = db.DateTimeField()
     voided_at = db.DateTimeField()
 
+    def is_valid(self):
+        return self.voided_at is None and datetime.now() > self.expires_at
+
+    def to_dict(self):
+        redemption_count = CouponCodeRedemption.objects.filter(coupon_code=self).count()
+
+        return {
+            "code": self.code,
+            "style": self.style,
+            "amount": self.amount,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "expires_at": self.expires_at,
+            "voided_at": self.voided_at,
+            "store": self.store.name,
+            "redemption_count": redemption_count
+        }
+
     meta = {
         'indexes': [('code',)]
     }

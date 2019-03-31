@@ -5,7 +5,7 @@ from datetime import datetime
 
 from customer.models import Customer
 from cart.models import Cart
-from invoice.models import Invoice, IncorrectDateFormat
+from invoice.models import Invoice, IncorrectDateFormat, CouponCode
 from invoice.templates import invoice_obj, invoice_objs
 from gift_card.models import GiftCard
 from credit.models import Credit
@@ -243,3 +243,68 @@ class CustomerInvoiceAPI(MethodView):
 
         return paginated_results(objects=invoices, collection_name='invoice', request=request
                                  , per_page=self.PER_PAGE, serialization_func=invoice_objs), 200
+
+
+class CouponCodeAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    @token_required
+    def post(self):
+        """
+        creates a new coupon code
+
+        :return: coupon code object
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        if "code" in request.args:
+            code = request.args.get("code")
+        else:
+            return jsonify({"error": "Please provide coupon code as query param 'code'"}), 400
+
+        if "amount" in request.args:
+            try:
+                amount = int(request.args.get("amount"))
+            except ValueError:
+                return jsonify({"error": "Amount should be integer"}), 400
+        else:
+            return jsonify({"error": "Please provide amount as query param 'amount'"}), 400
+
+        if amount < 0:
+            return jsonify({"error": "Invalid Amount"}), 400
+
+        style = request.args.get("style", "dollars_off")
+
+        if "expires_at" in request.args:
+            try:
+                expires_at = datetime.strptime(request.args.get("expires_at"), "%Y%m%d%H")
+            except ValueError:
+                return jsonify({"error": "incorrect date format"}), 400
+        else:
+            expires_at = None
+
+        if style not in ["dollars_off", "percent_off"]:
+            return jsonify({"error": "Style type does not exist"}), 400
+
+        if style == "percent_off":
+            if amount > 100:
+                return jsonify({"error": "Invalid amount For style percent off"}), 400
+
+        coupon = CouponCode(
+            coupon_code_id=str(uuid.uuid4().int),
+            store=store,
+            code=code,
+            style=style,
+            amount=amount,
+            expires_at=expires_at
+        ).save()
+
+        response = {
+            "result": "ok",
+            "coupon": coupon.to_json()
+        }
+        return jsonify(response), 201

@@ -5,7 +5,7 @@ import json
 
 from settings import MONGODB_HOST
 from application import fixtures
-from invoice.models import Invoice
+from invoice.models import Invoice, CouponCode
 from invoice.models import InvoiceLineItem
 from gift_card.models import GiftCard, GiftCardSpend
 from credit.models import Credit, CreditRedemption
@@ -318,3 +318,19 @@ class InvoiceTest(unittest.TestCase):
                           data=json.dumps("{}"),
                           content_type='application/json')
         assert rv.status_code == 404
+
+    def test_coupon_code(self):
+        """
+        tests the coupon code resource
+        """
+
+        rv = self.app.post('/coupon_code/?code=test&expires_at=2019031508&style=percent_off&amount=5',
+                           headers=self.other_store_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        coupon = CouponCode.objects.filter(code="test").first()
+        assert rv.status_code == 201
+        assert coupon.code == "test"
+        assert coupon.expires_at is not None
+        assert coupon.style == "percent_off"
+        assert coupon.amount == 5
