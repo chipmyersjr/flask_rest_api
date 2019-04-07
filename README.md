@@ -285,4 +285,4 @@ MongoDB change events are streamed using Kafka. Spark Streaming is used to calcu
 
 original issue =  https://github.com/chipmyersjr/flask_rest_api/issues/59, https://github.com/chipmyersjr/flask_rest_api/issues/53
 
-* GET /streaming/toptencartitems/<N>    (Top N items added to cart in current day.
+* GET /streaming/toptencartitems/<N>    (Top N items added to cart in current day)
