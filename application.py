@@ -40,6 +40,7 @@ def create_app(**config_overrides):
     from invoice.views import invoice_app
     from orders.views import order_app
     from refund.views import refund_app
+    from spark_server.views import streaming_app
 
     # register blueprints
     app.register_blueprint(product_app)
@@ -51,6 +52,7 @@ def create_app(**config_overrides):
     app.register_blueprint(invoice_app)
     app.register_blueprint(order_app)
     app.register_blueprint(refund_app)
+    app.register_blueprint(streaming_app)
 
     return app
 
