@@ -278,3 +278,11 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/21
 * PUT /order/{order-id}/delivered  (Mark an order as delivered)
 * PUT /order/{order-id}/canceled   (Mark an order as canceled)
 * GET /customer/{customer-id}/orders  (Returns list of orders for a customer) params = status, created_at_startdate, delivered_at_startdate, canceled_at_startdate, shipped_at_startdate, created_at_enddate, delivered_at_enddate, canceled_at_enddate, shipped_at_enddate
+
+
+# Streaming
+MongoDB change events are streamed using Kafka. Spark Streaming is used to calcuate near realtime metrics. Metrics are stored/retrieved with Redis
+
+original issue =  https://github.com/chipmyersjr/flask_rest_api/issues/59, https://github.com/chipmyersjr/flask_rest_api/issues/53
+
+* GET /streaming/toptencartitems/<N>    (Top N items added to cart in current day.
