@@ -34,9 +34,33 @@ services:
     environment:
       - ADVERTISED_HOST=172.20.0.6
       - ADVERTISED_PORT=9092
+    container_name: store-kafka
     networks:
             frontend:
                 ipv4_address: 172.20.0.6
+
+  spark:
+    build: ./spark_server
+    ports:
+      - '8888:8888'
+    volumes:
+      - ./spark_server:/home/code
+      - ../data:/home/data
+    container_name: store-spark
+    environment:
+      - PYSPARK_SUBMIT_ARGS=--packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.2 pyspark-shell org.mongodb.spark:mongo-spark-connector_2.11:2.2.3
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.9
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    container_name: store-redis
+    networks:
+            frontend:
+                ipv4_address: 172.20.0.4
 
 
 networks:

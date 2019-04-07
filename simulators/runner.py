@@ -1,12 +1,51 @@
+from random import randint, choice
+
 from customer import Customer
+from admin import Admin
 
 
 def main():
+    adding_cart_items()
+
+
+def adding_cart_items():
+    print("---adding products---")
+    product_ids = create_products()
+
+    print("---adding customers---")
+    customers = create_customers()
+
+    print("---cart activity---")
+    for customer in customers:
+        customer.open_cart()
+        for _ in range(randint(1, 5)):
+            customer.add_cart_item(choice(product_ids))
+
+
+def create_customers():
     counter = 0
-    while counter < 15:
-        customer = Customer()
-        customer.create()
+    customers = []
+    while counter < 1000:
+        try:
+            customer = Customer()
+            customer.create()
+            customers.append(customer)
+            counter += 1
+        except:
+            continue
+
+    return customers
+
+
+def create_products():
+    counter = 0
+    admin = Admin()
+    product_ids = []
+    while counter < 100:
+        product_ids.append(admin.create_product().get("product")["product_id"])
         counter += 1
+
+    return product_ids
 
 
 if __name__ == "__main__":

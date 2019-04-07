@@ -4,6 +4,7 @@ import uuid
 
 from product.models import Product
 from customer.models import Customer
+from kafka_server.decorators import produces_kafka_message
 
 
 class ProductNotFoundException(Exception):
@@ -13,6 +14,7 @@ class ProductNotFoundException(Exception):
     pass
 
 
+@produces_kafka_message.apply
 class Cart(db.Document):
     cart_id = db.StringField(db_field="cart_id", primary_key=True)
     customer_id = db.ReferenceField(Customer, db_field="customer_id")
@@ -90,6 +92,7 @@ class Cart(db.Document):
         return CartItem.objects.filter(cart_id=self, removed_at=None)
 
 
+@produces_kafka_message.apply
 class CartItem(db.Document):
     cart_item_id = db.StringField(db_field="cart_item_id", primary_key=True)
     product_id = db.ReferenceField(Product, db_field="product_id")

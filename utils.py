@@ -1,4 +1,8 @@
 from flask import jsonify
+import redis
+
+REDIS_HOST = "172.20.0.4"
+REDIS_PORT = "6379"
 
 
 def paginated_results(objects, collection_name, request, per_page, serialization_func, dictionary=False):
@@ -62,6 +66,10 @@ def handler(event):
         return fn
 
     return decorator
+
+
+def get_redis_connection():
+    return redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 
 class DuplicateDataError(Exception):
