@@ -4,10 +4,12 @@ from subprocess import call
 from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
+from flask_mail import Mail
 
 from settings import MONGODB_HOST
 
 db = MongoEngine()
+mail = Mail()
 
 
 def create_app(**config_overrides):
@@ -25,6 +27,7 @@ def create_app(**config_overrides):
 
     # setup db
     db.init_app(app)
+    mail.init_app(app)
 
     # set up elasticsearch
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
