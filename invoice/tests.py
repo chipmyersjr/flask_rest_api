@@ -2,6 +2,8 @@ from application import create_app as create_app_base
 from mongoengine.connection import _get_db
 import unittest
 import json
+from datetime import datetime
+from time import sleep
 
 from settings import MONGODB_HOST
 from application import fixtures
@@ -324,8 +326,8 @@ class InvoiceTest(unittest.TestCase):
         tests the coupon code resource
         """
 
-        rv = self.app.post('/coupon_code/?code=test&expires_at=2019031508&style=percent_off&amount=5',
-                           headers=self.other_store_headers,
+        rv = self.app.post('/coupon_code/?code=test&expires_at=2050031508&style=percent_off&amount=5',
+                           headers=self.headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
         coupon = CouponCode.objects.filter(code="test").first()
@@ -336,8 +338,25 @@ class InvoiceTest(unittest.TestCase):
         assert coupon.amount == 5
 
         rv = self.app.post('/coupon_code/?code=test&expires_at=2019031508&style=percent_off&amount=5',
-                           headers=self.other_store_headers,
+                           headers=self.headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
         assert rv.status_code == 400
         assert CouponCode.objects.filter(code="test").count() == 1
+
+        rv = self.app.get('/coupon_code/test/is_valid',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        print(json.loads(rv.get_data(as_text=True)).get("result"))
+        assert json.loads(rv.get_data(as_text=True)).get("result") == True
+
+        coupon.expires_at = datetime.now()
+        coupon.save()
+        sleep(2)
+
+        rv = self.app.get('/coupon_code/test/is_valid',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("result") == False

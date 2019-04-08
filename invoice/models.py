@@ -183,7 +183,7 @@ class CouponCode(db.Document):
     voided_at = db.DateTimeField()
 
     def is_valid(self):
-        return self.voided_at is None and datetime.now() > self.expires_at
+        return self.voided_at is None and datetime.now() < self.expires_at
 
     def to_dict(self):
         redemption_count = CouponCodeRedemption.objects.filter(coupon_code=self).count()

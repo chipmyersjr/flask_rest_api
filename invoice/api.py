@@ -24,7 +24,6 @@ INVOICE_IS_NOT_OPEN = "INVOICE_IS_NOT_OPEN"
 
 
 class BillCartApi(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -102,7 +101,6 @@ class BillCartApi(MethodView):
 
 
 class InvoiceAPI(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -144,7 +142,6 @@ class InvoiceAPI(MethodView):
 
 
 class InvoiceCollectedAPI(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -182,7 +179,6 @@ class InvoiceCollectedAPI(MethodView):
 
 
 class InvoiceFailedAPI(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -214,7 +210,6 @@ class InvoiceFailedAPI(MethodView):
 
 
 class CustomerInvoiceAPI(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -247,7 +242,6 @@ class CustomerInvoiceAPI(MethodView):
 
 
 class CouponCodeAPI(MethodView):
-
     def __init__(self):
         self.PER_PAGE = 10
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
@@ -309,6 +303,24 @@ class CouponCodeAPI(MethodView):
 
         response = {
             "result": "ok",
-            "coupon": coupon.to_json()
+            "coupon": coupon.to_dict()
         }
         return jsonify(response), 201
+
+    @token_required
+    def get(self, code):
+        """
+        true if coupon code is valid
+
+        :return: coupon code object
+        """
+        coupon = CouponCode.objects.filter(code=code).first()
+
+        if coupon is None:
+            return jsonify({"error": "not found"}), 404
+
+        response = {
+            "result": coupon.is_valid(),
+            "coupon": coupon.to_dict()
+        }
+        return jsonify(response), 200
