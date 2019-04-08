@@ -2,6 +2,7 @@ from flask.views import MethodView
 from flask import request, jsonify, abort
 import uuid
 from datetime import datetime
+from mongoengine.errors import NotUniqueError
 
 from customer.models import Customer
 from cart.models import Cart
@@ -294,14 +295,17 @@ class CouponCodeAPI(MethodView):
             if amount > 100:
                 return jsonify({"error": "Invalid amount For style percent off"}), 400
 
-        coupon = CouponCode(
-            coupon_code_id=str(uuid.uuid4().int),
-            store=store,
-            code=code,
-            style=style,
-            amount=amount,
-            expires_at=expires_at
-        ).save()
+        try:
+            coupon = CouponCode(
+                coupon_code_id=str(uuid.uuid4().int),
+                store=store,
+                code=code,
+                style=style,
+                amount=amount,
+                expires_at=expires_at
+            ).save()
+        except NotUniqueError:
+            return jsonify({"error": "coupon code already exists"}), 400
 
         response = {
             "result": "ok",

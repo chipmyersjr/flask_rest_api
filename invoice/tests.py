@@ -334,3 +334,10 @@ class InvoiceTest(unittest.TestCase):
         assert coupon.expires_at is not None
         assert coupon.style == "percent_off"
         assert coupon.amount == 5
+
+        rv = self.app.post('/coupon_code/?code=test&expires_at=2019031508&style=percent_off&amount=5',
+                           headers=self.other_store_headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        assert rv.status_code == 400
+        assert CouponCode.objects.filter(code="test").count() == 1
