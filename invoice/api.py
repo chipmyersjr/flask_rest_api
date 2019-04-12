@@ -324,3 +324,22 @@ class CouponCodeAPI(MethodView):
             "coupon": coupon.to_dict()
         }
         return jsonify(response), 200
+
+    @token_required
+    def delete(self, code):
+        """
+        voids coupon
+
+        :param code: coupon to void
+        :return: null
+        """
+
+        coupon = CouponCode.objects.filter(code=code).first()
+
+        if coupon is None:
+            return jsonify({"error": "not found"}), 404
+
+        coupon.voided_at = datetime.now()
+        coupon.save()
+
+        return jsonify({}), 204

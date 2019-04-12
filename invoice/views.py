@@ -21,3 +21,4 @@ invoice_app.add_url_rule('/invoice/<invoice_id>/failed', view_func=invoice_faile
 
 invoice_app.add_url_rule('/coupon_code/', view_func=coupon_code_view, methods=['POST', ])
 invoice_app.add_url_rule('/coupon_code/<code>/is_valid', view_func=coupon_code_view, methods=['GET', ])
+invoice_app.add_url_rule('/coupon_code/<code>', view_func=coupon_code_view, methods=['DELETE', ])

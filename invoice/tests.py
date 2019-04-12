@@ -348,7 +348,6 @@ class InvoiceTest(unittest.TestCase):
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
-        print(json.loads(rv.get_data(as_text=True)).get("result"))
         assert json.loads(rv.get_data(as_text=True)).get("result") == True
 
         coupon.expires_at = datetime.now()
@@ -356,6 +355,26 @@ class InvoiceTest(unittest.TestCase):
         sleep(2)
 
         rv = self.app.get('/coupon_code/test/is_valid',
+                          headers=self.headers,
+                          content_type='application/json')
+        assert rv.status_code == 200
+        assert json.loads(rv.get_data(as_text=True)).get("result") == False
+
+        # test void coupon code
+        self.app.post('/coupon_code/?code=test2&expires_at=2050031508&style=percent_off&amount=5',
+                      headers=self.headers,
+                      data=json.dumps("{}"),
+                      content_type='application/json')
+
+        rv = self.app.delete('/coupon_code/test2',
+                             headers=self.headers,
+                             content_type='application/json')
+        coupon = CouponCode.objects.filter(code="test2").first()
+        assert rv.status_code == 204
+        assert coupon.voided_at is not None
+
+        # make sure is valid
+        rv = self.app.get('/coupon_code/test2/is_valid',
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
