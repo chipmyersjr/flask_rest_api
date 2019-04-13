@@ -7,7 +7,7 @@ from time import sleep
 
 from settings import MONGODB_HOST
 from application import fixtures
-from invoice.models import Invoice, CouponCode
+from invoice.models import Invoice, CouponCode, CouponCodeRedemption
 from invoice.models import InvoiceLineItem
 from gift_card.models import GiftCard, GiftCardSpend
 from credit.models import Credit, CreditRedemption
@@ -326,7 +326,8 @@ class InvoiceTest(unittest.TestCase):
         tests the coupon code resource
         """
 
-        rv = self.app.post('/coupon_code/?code=test&expires_at=2050031508&style=percent_off&amount=5',
+        # create coupon code
+        rv = self.app.post('/coupon_code/?code=test&expires_at=2050031508&style=dollars_off&amount=500',
                            headers=self.headers,
                            data=json.dumps("{}"),
                            content_type='application/json')
@@ -334,9 +335,23 @@ class InvoiceTest(unittest.TestCase):
         assert rv.status_code == 201
         assert coupon.code == "test"
         assert coupon.expires_at is not None
-        assert coupon.style == "percent_off"
-        assert coupon.amount == 5
+        assert coupon.style == "dollars_off"
+        assert coupon.amount == 500
 
+        # test redemption
+        customer_id = "165886225230149151116807354302376343571"
+
+        rv = self.app.post('/customer/' + customer_id + "/cart/billcart?coupon=test",
+                           headers=self.headers,
+                           data=json.dumps("{}"),
+                           content_type='application/json')
+        redemption = CouponCodeRedemption.objects.filter(coupon_code=coupon).first()
+        assert rv.status_code == 201
+        assert redemption.amount_in_cents == 500
+        assert redemption.coupon_code.code == "test"
+        assert redemption.invoice.get_subtotal_amount() == 500
+
+        # test duplicate coupon code returns 400
         rv = self.app.post('/coupon_code/?code=test&expires_at=2019031508&style=percent_off&amount=5',
                            headers=self.headers,
                            data=json.dumps("{}"),
@@ -344,12 +359,14 @@ class InvoiceTest(unittest.TestCase):
         assert rv.status_code == 400
         assert CouponCode.objects.filter(code="test").count() == 1
 
+        # test check is valid returns true
         rv = self.app.get('/coupon_code/test/is_valid',
                           headers=self.headers,
                           content_type='application/json')
         assert rv.status_code == 200
         assert json.loads(rv.get_data(as_text=True)).get("result") == True
 
+        # expired coupon coid returns false
         coupon.expires_at = datetime.now()
         coupon.save()
         sleep(2)
@@ -373,7 +390,7 @@ class InvoiceTest(unittest.TestCase):
         assert rv.status_code == 204
         assert coupon.voided_at is not None
 
-        # make sure is valid
+        # void coupon code returns false
         rv = self.app.get('/coupon_code/test2/is_valid',
                           headers=self.headers,
                           content_type='application/json')

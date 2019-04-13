@@ -60,6 +60,16 @@ class BillCartApi(MethodView):
 
         invoice.create_invoice_line_items()
 
+        if "coupon" in request.args:
+            coupon = CouponCode.objects.filter(code=request.args.get("coupon"), store=store).first()
+            if coupon is None:
+                return jsonify({"error": "coupon code not found"}), 404
+
+            redemption = coupon.redeem(invoice=invoice)
+
+            if redemption is None:
+                return jsonify({"error": "coupon code not found"}), 404
+
         if store.credit_order_preference == "credit":
             self.apply_credits(customer, invoice)
             self.apply_gift_cards(customer, invoice)
@@ -314,7 +324,9 @@ class CouponCodeAPI(MethodView):
 
         :return: coupon code object
         """
-        coupon = CouponCode.objects.filter(code=code).first()
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        coupon = CouponCode.objects.filter(code=code, store=store).first()
 
         if coupon is None:
             return jsonify({"error": "not found"}), 404
@@ -333,8 +345,9 @@ class CouponCodeAPI(MethodView):
         :param code: coupon to void
         :return: null
         """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
 
-        coupon = CouponCode.objects.filter(code=code).first()
+        coupon = CouponCode.objects.filter(code=code, store=store).first()
 
         if coupon is None:
             return jsonify({"error": "not found"}), 404
