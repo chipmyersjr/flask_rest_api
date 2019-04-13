@@ -44,6 +44,7 @@ class Customer(db.Document):
     confirmed_on = db.DateTimeField()
     confirmation_token = db.StringField()
     confirmation_token_expires_at = db.DateTimeField()
+    last_seen_date = db.DateTimeField(default=datetime.now())
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField(default=datetime.now())
     deleted_at = db.DateTimeField()
@@ -132,6 +133,7 @@ class Customer(db.Document):
         :return: null
         """
         self.log_out_expires_at = datetime.now() + timedelta(hours=24)
+        self.last_seen_date = datetime.now()
         self.save()
 
     def logout(self):

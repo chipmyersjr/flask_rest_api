@@ -23,6 +23,7 @@ class Invoice(db.Document):
     state = db.StringField(default="open")
     gift_card_used_amount_in_cents = db.IntField(default=0)
     credit_used_amount_in_cents = db.IntField(default=0)
+    discount_amount_cents = db.IntField(default=0)
     created_at = db.DateTimeField(default=datetime.now())
     closed_at = db.DateTimeField()
 
@@ -70,7 +71,7 @@ class Invoice(db.Document):
         total_amount + tax_amount - gift_card_used_amount - credit_used_amount
         """
         return self.get_total_amount() - self.gift_card_used_amount_in_cents - self.credit_used_amount_in_cents \
-               + self.get_tax_amount()
+               + self.get_tax_amount() - self.discount_amount_cents
 
     def get_pre_tax_amount(self):
         """
@@ -169,3 +170,80 @@ class InvoiceLineItem(db.Document):
     meta = {
         'indexes': [('invoice',)]
     }
+
+
+class CouponCode(db.Document):
+    coupon_code_id = db.StringField(primary_key=True)
+    store = db.ReferenceField(Store, db_field="store_id")
+    code = db.StringField(unique_with="store")
+    style = db.StringField(default="dollars_off")
+    amount = db.IntField(default=0)
+    created_at = db.DateTimeField(default=datetime.now())
+    updated_at = db.DateTimeField()
+    expires_at = db.DateTimeField()
+    voided_at = db.DateTimeField()
+
+    def is_valid(self):
+        """
+        checks if coupon code is still valid
+
+        :return: boolean
+        """
+        return self.voided_at is None and datetime.now() < self.expires_at
+
+    def redeem(self, invoice):
+        """
+        adds discount to invoice, creates redemption record
+
+        :param invoice: invoice
+        :return: redemption object
+        """
+
+        if self.is_valid():
+            redemption = CouponCodeRedemption(
+                coupon_code_redemption_id=str(uuid.uuid4().int),
+                coupon_code=self,
+                invoice=invoice
+            ).save()
+            if self.style == "dollars_off":
+                invoice.discount_amount_cents = min([invoice.get_subtotal_amount(), self.amount])
+                redemption.amount_in_cents = min([invoice.get_subtotal_amount(), self.amount])
+
+            invoice.discount_amount_cents = min([invoice.get_subtotal_amount()
+                                                , invoice.get_subtotal_amount() * (self.amount / 100.0)])
+
+            redemption.discount_amount_cents = min([invoice.get_subtotal_amount()
+                                                    , invoice.get_subtotal_amount() * (self.amount / 100.0)])
+
+            invoice.save()
+            redemption.save()
+            return redemption
+
+        return None
+
+    def to_dict(self):
+        redemption_count = CouponCodeRedemption.objects.filter(coupon_code=self).count()
+
+        return {
+            "code": self.code,
+            "style": self.style,
+            "amount": self.amount,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "expires_at": self.expires_at,
+            "voided_at": self.voided_at,
+            "store": self.store.name,
+            "redemption_count": redemption_count
+        }
+
+    meta = {
+        'indexes': [('code',)]
+    }
+
+
+class CouponCodeRedemption(db.Document):
+    coupon_code_redemption_id = db.StringField(primary_key=True)
+    coupon_code = db.ReferenceField(CouponCode, db_field="coupon_code_id")
+    invoice = db.ReferenceField(Invoice, db_field="invoice_id")
+    amount_in_cents = db.IntField()
+    created_at = db.DateTimeField(default=datetime.now())
