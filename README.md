@@ -279,6 +279,34 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/21
 * PUT /order/{order-id}/canceled   (Mark an order as canceled)
 * GET /customer/{customer-id}/orders  (Returns list of orders for a customer) params = status, created_at_startdate, delivered_at_startdate, canceled_at_startdate, shipped_at_startdate, created_at_enddate, delivered_at_enddate, canceled_at_enddate, shipped_at_enddate
 
+# Coupon Code
+
+**fields:**
+
+*coupon_code:*
+* coupon_code_id
+* store_id
+* code
+* style [dollars_off, percent_off]
+* amount (should be between 0 and 100 if percent_off)
+* created_at
+* updated_at
+* expires_at
+* voided_at
+
+*coupon_code_redemption:*
+* coupon_code_redemption_id
+* coupon_code_id
+* invoice_id
+* amount
+* created_at
+
+**Methods:**
+* GET /coupon_code//is_valid    (Check if coupon code exists and is still valid)
+* POST /coupon_code/?expires_at=201903150800&style=percent_off&amount=5   (Creates a new coupon code)
+* DELETE /coupon_code/     (Voids a coupon code)
+
+
 
 # Streaming
 MongoDB change events are streamed using Kafka. Spark Streaming is used to calcuate near realtime metrics. Metrics are stored/retrieved with Redis
