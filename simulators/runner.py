@@ -1,6 +1,6 @@
 from random import randint, choice
 
-from customer import Customer
+from customer_sim import CustomerSim
 from admin import Admin
 
 
@@ -25,13 +25,14 @@ def adding_cart_items():
 def create_customers():
     counter = 0
     customers = []
-    while counter < 1000:
+    while counter < 100:
         try:
-            customer = Customer()
+            customer = CustomerSim()
             customer.create()
             customers.append(customer)
             counter += 1
         except:
+            counter += 1
             continue
 
     return customers
@@ -41,7 +42,7 @@ def create_products():
     counter = 0
     admin = Admin()
     product_ids = []
-    while counter < 100:
+    while counter < 5:
         product_ids.append(admin.create_product().get("product")["product_id"])
         counter += 1
 

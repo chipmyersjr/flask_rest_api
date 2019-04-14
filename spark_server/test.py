@@ -20,4 +20,6 @@ def get_redis_connection():
 
 r = get_redis_connection()
 
-print(r.get("Store_Product_Count"))
+#print(r.get("Store_Product_Count"))
+
+r.set("Store_Product_Count", "{}")
