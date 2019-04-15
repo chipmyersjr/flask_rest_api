@@ -9,6 +9,7 @@ from product.models import Product
 from product.templates import products_obj
 
 TOP_TEN_CART_ITEMS = "Store_Product_Count"
+INVOICE_AMOUNT = "Invoice_Amount"
 
 
 class TopTenCartItemsAPI(MethodView):
@@ -59,5 +60,35 @@ class TopTenCartItemsAPI(MethodView):
 
         response["products"] = sorted(response["products"]
                                       , key=lambda product: product["number_of_cart_adds"], reverse=True)
+
+        return jsonify(response), 200
+
+
+class InvoiceAmountAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self):
+        """
+        return the total invoiced amount in the last two hours
+        """
+
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        redis_conn = get_redis_connection()
+
+        redis_response = json.loads(redis_conn.get(INVOICE_AMOUNT))
+
+        try:
+            result = redis_response[store.store_id]
+        except KeyError:
+            result = 0
+
+        response = {
+            "result": result
+        }
 
         return jsonify(response), 200

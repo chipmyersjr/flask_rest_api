@@ -20,6 +20,7 @@ def adding_cart_items():
         customer.open_cart()
         for _ in range(randint(1, 5)):
             customer.add_cart_item(choice(product_ids))
+        customer.billcart()
 
 
 def create_customers():

@@ -96,3 +96,7 @@ class CustomerSim:
         token = response.get("result")
 
         requests.get(url=API_URL + 'customer/confirm/' + token, headers=self.headers)
+
+    def billcart(self):
+        requests.post(url=API_URL + 'customer/' + self.customer_id + "/cart/billcart", headers=self.headers
+                      , json=json.dumps("{}"))
