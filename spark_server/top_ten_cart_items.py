@@ -4,14 +4,7 @@ from pyspark.streaming.kafka import KafkaUtils
 import json
 import redis
 
-
-KAKFA_CART_TOPIC = "cart"
-KAFKA_CART_ITEM_TOPIC = "cart_item"
-KAFKA_CUSTOMER_TOPIC = "customer"
-KAFKA_BROKER = "172.20.0.6:9092"
-SPARK_STREAMING_CHECKPOINT_DIR = "/home/data"
-REDIS_HOST = "172.20.0.4"
-REDIS_PORT = "6379"
+from spark_settings import *
 
 
 def main():

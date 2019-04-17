@@ -26,7 +26,7 @@ def adding_cart_items():
 def create_customers():
     counter = 0
     customers = []
-    while counter < 100:
+    while counter < 10:
         try:
             customer = CustomerSim()
             customer.create()
