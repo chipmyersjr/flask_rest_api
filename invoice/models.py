@@ -10,12 +10,14 @@ from product.models import Product
 from product.templates import products_obj
 from store.models import Store
 from utils import paginated_results
+from kafka_server.decorators import produces_kafka_message
 
 
 class IncorrectDateFormat(Exception):
     pass
 
 
+@produces_kafka_message.apply
 class Invoice(db.Document):
     invoice_id = db.StringField(db_field="invoice_id", primary_key=True)
     customer = db.ReferenceField(Customer, db_field="customer_id")
@@ -156,6 +158,7 @@ class Invoice(db.Document):
         return InvoiceLineItem.objects.filter(invoice=self).all()
 
 
+@produces_kafka_message.apply
 class InvoiceLineItem(db.Document):
     invoice_line_item_id = db.StringField(db_field="invoice_line_item_id", primary_key=True)
     invoice = db.ReferenceField(Invoice, db_field="invoice_id")

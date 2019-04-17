@@ -8,6 +8,7 @@ from store.schema import schema, token_request_schema
 from store.models import Store, AccessToken
 from store.templates import store_obj
 from store.decorators import token_required
+import redis
 
 CREDIT_ORDER_PREFERENCE_ERROR = "CREDIT_ORDER_ALLOWED_VALUES_ARE_CREDIT_GIFT-CARD"
 

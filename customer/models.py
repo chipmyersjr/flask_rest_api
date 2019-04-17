@@ -2,7 +2,6 @@ from application import db
 from datetime import datetime, timedelta
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import request, url_for
 from flask_mail import Message
 import os
 
