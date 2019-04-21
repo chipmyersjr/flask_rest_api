@@ -1,5 +1,5 @@
 from application import db
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from collections import Counter
 
@@ -175,15 +175,17 @@ class InvoiceLineItem(db.Document):
     }
 
 
+@produces_kafka_message.apply
 class CouponCode(db.Document):
     coupon_code_id = db.StringField(primary_key=True)
     store = db.ReferenceField(Store, db_field="store_id")
     code = db.StringField(unique_with="store")
     style = db.StringField(default="dollars_off")
     amount = db.IntField(default=0)
+    last_redemption = db.DateTimeField()
     created_at = db.DateTimeField(default=datetime.now())
     updated_at = db.DateTimeField()
-    expires_at = db.DateTimeField()
+    expires_at = db.DateTimeField(default=datetime.now() + timedelta(days=30))
     voided_at = db.DateTimeField()
 
     def is_valid(self):
@@ -217,7 +219,9 @@ class CouponCode(db.Document):
 
             redemption.discount_amount_cents = min([invoice.get_subtotal_amount()
                                                     , invoice.get_subtotal_amount() * (self.amount / 100.0)])
+            self.last_redemption = datetime.now()
 
+            self.save()
             invoice.save()
             redemption.save()
             return redemption
@@ -244,6 +248,7 @@ class CouponCode(db.Document):
     }
 
 
+@produces_kafka_message.apply
 class CouponCodeRedemption(db.Document):
     coupon_code_redemption_id = db.StringField(primary_key=True)
     coupon_code = db.ReferenceField(CouponCode, db_field="coupon_code_id")

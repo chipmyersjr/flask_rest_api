@@ -2,6 +2,7 @@ import requests
 from faker import Faker
 from random import randint, choice
 import httplib2
+import json
 
 
 API_URL = "http://127.0.0.1/"
@@ -41,3 +42,7 @@ class Admin:
         }
 
         return requests.post(url=API_URL + 'product/', json=data, headers=self.headers).json()
+
+    def create_coupon_code(self):
+        return requests.post(url=API_URL + 'coupon_code/?code=' + self.fake.words()[0] + str(randint(1, 50))
+                             + '&style=dollars_off&amount=500', headers=self.headers, json=json.dumps("{}")).json()

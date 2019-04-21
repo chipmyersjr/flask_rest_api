@@ -15,18 +15,21 @@ def adding_cart_items():
     print("---adding customers---")
     customers = create_customers()
 
+    print("---adding coupons---")
+    coupons = create_coupons()
+
     print("---cart activity---")
     for customer in customers:
         customer.open_cart()
         for _ in range(randint(1, 5)):
             customer.add_cart_item(choice(product_ids))
-        customer.billcart()
+        customer.billcart(coupon=choice(coupons))
 
 
 def create_customers():
     counter = 0
     customers = []
-    while counter < 10:
+    while counter < 30:
         try:
             customer = CustomerSim()
             customer.create()
@@ -48,6 +51,18 @@ def create_products():
         counter += 1
 
     return product_ids
+
+
+def create_coupons():
+    counter = 0
+    admin = Admin()
+    coupon_codes = []
+
+    while counter < 10:
+        coupon_codes.append(admin.create_coupon_code().get("coupon")["code"])
+        counter += 1
+
+    return coupon_codes
 
 
 if __name__ == "__main__":

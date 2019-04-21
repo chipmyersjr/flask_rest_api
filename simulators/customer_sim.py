@@ -97,6 +97,9 @@ class CustomerSim:
 
         requests.get(url=API_URL + 'customer/confirm/' + token, headers=self.headers)
 
-    def billcart(self):
-        requests.post(url=API_URL + 'customer/' + self.customer_id + "/cart/billcart", headers=self.headers
-                      , json=json.dumps("{}"))
+    def billcart(self, coupon=None):
+        url = API_URL + 'customer/' + self.customer_id + "/cart/billcart"
+
+        if coupon:
+            url += "?coupon=" + coupon
+        requests.post(url=url, headers=self.headers, json=json.dumps("{}"))
