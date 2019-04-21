@@ -4,7 +4,7 @@ from pyspark.streaming.kafka import KafkaUtils
 import json
 import redis
 
-from spark_settings import *
+from spark_utils import *
 
 
 def main():

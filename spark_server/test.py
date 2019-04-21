@@ -20,5 +20,5 @@ def get_redis_connection():
 
 r = get_redis_connection()
 
-print(r.get("Invoice_Amount"))
+print(r.get("Top_Coupon_Code"))
 

@@ -4,7 +4,7 @@ from pyspark.streaming.kafka import KafkaUtils
 import json
 import redis
 
-from spark_settings import *
+from spark_utils import *
 
 
 def main():
@@ -17,12 +17,7 @@ def main():
     invoices = invoice_stream.map(lambda x: (json.loads(x[1]).get("_id"), json.loads(x[1]).get("customer_id")))\
                              .window(15)
 
-    customer_stream = KafkaUtils.createDirectStream(ssc, [KAFKA_CUSTOMER_TOPIC],
-                                                    {"metadata.broker.list": KAFKA_BROKER})
-    customers = customer_stream.map(lambda x: (json.loads(x[1]).get("_id"), json.loads(x[1]).get("store_id")))\
-                               .window(3600)
-
-    distinct_customers = customers.transform(lambda x: x.distinct())
+    distinct_customers = get_distinct_customers(streaming_context=ssc)
 
     invoice_line_item_stream = KafkaUtils.createDirectStream(ssc, [KAFKA_INVOICE_LINE_ITEM_TOPIC],
                                                              {"metadata.broker.list": KAFKA_BROKER})
@@ -48,10 +43,6 @@ def main():
 
     ssc.start()
     ssc.awaitTermination()
-
-
-def get_redis_connection():
-    return redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 
 if __name__ == "__main__":

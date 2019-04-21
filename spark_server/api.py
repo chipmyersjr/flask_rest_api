@@ -7,9 +7,11 @@ from store.decorators import token_required
 from store.models import Store
 from product.models import Product
 from product.templates import products_obj
+from invoice.models import CouponCode
 
 TOP_TEN_CART_ITEMS = "Store_Product_Count"
 INVOICE_AMOUNT = "Invoice_Amount"
+TOP_COUPON = "Top_Coupon_Code"
 
 
 class TopTenCartItemsAPI(MethodView):
@@ -89,6 +91,48 @@ class InvoiceAmountAPI(MethodView):
 
         response = {
             "result": result
+        }
+
+        return jsonify(response), 200
+
+
+class TopCouponCode(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self):
+        """
+        returns the most used coupon code in last two hours
+
+        :return: coupon code object
+        """
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        redis_conn = get_redis_connection()
+
+        redis_response = json.loads(redis_conn.get(TOP_COUPON))
+
+        coupon_code_id = None
+        redemptions = 0
+        for key, value in sorted(redis_response.items(), key=lambda x: x[1][1], reverse=True):
+            if value[0] == store.store_id:
+                coupon_code_id = key
+                redemptions = value[1]
+                break
+
+        if coupon_code_id is None:
+            return jsonify("{}"), 404
+
+        coupon = CouponCode.objects.filter(coupon_code_id=coupon_code_id).first().to_dict()
+
+        coupon["redemptions"] = redemptions
+
+        response = {
+            "result": "ok",
+            "coupon": coupon
         }
 
         return jsonify(response), 200
