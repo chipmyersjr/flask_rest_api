@@ -1,8 +1,6 @@
 ## Flask Rest API Example - Online Store
 
-I started working on this after taking a Udemy course. I'm mimmicking the Shopify API for practice.
-https://www.udemy.com/restful-api-flask-course/
-https://help.shopify.com/en/api/reference
+Example Flask Rest API utilizing MongoDB, Spark, Kafka, Redis and Elasticsearch.
 
 
 
