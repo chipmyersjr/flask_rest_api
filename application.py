@@ -5,6 +5,8 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 from flask_mail import Mail
+from rq import Queue
+from worker import conn
 
 from settings import MONGODB_HOST
 
@@ -32,6 +34,8 @@ def create_app(**config_overrides):
     # set up elasticsearch
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
+
+    redis_task_queue = Queue(connection=conn)
 
     # import blueprints
     from product.views import product_app
