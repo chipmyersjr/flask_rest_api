@@ -12,6 +12,7 @@ from settings import MONGODB_HOST
 
 db = MongoEngine()
 mail = Mail()
+redis_task_queue = Queue(connection=conn)
 
 
 def create_app(**config_overrides):
@@ -34,8 +35,6 @@ def create_app(**config_overrides):
     # set up elasticsearch
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
-
-    redis_task_queue = Queue(connection=conn)
 
     # import blueprints
     from product.views import product_app
