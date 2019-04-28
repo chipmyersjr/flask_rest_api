@@ -5,11 +5,14 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 from flask_mail import Mail
+from rq import Queue
+from worker import conn
 
 from settings import MONGODB_HOST
 
 db = MongoEngine()
 mail = Mail()
+redis_task_queue = Queue(connection=conn)
 
 
 def create_app(**config_overrides):
