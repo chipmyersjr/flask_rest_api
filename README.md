@@ -209,6 +209,8 @@ original issue = https://github.com/chipmyersjr/flask_rest_api/issues/28
 * POST /customer/{customer-id}/credit/{amount}   (Issue customer a credit)
 * DELETE /customer/{customer-id}/credit/{credit_id} (Void customer credit)
 * GET /customer/{customer-id}/credit?active=true   (Get customer credits)
+* POST /customer/credit/{amount}  (Bulk create credits as background task)
+* POST /customer/credit/statas/{job_id}  (Check on status of credit batch job)
 
 
 # Invoice
