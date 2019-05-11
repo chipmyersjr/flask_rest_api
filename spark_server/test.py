@@ -20,5 +20,5 @@ def get_redis_connection():
 
 r = get_redis_connection()
 
-print(r.get("Top_Coupon_Code"))
+print(r.get("New_Customers"))
 
