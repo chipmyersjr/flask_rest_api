@@ -316,3 +316,4 @@ original issue =  https://github.com/chipmyersjr/flask_rest_api/issues/59, https
 * GET /streaming/toptencartitems/<N>    (Top N items added to cart in current day)
 * GET /streaming/invoiceamount/   (Total billed amount last 2 hours)
 * GET /streaming/topcoupon/    (Most used coupon in last two hours)
+* GET /streaming/newcustomers/    (Number of new customers in last 24 hours)
