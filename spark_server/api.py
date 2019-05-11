@@ -12,6 +12,7 @@ from invoice.models import CouponCode
 TOP_TEN_CART_ITEMS = "Store_Product_Count"
 INVOICE_AMOUNT = "Invoice_Amount"
 TOP_COUPON = "Top_Coupon_Code"
+NEW_CUSTOMERS = "New_Customers"
 
 
 class TopTenCartItemsAPI(MethodView):
@@ -133,6 +134,36 @@ class TopCouponCode(MethodView):
         response = {
             "result": "ok",
             "coupon": coupon
+        }
+
+        return jsonify(response), 200
+
+
+class NewCustomerAPI(MethodView):
+
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self):
+        """
+        return the total invoiced amount in the last two hours
+        """
+
+        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+        redis_conn = get_redis_connection()
+
+        redis_response = json.loads(redis_conn.get(NEW_CUSTOMERS))
+
+        try:
+            result = redis_response[store.store_id]
+        except KeyError:
+            result = 0
+
+        response = {
+            "result": result
         }
 
         return jsonify(response), 200
