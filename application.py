@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_mongoengine import MongoEngine
 from subprocess import call
 from elasticsearch import Elasticsearch
@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from flask_mail import Mail
 from rq import Queue
 from worker import conn
+from flask_limiter import Limiter
 
 from settings import MONGODB_HOST
 
@@ -47,6 +48,8 @@ def create_app(**config_overrides):
     from orders.views import order_app
     from refund.views import refund_app
     from spark_server.views import streaming_app
+
+    limiter = Limiter(app, default_limits=["100/second"], key_func=lambda: request.headers.get('APP-ID'))
 
     # register blueprints
     app.register_blueprint(product_app)
