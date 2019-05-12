@@ -44,6 +44,7 @@ class TopTenCartItemsAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self, n=10):
         """
         returns the top ten products added to customer carts
@@ -96,6 +97,7 @@ class InvoiceAmountAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self):
         """
         return the total invoiced amount in the last two hours
@@ -113,6 +115,7 @@ class TopCouponCode(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self):
         """
         returns the most used coupon code in last two hours
@@ -155,6 +158,7 @@ class NewCustomerAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self):
         """
         return the total invoiced amount in the last two hours
@@ -172,6 +176,7 @@ class CustomerLoginAPI(MethodView):
         if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
             abort(400)
 
+    @token_required
     def get(self):
         """
         return the total invoiced amount in the last two hours
