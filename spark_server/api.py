@@ -13,6 +13,28 @@ TOP_TEN_CART_ITEMS = "Store_Product_Count"
 INVOICE_AMOUNT = "Invoice_Amount"
 TOP_COUPON = "Top_Coupon_Code"
 NEW_CUSTOMERS = "New_Customers"
+CUSTOMER_LOGINS = "Customer_Logins"
+
+
+def results_by_store_id(request, topic_name):
+    """
+    helper function to return a redis cached result by store_id
+
+    :param request: flask request object
+    :return: response object
+    """
+    store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+
+    redis_conn = get_redis_connection()
+
+    redis_response = json.loads(redis_conn.get(topic_name))
+
+    try:
+        result = redis_response[store.store_id]
+    except KeyError:
+        result = 0
+
+    return {"result": result}
 
 
 class TopTenCartItemsAPI(MethodView):
@@ -79,20 +101,7 @@ class InvoiceAmountAPI(MethodView):
         return the total invoiced amount in the last two hours
         """
 
-        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
-
-        redis_conn = get_redis_connection()
-
-        redis_response = json.loads(redis_conn.get(INVOICE_AMOUNT))
-
-        try:
-            result = redis_response[store.store_id]
-        except KeyError:
-            result = 0
-
-        response = {
-            "result": result
-        }
+        response = results_by_store_id(request, INVOICE_AMOUNT)
 
         return jsonify(response), 200
 
@@ -151,19 +160,23 @@ class NewCustomerAPI(MethodView):
         return the total invoiced amount in the last two hours
         """
 
-        store = Store.objects.filter(app_id=request.headers.get('APP-ID'), deleted_at=None).first()
+        response = results_by_store_id(request, NEW_CUSTOMERS)
 
-        redis_conn = get_redis_connection()
+        return jsonify(response), 200
 
-        redis_response = json.loads(redis_conn.get(NEW_CUSTOMERS))
 
-        try:
-            result = redis_response[store.store_id]
-        except KeyError:
-            result = 0
+class CustomerLoginAPI(MethodView):
 
-        response = {
-            "result": result
-        }
+    def __init__(self):
+        self.PER_PAGE = 10
+        if (request.method != 'GET' and request.method != 'DELETE') and not request.json:
+            abort(400)
+
+    def get(self):
+        """
+        return the total invoiced amount in the last two hours
+        """
+
+        response = results_by_store_id(request, CUSTOMER_LOGINS)
 
         return jsonify(response), 200
