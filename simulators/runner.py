@@ -5,7 +5,7 @@ from admin import Admin
 
 
 def main():
-    adding_cart_items()
+    create_customers()
 
 
 def adding_cart_items():

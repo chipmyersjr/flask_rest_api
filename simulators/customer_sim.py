@@ -61,6 +61,8 @@ class CustomerSim:
 
         self.confirm()
 
+        self.add_emails()
+
     def open_cart(self):
         self.refresh_token()
 
@@ -103,3 +105,10 @@ class CustomerSim:
         if coupon:
             url += "?coupon=" + coupon
         requests.post(url=url, headers=self.headers, json=json.dumps("{}"))
+
+    def add_emails(self):
+        url_template = "{}customer/{}/email/?is_primary={}"
+        for i in range(randint(1, 5)):
+            url = url_template.format(API_URL, self.customer_id, "true" if i == 0 else "false")
+            data = {"email": self.fake.email()}
+            requests.post(url=url, headers=self.headers, json=data)
