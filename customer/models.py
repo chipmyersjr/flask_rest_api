@@ -8,7 +8,7 @@ import os
 
 from store.models import Store
 from utils import DuplicateDataError
-from kafka_server.decorators import produces_kafka_message
+from kafka_server.decorators import produces_kafka_message, produces_kinesis_message
 from application import mail
 
 
@@ -25,6 +25,7 @@ class Email(db.EmbeddedDocument):
     deleted_at = db.DateTimeField()
 
 
+@produces_kinesis_message.apply
 @produces_kafka_message.apply
 class Customer(db.Document):
     customer_id = db.StringField(db_field="customer_id", primary_key=True)
