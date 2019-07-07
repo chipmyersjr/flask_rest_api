@@ -1,6 +1,6 @@
 import requests
 from faker import Faker
-from random import randint
+from random import randint, random
 import httplib2
 import json
 
@@ -73,8 +73,17 @@ class CustomerSim:
         self.refresh_token()
 
         data = {"quantity": randint(1, 5)}
-        return requests.post(url=API_URL + 'customer/' + str(self.customer_id) + '/cart/item/' + product_id
-                             , json=data, headers=self.headers)
+        result = requests.post(url=API_URL + 'customer/' + str(self.customer_id) + '/cart/item/' + product_id
+                               , json=data, headers=self.headers)
+
+        if random() < 0.25:
+            data = {"quantity": randint(1, 5)}
+            requests.put(url=API_URL + 'customer/' + str(self.customer_id) + '/cart/item/' + product_id
+                         , json=data, headers=self.headers)
+
+        if random() < 0.25:
+            requests.delete(url=API_URL + 'customer/' + str(self.customer_id) + '/cart/item/' + product_id
+                            , json=data, headers=self.headers)
 
     def refresh_token(self):
         data = {
