@@ -28,6 +28,12 @@ ADD . .
 # pip install the local requirements.txt
 RUN pip install -r requirements.txt
 
+# conflicts with aws cli
+RUN pip uninstall aws
+
+# install aws cli
+RUN pip install awscli --upgrade --user
+
 # Listen to port 5000 at runtime
 EXPOSE 5000
 

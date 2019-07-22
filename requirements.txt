@@ -12,3 +12,4 @@ Flask-Mail==0.9.1
 requests==2.21.0
 rq==1.0
 flask_limiter==1.0.1
+boto3==1.9.183

@@ -5,7 +5,7 @@ from admin import Admin
 
 
 def main():
-    create_customers()
+    adding_cart_items()
 
 
 def adding_cart_items():
@@ -29,7 +29,7 @@ def adding_cart_items():
 def create_customers():
     counter = 0
     customers = []
-    while counter < 30:
+    while counter < 500:
         try:
             customer = CustomerSim()
             customer.create()
