@@ -6,6 +6,7 @@ from store.models import Store
 from utils import DuplicateDataError
 from search.decorators import search_reindex
 from search.search_mixin import SearchableMixin
+from kafka_server.decorators import produces_kinesis_message
 
 
 class ProductInventoryLessThanZeroException(Exception):
@@ -19,6 +20,7 @@ class ProductTag(db.EmbeddedDocument):
     deleted_at = db.DateTimeField()
 
 
+@produces_kinesis_message.apply
 @search_reindex.apply
 class Product(db.Document, SearchableMixin):
     __searchable__ = ['description', 'product_type', 'title', 'vendor', 'tags']

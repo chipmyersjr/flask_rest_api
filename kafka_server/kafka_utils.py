@@ -1,5 +1,6 @@
 from kafka import KafkaProducer
 import boto3
+import json
 
 KAKFA_SERVER = '172.20.0.6:9092'
 
@@ -23,11 +24,13 @@ def produce_kinesis_message(document):
     :param document: document being edited
     :return: Kinesis Result object
     """
-    stream_name = 'flask_app_customer_collection'
     kinesis_client = boto3.client('kinesis', region_name='us-west-2')
 
-    result = kinesis_client.put_record(StreamName=stream_name,
-                                       Data=document.to_json(),
+    message = json.loads(document.to_json())
+    message["collection_name"] = document._get_collection_name()
+
+    result = kinesis_client.put_record(StreamName=document._get_collection_name(),
+                                       Data=json.dumps(message) + '\n',
                                        PartitionKey="_id")
 
     return result
